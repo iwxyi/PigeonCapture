@@ -8,6 +8,8 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QDebug>
+#include <QFontMetrics>
+#include <QTimer>
 
 class AreaSelector : public QWidget
 {
@@ -16,6 +18,8 @@ public:
     AreaSelector(QWidget *parent = nullptr);
 
     void setPaint(bool paint);
+    QRect getArea();
+    void setArea(QRect rect);
 
 protected:
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
@@ -28,7 +32,9 @@ signals:
     void areaChanged(QRect rect);
 
 private:
-    int boundaryWidth;
+    int fontHeight = 0;
+    int boundaryWidth = 8;
+    int boundaryShowed = 2;
     QPoint clickPos;
     bool shouldPaint = true;
 };

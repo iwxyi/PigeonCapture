@@ -130,7 +130,7 @@ QPixmap MainWindow::getScreenShot()
     {
         // 隐藏区域截图
         areaSelector->setPaint(false);
-        QRect rect = areaSelector->geometry();
+        QRect rect = areaSelector->getArea();
 
         QPixmap pixmap = screen->grabWindow(QApplication::desktop()->winId(),
                                         rect.left(), rect.top(),
