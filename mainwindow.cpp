@@ -24,11 +24,25 @@ MainWindow::MainWindow(QWidget *parent)
     ui->serialCaptureEdit->setText(skey);
     setSerialShortcut(skey);
 
+    // 截图区域选择器
+    areaSelector = new AreaSelector(this);
+    if (settings.contains("capture/area"))
+        areaSelector->setGeometry(settings.value("capture/area").toRect());
+    connect(areaSelector, SIGNAL(areaChanged(QRect)), this, SLOT(areaSelectorMoved(QRect)));
+
     // 设置截图模式
     int mode = settings.value("capture/mode", 0).toInt();
     ui->modeTab->setCurrentIndex(mode);
-    areaSelector = new AreaSelector(this);
-    areaSelector->hide();
+    if (mode != FullScreen && settings.value("capture/showAreaSelector").toBool())
+    {
+        areaSelector->show();
+        ui->showAreaSelector->setText("隐藏截图区域");
+    }
+    else
+    {
+        areaSelector->hide();
+        ui->showAreaSelector->setText("显示截图区域");
+    }
 
     // 提示信息
     tipTimer = new QTimer(this);
@@ -50,13 +64,15 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "连续截图：已截" << serialCaptureCount << "张";
     });
 
-    // 设置截图信号槽
+    // 单次截图信号槽
     connect(fastCaptureShortcut, &QxtGlobalShortcut::activated,[=]() {
         runCapture();
 
         ui->fastCaptureShortcut->setText("截图成功");
+        tipTimer->start();
     });
 
+    // 连续截图信号槽
     connect(serialCaptureShortcut, &QxtGlobalShortcut::activated,[=]() {
         if (serialTimer->isActive())
         {
@@ -104,15 +120,24 @@ void MainWindow::selectArea()
 QPixmap MainWindow::getScreenShot()
 {
     int mode = ui->modeTab->currentIndex();
+    QScreen *screen = QGuiApplication::primaryScreen();
     if (mode == FullScreen) // 全屏截图
     {
-        QScreen *screen = QGuiApplication::primaryScreen();
         QPixmap pixmap = screen->grabWindow(0);
         return pixmap;
     }
     else if (mode == ScreenArea) // 区域截图
     {
+        // 隐藏区域截图
+        areaSelector->setPaint(false);
+        QRect rect = areaSelector->geometry();
 
+        QPixmap pixmap = screen->grabWindow(QApplication::desktop()->winId(),
+                                        rect.left(), rect.top(),
+                                       rect.width(), rect.height());
+
+        areaSelector->setPaint(true);
+        return pixmap;
     }
 
     return QPixmap();
@@ -149,6 +174,11 @@ void MainWindow::runCapture()
     }
 }
 
+void MainWindow::areaSelectorMoved(QRect rect)
+{
+    showPreview(getScreenShot());
+}
+
 /**
  * 设置截图快捷键
  */
@@ -159,12 +189,16 @@ void MainWindow::setFastShortcut(QString s)
 
     if(fastCaptureShortcut->setShortcut(QKeySequence(s)))
     {
-       qDebug() << "设置快捷键成功：" << s;
+        ui->fastCaptureShortcut->setText("设置成功");
+       qDebug() << "设置快速截图快捷键：" << s;
     }
     else
     {
-       qDebug() << "快捷键设置失败，或许是冲突了";
+        ui->fastCaptureShortcut->setText("冲突");
+       qDebug() << "快捷键设置失败，或许是冲突了" << s;
     }
+    if (tipTimer)
+        tipTimer->start();
 }
 
 void MainWindow::setSerialShortcut(QString s)
@@ -174,12 +208,16 @@ void MainWindow::setSerialShortcut(QString s)
 
     if(serialCaptureShortcut->setShortcut(QKeySequence(s)))
     {
-       qDebug() << "设置快捷键成功：" << s;
+        ui->serialCaptureShortcut->setText("设置成功");
+       qDebug() << "设置连续截图快捷键：" << s;
     }
     else
     {
-       qDebug() << "快捷键设置失败，或许是冲突了";
+        ui->serialCaptureShortcut->setText("冲突");
+       qDebug() << "快捷键设置失败，或许是冲突了" << s;
     }
+    if (tipTimer)
+        tipTimer->start();
 }
 
 /**
@@ -187,7 +225,9 @@ void MainWindow::setSerialShortcut(QString s)
  */
 void MainWindow::showPreview(QPixmap pixmap)
 {
-    ui->previewLabel->setPixmap(pixmap.scaledToWidth(ui->previewLabel->width()));
+    if (pixmap.width() > ui->previewLabel->width())
+        pixmap = pixmap.scaledToWidth(ui->previewLabel->width());
+    ui->previewLabel->setPixmap(pixmap);
 }
 
 
@@ -219,12 +259,44 @@ void MainWindow::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
 
+    showPreview(getScreenShot());
+}
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    settings.setValue("capture/area", areaSelector->geometry());
+    areaSelector->deleteLater();
+
+    QMainWindow::closeEvent(event);
 }
 
 void MainWindow::on_modeTab_currentChanged(int index)
 {
-    qDebug() << "设置截图模式：" << index;
+    if (index == FullScreen && !areaSelector->isHidden())
+        areaSelector->hide();
+    else if (index != FullScreen && settings.value("capture/showAreaSelector", true).toBool())
+        areaSelector->show();
+
     settings.setValue("capture/mode", index);
     showPreview(getScreenShot());
+    qDebug() << "设置截图模式：" << index;
+}
+
+void MainWindow::on_showAreaSelector_clicked()
+{
+    if (areaSelector->isHidden())
+    {
+        areaSelector->show();
+        settings.setValue("capture/showAreaSelector", true);
+        ui->showAreaSelector->setText("隐藏截图区域");
+        qDebug() << "显示区域选择器" << areaSelector->geometry();
+    }
+    else
+    {
+        areaSelector->hide();
+        settings.setValue("capture/showAreaSelector", false);
+        ui->showAreaSelector->setText("显示截图区域");
+        settings.setValue("capture/area", areaSelector->geometry());
+        qDebug() << "隐藏区域选择器" << areaSelector->geometry();
+    }
 }

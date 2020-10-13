@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>345</width>
-    <height>355</height>
+    <height>414</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>鸽鸽子表情包抓截工具</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,1">
@@ -99,17 +99,46 @@
     <item>
      <widget class="QTabWidget" name="modeTab">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="fullScreen">
        <attribute name="title">
         <string>全屏</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1">
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>目标显示器</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBox"/>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
       <widget class="QWidget" name="screenArea">
        <attribute name="title">
         <string>区域</string>
        </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item>
+           <widget class="QPushButton" name="showAreaSelector">
+            <property name="text">
+             <string>显示截图区域</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -197,7 +226,6 @@
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionEmoji_Creator">
    <property name="text">
     <string>表情包制造者</string>

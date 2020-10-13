@@ -1,12 +1,19 @@
 #include "areaselector.h"
 
 AreaSelector::AreaSelector(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(nullptr)
 {
-    boundaryWidth=4;                                    //设置触发resize的宽度
-    this->setWindowFlags(Qt::FramelessWindowHint);      //设置为无边框窗口
+    boundaryWidth=8;                                    //设置触发resize的宽度
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);      //设置为无边框置顶窗口
     this->setMinimumSize(45,45);                        //设置最小尺寸
     this->setStyleSheet("background:#D1EEEE");          //设置背景颜色
+    this->setAttribute(Qt::WA_TranslucentBackground, true); // 设置窗口透明
+}
+
+void AreaSelector::setPaint(bool paint)
+{
+    this->shouldPaint = paint;
+    repaint();
 }
 
 bool AreaSelector::nativeEvent(const QByteArray &eventType, void *message, long *result)
@@ -15,8 +22,9 @@ bool AreaSelector::nativeEvent(const QByteArray &eventType, void *message, long 
     switch(msg->message)
     {
     case WM_NCHITTEST:
-        int xPos = GET_X_LPARAM(msg->lParam) - this->frameGeometry().x();
-        int yPos = GET_Y_LPARAM(msg->lParam) - this->frameGeometry().y();
+        const auto ratio = devicePixelRatioF(); // 解决4K下的问题
+        int xPos = GET_X_LPARAM(msg->lParam) / ratio - this->frameGeometry().x();
+        int yPos = GET_Y_LPARAM(msg->lParam) / ratio - this->frameGeometry().y();
         if(xPos < boundaryWidth && yPos<boundaryWidth)                    //左上角
             *result = HTTOPLEFT;
         else if(xPos>=width()-boundaryWidth&&yPos<boundaryWidth)          //右上角
@@ -48,5 +56,46 @@ void AreaSelector::mousePressEvent(QMouseEvent *e)
 void AreaSelector::mouseMoveEvent(QMouseEvent *e)
 {
     if(e->buttons()&Qt::LeftButton)
+    {
         move(e->pos()+pos()-clickPos);
+        emit areaChanged(geometry());
+    }
+}
+
+void AreaSelector::resizeEvent(QResizeEvent *event)
+{
+    emit areaChanged(geometry());
+}
+
+void AreaSelector::paintEvent(QPaintEvent *event)
+{
+    if (!shouldPaint)
+        return ;
+
+    QColor c(30, 144, 255, 192);
+    int penW = 4;
+    QPainter painter(this);
+
+    // 绘制用来看的边框
+    painter.setPen(QPen(c, penW/2, Qt::PenStyle::DashDotLine));
+    painter.drawRect(0, 0, width(), height());
+
+    QRect g = geometry();
+    painter.drawText(QRect(penW, penW, width()-penW, height()-penW), Qt::AlignLeft|Qt::AlignTop,
+                     QString("(%1,%2) %3×%4").arg(g.left()).arg(g.top()).arg(g.width()).arg(g.height()));
+
+    // 绘制用来拖动的边框
+    penW = 32;
+    c.setAlpha(1);
+    painter.setPen(QPen(c, penW/2, Qt::PenStyle::DashDotLine));
+    painter.drawRect(0, 0, width(), height());
+
+    // 绘制用来移动的中心点
+    QPainterPath path;
+    const int radius = 4;
+    c.setAlpha(64);
+    path.addEllipse(width()/2-radius,height()/2-radius, radius*2, radius*2);
+    painter.setBrush(c);
+    painter.setPen(QPen(c, 0));
+    painter.drawPath(path);
 }
