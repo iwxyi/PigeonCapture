@@ -15,6 +15,8 @@
 #include <QScrollBar>
 
 #define BACK_PREV_DIRECTORY ".."
+#define FilePathRole (Qt::UserRole)
+#define FileMarkRole (Qt::UserRole+1)
 
 namespace Ui {
 class PictureBrowser;
@@ -32,6 +34,7 @@ public:
     {
         int index;
         int scroll;
+        QString file;
     };
 
     void enterDirectory(QString targetDir);
@@ -61,6 +64,34 @@ private slots:
     void on_actionIcon_Large_triggered();
 
     void on_actionIcon_Largest_triggered();
+
+    void on_listWidget_customContextMenuRequested(const QPoint &pos);
+
+    void on_actionIcon_Lager_triggered();
+
+    void on_actionIcon_Smaller_triggered();
+
+    void on_actionRestore_Size_triggered();
+
+    void on_actionFill_Size_triggered();
+
+    void on_actionOrigin_Size_triggered();
+
+    void on_actionDelete_Selected_triggered();
+
+    void on_actionExtra_Selected_triggered();
+
+    void on_actionDelete_Unselected_triggered();
+
+    void on_actionExtra_And_Delete_triggered();
+
+    void on_actionOpen_Select_In_Explore_triggered();
+
+    void on_actionOpen_In_Explore_triggered();
+
+    void on_actionBack_Prev_Directory_triggered();
+
+private:
 
 private:
     Ui::PictureBrowser *ui;

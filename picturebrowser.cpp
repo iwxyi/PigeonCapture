@@ -30,6 +30,8 @@ void PictureBrowser::readDirectory(QString targetDir)
 void PictureBrowser::enterDirectory(QString targetDir)
 {
     currentDirPath = targetDir;
+    ui->actionBack_Prev_Directory->setEnabled(currentDirPath != rootDirPath);
+
     ui->listWidget->clear();
     if (targetDir.isEmpty())
         return ;
@@ -37,11 +39,11 @@ void PictureBrowser::enterDirectory(QString targetDir)
     if (currentDirPath != rootDirPath)
     {
         QListWidgetItem* item = new QListWidgetItem(QIcon(":/images/cd_up"), BACK_PREV_DIRECTORY, ui->listWidget);
-        item->setData(Qt::UserRole, BACK_PREV_DIRECTORY);
+        item->setData(FilePathRole, BACK_PREV_DIRECTORY);
     }
 
     // 读取目录的图片和文件夹
-    QDir dir(rootDirPath);
+    QDir dir(targetDir);
     QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Time | QDir::Reversed);
     foreach (QFileInfo info, infos)
     {
@@ -56,13 +58,13 @@ void PictureBrowser::enterDirectory(QString targetDir)
         else if (info.isFile())
         {
             if (name.contains("."))
-                name = name.left(name.indexOf("."));
+                name = name.left(name.lastIndexOf("."));
             QIcon icon(info.absoluteFilePath());
             item = new QListWidgetItem(icon, name, ui->listWidget);
         }
         else
             continue;
-        item->setData(Qt::UserRole, info.absoluteFilePath());
+        item->setData(FilePathRole, info.absoluteFilePath());
         item->setToolTip(info.baseName());
     }
 
@@ -110,8 +112,11 @@ void PictureBrowser::saveCurrentViewPos()
 {
     if (currentDirPath.isEmpty())
         return ;
+    if (ui->listWidget->currentItem() == nullptr)
+        return ;
     ListProgress progress{ui->listWidget->currentRow(),
-                         ui->listWidget->verticalScrollBar()->sliderPosition()};
+                         ui->listWidget->verticalScrollBar()->sliderPosition(),
+                         ui->listWidget->currentItem()->data(FilePathRole).toString()};
     viewPoss[currentDirPath] = progress;
 }
 
@@ -122,11 +127,23 @@ void PictureBrowser::restoreCurrentViewPos()
     ListProgress progress = viewPoss.value(currentDirPath);
     ui->listWidget->setCurrentRow(progress.index);
     ui->listWidget->verticalScrollBar()->setSliderPosition(progress.scroll);
+    if (ui->listWidget->currentItem()->data(FilePathRole) != progress.file)
+    {
+        for (int i = 0; i < ui->listWidget->count(); i++)
+        {
+            auto item = ui->listWidget->item(i);
+            if (item->data(FilePathRole).toString() == progress.file)
+            {
+                ui->listWidget->setCurrentRow(i);
+                break;
+            }
+        }
+    }
 }
 
 void PictureBrowser::on_actionRefresh_triggered()
 {
-    readDirectory(rootDirPath);
+    readDirectory(currentDirPath);
 }
 
 void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
@@ -137,7 +154,7 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
         return ;
     }
 
-    QString path = current->data(Qt::UserRole).toString();
+    QString path = current->data(FilePathRole).toString();
     QFileInfo info(path);
     if (info.isFile() && path.endsWith(".jpg"))
     {
@@ -171,17 +188,13 @@ void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
     }
 
     // 返回上一级
-    if (item->data(Qt::UserRole).toString() == BACK_PREV_DIRECTORY)
+    if (item->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
     {
-        saveCurrentViewPos();
-
-        QDir dir(currentDirPath);
-        dir.cdUp();
-        enterDirectory(dir.absolutePath());
+        on_actionBack_Prev_Directory_triggered();
         return ;
     }
 
-    QString path = item->data(Qt::UserRole).toString();
+    QString path = item->data(FilePathRole).toString();
     QFileInfo info(path);
     if (info.isFile())
     {
@@ -225,4 +238,197 @@ void PictureBrowser::on_actionIcon_Large_triggered()
 void PictureBrowser::on_actionIcon_Largest_triggered()
 {
     setListWidgetIconSize(512);
+}
+
+void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
+{
+    QMenu* menu = new QMenu(this);
+    menu->addAction(ui->actionOpen_Select_In_Explore);
+    menu->addSeparator();
+    menu->addAction(ui->actionExtra_Selected);
+    menu->addAction(ui->actionExtra_And_Delete);
+    menu->addAction(ui->actionDelete_Selected);
+    menu->addAction(ui->actionDelete_Unselected);
+    menu->exec(QCursor::pos());
+}
+
+void PictureBrowser::on_actionIcon_Lager_triggered()
+{
+    int size = ui->listWidget->iconSize().width();
+    size = size * 5 / 4;
+    setListWidgetIconSize(size);
+}
+
+void PictureBrowser::on_actionIcon_Smaller_triggered()
+{
+    int size = ui->listWidget->iconSize().width();
+    size = size * 4 / 5;
+    setListWidgetIconSize(size);
+}
+
+void PictureBrowser::on_actionRestore_Size_triggered()
+{
+    // 还原预览图默认大小
+}
+
+void PictureBrowser::on_actionFill_Size_triggered()
+{
+    // 预览图填充屏幕
+}
+
+void PictureBrowser::on_actionOrigin_Size_triggered()
+{
+    // 原始大小
+}
+
+void PictureBrowser::on_actionDelete_Selected_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    foreach (auto item, items)
+    {
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            continue;
+
+        QFileInfo info(path);
+        if (info.isFile())
+        {
+            QFile::remove(path);
+        }
+        else if (info.isDir())
+        {
+            QDir dir(path);
+            dir.removeRecursively();
+        }
+
+        int row = ui->listWidget->row(item);
+        ui->listWidget->takeItem(row);
+    }
+}
+
+void PictureBrowser::on_actionExtra_Selected_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    foreach(auto item, items)
+    {
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            continue;
+        QFileInfo info(path);
+        if (!info.exists())
+            continue;
+        if (info.isFile() || info.isDir())
+        {
+            QFile file(path);
+            QDir dir(info.absoluteDir());
+            dir.cdUp();
+            file.rename(dir.absoluteFilePath(info.fileName()));
+        }
+
+        int row = ui->listWidget->row(item);
+        ui->listWidget->takeItem(row);
+    }
+}
+
+void PictureBrowser::on_actionDelete_Unselected_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    for (int i = 0; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (items.contains(item))
+            continue;
+
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            continue;
+        QFileInfo info(path);
+        if (path.isEmpty() || !info.exists())
+            continue;
+
+        QFile file(path);
+        file.remove();
+
+        ui->listWidget->takeItem(i--);
+    }
+}
+
+void PictureBrowser::on_actionExtra_And_Delete_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    QStringList paths;
+
+    // 提取文件
+    foreach (auto item, items)
+    {
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            return ;
+        if (path.isEmpty() || !QFileInfo(path).exists())
+            return ;
+
+        paths.append(path);
+
+        // 提取文件到外面
+        QFileInfo info(path);
+        if (!info.exists())
+            continue;
+        if (info.isFile() || info.isDir())
+        {
+            QFile file(path);
+            QDir dir(info.absoluteDir());
+            dir.cdUp();
+            file.rename(dir.absoluteFilePath(info.fileName()));
+        }
+    }
+
+    // 删除剩下的整个文件夹
+    QDir dir(currentDirPath);
+    QDir up(currentDirPath);
+    up.cdUp();
+    dir.removeRecursively();
+    enterDirectory(up.absolutePath());
+
+    // 选中刚提取的
+    ui->listWidget->selectionModel()->clear();
+    for (int i = 0; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (paths.contains(item->data(FilePathRole).toString()))
+        {
+            ui->listWidget->setCurrentItem(item, QItemSelectionModel::Select);
+        }
+    }
+}
+
+void PictureBrowser::on_actionOpen_Select_In_Explore_triggered()
+{
+    auto item = ui->listWidget->currentItem();
+    QString path = item->data(FilePathRole).toString();
+    if (path == BACK_PREV_DIRECTORY)
+        return ;
+    if (path.isEmpty() || !QFileInfo(path).exists())
+        return ;
+
+    QProcess process;
+    path.replace("/", "\\");
+    QString cmd = QString("explorer.exe /select, \"%1\"").arg(path);
+    process.startDetached(cmd);
+}
+
+
+void PictureBrowser::on_actionOpen_In_Explore_triggered()
+{
+    QDesktopServices::openUrl(QUrl("file:///" + currentDirPath, QUrl::TolerantMode));
+}
+
+void PictureBrowser::on_actionBack_Prev_Directory_triggered()
+{
+    if (currentDirPath == rootDirPath)
+        return ;
+    saveCurrentViewPos();
+
+    QDir dir(currentDirPath);
+    dir.cdUp();
+    enterDirectory(dir.absolutePath());
 }
