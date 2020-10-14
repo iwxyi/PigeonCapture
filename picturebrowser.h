@@ -13,6 +13,8 @@
 #include <QUrl>
 #include <QHash>
 #include <QScrollBar>
+#include <QClipboard>
+#include <QMimeData>
 
 #define BACK_PREV_DIRECTORY ".."
 #define FilePathRole (Qt::UserRole)
@@ -90,6 +92,16 @@ private slots:
     void on_actionOpen_In_Explore_triggered();
 
     void on_actionBack_Prev_Directory_triggered();
+
+    void on_actionCopy_File_triggered();
+
+    void on_actionCut_File_triggered();
+
+    void on_actionDelete_Up_Files_triggered();
+
+    void on_actionDelete_Down_Files_triggered();
+
+    void on_listWidget_itemSelectionChanged();
 
 private:
 

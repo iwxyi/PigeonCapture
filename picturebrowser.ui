@@ -27,6 +27,9 @@
        <property name="selectionMode">
         <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
+       <property name="movement">
+        <enum>QListView::Static</enum>
+       </property>
        <property name="viewMode">
         <enum>QListView::IconMode</enum>
        </property>
@@ -45,7 +48,7 @@
      <x>0</x>
      <y>0</y>
      <width>647</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -79,11 +82,15 @@
     <property name="title">
      <string>选择</string>
     </property>
+    <addaction name="actionCopy_File"/>
+    <addaction name="separator"/>
     <addaction name="actionDelete_Selected"/>
     <addaction name="actionExtra_Selected"/>
     <addaction name="actionDelete_Unselected"/>
     <addaction name="actionExtra_And_Delete"/>
     <addaction name="actionOpen_Select_In_Explore"/>
+    <addaction name="actionDelete_Up_Files"/>
+    <addaction name="actionDelete_Down_Files"/>
    </widget>
    <widget class="QMenu" name="menu_5">
     <property name="title">
@@ -211,6 +218,26 @@
   <action name="actionBack_Prev_Directory">
    <property name="text">
     <string>返回上一级</string>
+   </property>
+  </action>
+  <action name="actionCopy_File">
+   <property name="text">
+    <string>复制选中</string>
+   </property>
+  </action>
+  <action name="actionCut_File">
+   <property name="text">
+    <string>剪切选中</string>
+   </property>
+  </action>
+  <action name="actionDelete_Up_Files">
+   <property name="text">
+    <string>删除前面所有</string>
+   </property>
+  </action>
+  <action name="actionDelete_Down_Files">
+   <property name="text">
+    <string>删除后面所有</string>
    </property>
   </action>
  </widget>

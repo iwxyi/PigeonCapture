@@ -45,6 +45,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
     // 读取目录的图片和文件夹
     QDir dir(targetDir);
     QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+    QSize maxIconSize = ui->listWidget->iconSize();
     foreach (QFileInfo info, infos)
     {
         QString name = info.baseName();
@@ -63,7 +64,10 @@ void PictureBrowser::enterDirectory(QString targetDir)
             if (suffix != "jpg" && suffix != "png"
                     && suffix != "jpeg" && suffix != "gif")
                 continue;
-            QIcon icon(info.absoluteFilePath());
+            QPixmap pixmap(info.absoluteFilePath());
+            if (pixmap.width() > maxIconSize.width() || pixmap.height() > maxIconSize.height())
+                pixmap = pixmap.scaled(maxIconSize, Qt::AspectRatioMode::KeepAspectRatio);
+            QIcon icon(pixmap);
             item = new QListWidgetItem(icon, name, ui->listWidget);
         }
         else
@@ -110,6 +114,7 @@ void PictureBrowser::setListWidgetIconSize(int x)
 {
     ui->listWidget->setIconSize(QSize(x, x));
     settings.setValue("picturebrowser/iconSize", x);
+    on_actionRefresh_triggered();
 }
 
 void PictureBrowser::saveCurrentViewPos()
@@ -147,7 +152,7 @@ void PictureBrowser::restoreCurrentViewPos()
 
 void PictureBrowser::on_actionRefresh_triggered()
 {
-    readDirectory(currentDirPath);
+    enterDirectory(currentDirPath);
 }
 
 void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
@@ -163,7 +168,8 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
     if (info.isFile() && path.endsWith(".jpg"))
     {
         // 显示图片预览
-        ui->previewPicture->setPixmap(QPixmap(info.absoluteFilePath()));
+        if (!ui->previewPicture->setPixmap(QPixmap(info.absoluteFilePath())))
+            qDebug() << "打开图片失败：" << info.absoluteFilePath() << QPixmap(info.absoluteFilePath()).isNull();
     }
     else if (info.isDir())
     {
@@ -190,6 +196,7 @@ void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
         return ;
     }
 
+    // 使用系统程序打开图片
     QString path = item->data(FilePathRole).toString();
     QFileInfo info(path);
     if (info.isFile())
@@ -240,11 +247,15 @@ void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
 {
     QMenu* menu = new QMenu(this);
     menu->addAction(ui->actionOpen_Select_In_Explore);
+    menu->addAction(ui->actionCopy_File);
     menu->addSeparator();
     menu->addAction(ui->actionExtra_Selected);
     menu->addAction(ui->actionExtra_And_Delete);
     menu->addAction(ui->actionDelete_Selected);
     menu->addAction(ui->actionDelete_Unselected);
+    menu->addSeparator();
+    menu->addAction(ui->actionDelete_Up_Files);
+    menu->addAction(ui->actionDelete_Down_Files);
     menu->exec(QCursor::pos());
 }
 
@@ -427,4 +438,86 @@ void PictureBrowser::on_actionBack_Prev_Directory_triggered()
     QDir dir(currentDirPath);
     dir.cdUp();
     enterDirectory(dir.absolutePath());
+}
+
+void PictureBrowser::on_actionCopy_File_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    QList<QUrl> urls;
+    foreach (auto item, items)
+    {
+        urls.append(QUrl("file:///" + item->data(FilePathRole).toString()));
+    }
+
+    QMimeData* mime = new QMimeData();
+    mime->setUrls(urls);
+    QApplication::clipboard()->setMimeData(mime);
+}
+
+void PictureBrowser::on_actionCut_File_triggered()
+{
+    // 不支持剪切文件
+}
+
+void PictureBrowser::on_actionDelete_Up_Files_triggered()
+{
+    auto item = ui->listWidget->currentItem();
+    int row = ui->listWidget->row(item);
+    int start = 0;
+    while (row--)
+    {
+        auto item = ui->listWidget->item(start);
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+        {
+            start++;
+            continue;
+        }
+
+        QFileInfo info(path);
+        if (info.isFile())
+        {
+            QFile::remove(path);
+        }
+        else if (info.isDir())
+        {
+            QDir dir(path);
+            dir.removeRecursively();
+        }
+
+        ui->listWidget->takeItem(start);
+    }
+}
+
+void PictureBrowser::on_actionDelete_Down_Files_triggered()
+{
+    auto item = ui->listWidget->currentItem();
+    int row = ui->listWidget->row(item) + 1;
+    while (row < ui->listWidget->count())
+    {
+        auto item = ui->listWidget->item(row);
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            continue;
+
+        QFileInfo info(path);
+        if (info.isFile())
+        {
+            QFile::remove(path);
+        }
+        else if (info.isDir())
+        {
+            QDir dir(path);
+            dir.removeRecursively();
+        }
+
+        ui->listWidget->takeItem(row);
+    }
+}
+
+void PictureBrowser::on_listWidget_itemSelectionChanged()
+{
+    int count = ui->listWidget->selectedItems().size();
+    ui->actionDelete_Up_Files->setEnabled(count == 1);
+    ui->actionDelete_Down_Files->setEnabled(count == 1);
 }

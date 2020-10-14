@@ -14,18 +14,9 @@ class ResizablePicture : public QWidget
 public:
     ResizablePicture(QWidget *parent = nullptr);
 
-    struct ScaleInfo
-    {
-        ScaleInfo(){}
-        ScaleInfo(double s, QPointF o) : scale(s), offset(o){}
-        double scale = 1.0; // 缩放的比例
-        QPointF offset = QPointF(0, 0); // 中心点的偏移比例
-        QString toString(){ return QString("%1 (%2,%3)").arg(scale).arg(offset.x()).arg(offset.y()); }
-    };
-
-    void setPixmap(const QPixmap& pixmap);
+    bool setPixmap(const QPixmap& pixmap);
     void resetScale();
-    void restoreScale(ScaleInfo scale);
+    void restoreScale();
 
     void setScaleCache(bool enable);
 
@@ -46,7 +37,7 @@ private:
     QPixmap originPixmap;
     QPixmap currentPixmap;
     bool scaleCacheEnabled = true;
-    QHash<qint64, ScaleInfo> scaleCache; // 缓存相同大小的图片位置信息（相同大小的图片都只看同一部分区域）
+    QHash<qint64, QRect> scaleCache; // 缓存相同大小的图片位置信息（相同大小的图片都只看同一部分区域）
 };
 
 #endif // RESIZABLEPICTURE_H
