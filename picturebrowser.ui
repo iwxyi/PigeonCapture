@@ -14,7 +14,7 @@
    <string>图片浏览</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -34,11 +34,7 @@
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
+      <widget class="ResizablePicture" name="previewPicture" native="true"/>
      </widget>
     </item>
    </layout>
@@ -218,6 +214,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ResizablePicture</class>
+   <extends>QWidget</extends>
+   <header location="global">resizablepicture.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -8,7 +8,7 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->splitter, &QSplitter::splitterMoved, this, [=](int, int){
-        showCurrentItemPreview();
+//        showCurrentItemPreview();
 
         QSize size(ui->listWidget->iconSize());
         ui->listWidget->setIconSize(QSize(1, 1));
@@ -77,7 +77,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
 
 void PictureBrowser::resizeEvent(QResizeEvent *event)
 {
-    showCurrentItemPreview();
+    QMainWindow::resizeEvent(event);
 }
 
 void PictureBrowser::showEvent(QShowEvent *event)
@@ -154,7 +154,7 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
 {
     if (!current)
     {
-        ui->label->setPixmap(QPixmap());
+        ui->previewPicture->setPixmap(QPixmap());
         return ;
     }
 
@@ -163,22 +163,14 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
     if (info.isFile() && path.endsWith(".jpg"))
     {
         // 显示图片预览
-        QPixmap pixmap(path);
-        if (pixmap.width() > ui->label->width() || pixmap.height() > ui->label->height())
-            pixmap = pixmap.scaled(ui->label->size(), Qt::KeepAspectRatio);
-        ui->label->setPixmap(pixmap);
-        ui->label->setMinimumSize(1, 1); // 避免无法缩放
+        ui->previewPicture->setPixmap(QPixmap(info.absoluteFilePath()));
     }
     else if (info.isDir())
     {
         QList<QFileInfo> infos = QDir(info.absoluteFilePath()).entryInfoList(QDir::Files, QDir::SortFlag::Time | QDir::SortFlag::Reversed);
         if (infos.size())
         {
-            QPixmap pixmap(infos.first().absoluteFilePath());
-            if (pixmap.width() > ui->label->width() || pixmap.height() > ui->label->height())
-                pixmap = pixmap.scaled(ui->label->size(), Qt::KeepAspectRatio);
-            ui->label->setPixmap(pixmap);
-            ui->label->setMinimumSize(1, 1); // 避免无法缩放
+            ui->previewPicture->setPixmap(QPixmap(infos.first().absoluteFilePath()));
         }
     }
 }
@@ -187,7 +179,7 @@ void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
 {
     if (!item)
     {
-        ui->label->setPixmap(QPixmap());
+        ui->previewPicture->setPixmap(QPixmap());
         return ;
     }
 

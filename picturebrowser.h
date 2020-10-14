@@ -41,7 +41,7 @@ public:
     void readDirectory(QString targetDir);
 
 protected:
-    void resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent*) override;
     void showEvent(QShowEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
 

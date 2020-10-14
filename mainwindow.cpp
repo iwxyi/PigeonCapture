@@ -79,7 +79,6 @@ MainWindow::MainWindow(QWidget *parent)
                                                  new QPixmap(getScreenShot())});
         } catch (...) {
             failed = true;
-            return ;
         }
 
         while (prevCapturedList->size())
@@ -92,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->prevCaptureCheckBox->setText(QString("已有%1张(%2s)%3")
                                          .arg(prevCapturedList->size())
                                          .arg((timestamp-prevCapturedList->first().time)/1000)
-                                         .arg(failed ? " 内存不足，建议降低间隔" : ""));
+                                         .arg(failed ? " 内存不足" : ""));
     });
 
     // 单次截图信号槽

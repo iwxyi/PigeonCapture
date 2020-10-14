@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QWheelEvent>
 #include <QMouseEvent>
+#include <QDebug>
 
 class ResizablePicture : public QWidget
 {
@@ -17,8 +18,9 @@ public:
     {
         ScaleInfo(){}
         ScaleInfo(double s, QPointF o) : scale(s), offset(o){}
-        double scale = 1.0; // 缩放的百分比
-        QPointF offset = QPointF(0, 0); // 中心点的偏移
+        double scale = 1.0; // 缩放的比例
+        QPointF offset = QPointF(0, 0); // 中心点的偏移比例
+        QString toString(){ return QString("%1 (%2,%3)").arg(scale).arg(offset.x()).arg(offset.y()); }
     };
 
     void setPixmap(const QPixmap& pixmap);
