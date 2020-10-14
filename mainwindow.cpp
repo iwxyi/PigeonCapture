@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+qDebug() << settings.fileName();
     // 读取路径
     saveDir = settings.value("path/save").toString();
     if (saveDir.isEmpty())
@@ -195,7 +195,6 @@ void MainWindow::triggerSerialCapture()
 
 void MainWindow::areaSelectorMoved(QRect rect)
 {
-    currentRect = rect;
     showPreview(getScreenShot());
 }
 
@@ -366,5 +365,17 @@ void MainWindow::on_comboBox_activated(int index)
 {
     QDesktopWidget * desktop = QApplication::desktop();
     QRect rect = desktop->screenGeometry(index);
-    currentRect = rect;
+}
+
+void MainWindow::on_actionRestore_Geometry_triggered()
+{
+    settings.remove("capture/area");
+    settings.remove("mainwindow/geometry");
+    settings.remove("mainwindow/state");
+    settings.remove("picturebrowser/geometry");
+    settings.remove("picturebrowser/state");
+    settings.remove("picturebrowser/splitGeometry");
+    settings.remove("picturebrowser/splitState");
+    areaSelector->deleteLater();
+    areaSelector = new AreaSelector(nullptr);
 }

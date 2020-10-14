@@ -212,7 +212,7 @@
      <x>0</x>
      <y>0</y>
      <width>345</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -221,6 +221,7 @@
     </property>
     <addaction name="actionCapture_History"/>
     <addaction name="actionOpen_Directory"/>
+    <addaction name="actionRestore_Geometry"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -262,6 +263,11 @@
   <action name="actionOpen_Directory">
    <property name="text">
     <string>打开保存位置</string>
+   </property>
+  </action>
+  <action name="actionRestore_Geometry">
+   <property name="text">
+    <string>重设位置</string>
    </property>
   </action>
  </widget>

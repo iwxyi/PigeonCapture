@@ -69,6 +69,8 @@ private slots:
 
     void on_comboBox_activated(int index);
 
+    void on_actionRestore_Geometry_triggered();
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
