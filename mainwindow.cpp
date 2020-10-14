@@ -49,8 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
     tipTimer->setInterval(2000);
     tipTimer->setSingleShot(0);
     connect(tipTimer, &QTimer::timeout, this, [=]{
-        ui->fastCaptureShortcut->setText("设置");
-        ui->serialCaptureShortcut->setText("设置");
+        ui->fastCaptureShortcut->setText("开始");
+        ui->serialCaptureShortcut->setText("开始");
     });
 
     // 连续截图
@@ -66,41 +66,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 单次截图信号槽
     connect(fastCaptureShortcut, &QxtGlobalShortcut::activated,[=]() {
-        runCapture();
-
-        ui->fastCaptureShortcut->setText("截图成功");
-        tipTimer->start();
+        triggerFastCapture();
     });
 
     // 连续截图信号槽
     connect(serialCaptureShortcut, &QxtGlobalShortcut::activated,[=]() {
-        if (serialTimer->isActive())
-        {
-            // 停止连续截图
-            serialTimer->stop();
-            tipTimer->start();
-            qDebug() << "停止连续截图";
-
-            ui->selectDirButton->setEnabled(true);
-            ui->fastCaptureShortcut->setEnabled(true);
-            ui->serialCaptureShortcut->setEnabled(true);
-        }
-        else
-        {
-            serialCaptureDir = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz");
-            QDir(saveDir).mkdir(serialCaptureDir);
-
-            serialCaptureCount = 0;
-            // 开始连续截图
-            serialTimer->start();
-            // 先截一张
-            runCapture();
-            qDebug() << "开启连续截图";
-
-            ui->selectDirButton->setEnabled(false);
-            ui->fastCaptureShortcut->setEnabled(false);
-            ui->serialCaptureShortcut->setEnabled(false);
-        }
+        triggerSerialCapture();
     });
 }
 
@@ -148,7 +119,7 @@ QPixmap MainWindow::getScreenShot()
  */
 QString MainWindow::getCurrentSavePath()
 {
-    QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz.jpg");
+    QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz.jpg");
     QDir dir(saveDir);
     if (serialTimer->isActive())
         dir = QDir(dir.filePath(serialCaptureDir));
@@ -174,6 +145,41 @@ void MainWindow::runCapture()
     }
 }
 
+void MainWindow::triggerFastCapture()
+{
+    runCapture();
+
+    ui->fastCaptureShortcut->setText("截图成功");
+    tipTimer->start();
+}
+
+void MainWindow::triggerSerialCapture()
+{
+    if (serialTimer->isActive())
+    {
+        // 停止连续截图
+        serialTimer->stop();
+        tipTimer->start();
+        qDebug() << "停止连续截图";
+
+        ui->selectDirButton->setEnabled(true);
+    }
+    else
+    {
+        serialCaptureDir = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz");
+        QDir(saveDir).mkdir(serialCaptureDir);
+
+        serialCaptureCount = 0;
+        // 开始连续截图
+        serialTimer->start();
+        // 先截一张
+        runCapture();
+        qDebug() << "开启连续截图";
+
+        ui->selectDirButton->setEnabled(false);
+    }
+}
+
 void MainWindow::areaSelectorMoved(QRect rect)
 {
     showPreview(getScreenShot());
@@ -189,12 +195,14 @@ void MainWindow::setFastShortcut(QString s)
 
     if(fastCaptureShortcut->setShortcut(QKeySequence(s)))
     {
-        ui->fastCaptureShortcut->setText("设置成功");
+        if (tipTimer)
+            ui->fastCaptureShortcut->setText("设置成功");
        qDebug() << "设置快速截图快捷键：" << s;
     }
     else
     {
-        ui->fastCaptureShortcut->setText("冲突");
+        if (tipTimer)
+            ui->fastCaptureShortcut->setText("冲突");
        qDebug() << "快捷键设置失败，或许是冲突了" << s;
     }
     if (tipTimer)
@@ -208,12 +216,14 @@ void MainWindow::setSerialShortcut(QString s)
 
     if(serialCaptureShortcut->setShortcut(QKeySequence(s)))
     {
-        ui->serialCaptureShortcut->setText("设置成功");
+        if (tipTimer)
+            ui->serialCaptureShortcut->setText("设置成功");
        qDebug() << "设置连续截图快捷键：" << s;
     }
     else
     {
-        ui->serialCaptureShortcut->setText("冲突");
+        if (tipTimer)
+            ui->serialCaptureShortcut->setText("冲突");
        qDebug() << "快捷键设置失败，或许是冲突了" << s;
     }
     if (tipTimer)
@@ -225,9 +235,10 @@ void MainWindow::setSerialShortcut(QString s)
  */
 void MainWindow::showPreview(QPixmap pixmap)
 {
-    if (pixmap.width() > ui->previewLabel->width())
-        pixmap = pixmap.scaledToWidth(ui->previewLabel->width());
+    if (pixmap.width() > ui->previewLabel->width() || pixmap.height() > ui->previewLabel->height())
+        pixmap = pixmap.scaled(ui->previewLabel->size(), Qt::KeepAspectRatio);
     ui->previewLabel->setPixmap(pixmap);
+    ui->previewLabel->setMinimumSize(1, 1);
 }
 
 
@@ -243,21 +254,20 @@ void MainWindow::on_selectDirButton_clicked()
 
 void MainWindow::on_fastCaptureShortcut_clicked()
 {
-    QString s = ui->fastCaptureEdit->text();
-    setFastShortcut(s);
-    settings.setValue("key/capture", s);
+    triggerFastCapture();
 }
 
 void MainWindow::on_serialCaptureShortcut_clicked()
 {
-    QString s = ui->serialCaptureEdit->text();
-    setSerialShortcut(s);
-    settings.setValue("key/serial", s);
+    triggerSerialCapture();
 }
 
 void MainWindow::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
+
+    restoreGeometry(settings.value("mainwindow/geometry").toByteArray());
+    restoreState(settings.value("mainwindow/state").toByteArray());
 
     showPreview(getScreenShot());
 }
@@ -266,8 +276,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     settings.setValue("capture/area", areaSelector->geometry());
     areaSelector->deleteLater();
+    settings.setValue("mainwindow/geometry", this->saveGeometry());
+    settings.setValue("mainwindow/state", this->saveState());
 
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    showPreview(getScreenShot());
 }
 
 void MainWindow::on_modeTab_currentChanged(int index)
@@ -299,4 +316,28 @@ void MainWindow::on_showAreaSelector_clicked()
         settings.setValue("capture/area", areaSelector->geometry());
         qDebug() << "隐藏区域选择器" << areaSelector->geometry();
     }
+}
+
+void MainWindow::on_actionOpen_Directory_triggered()
+{
+    QDesktopServices::openUrl(QUrl("file:///" + saveDir, QUrl::TolerantMode));
+}
+
+void MainWindow::on_actionCapture_History_triggered()
+{
+    PictureBrowser* pb = new PictureBrowser(this);
+    pb->readDirectory(saveDir);
+    pb->show();
+}
+
+void MainWindow::on_fastCaptureEdit_textEdited(const QString &arg1)
+{
+    setFastShortcut(arg1);
+    settings.setValue("key/capture", arg1);
+}
+
+void MainWindow::on_serialCaptureEdit_textEdited(const QString &arg1)
+{
+    setSerialShortcut(arg1);
+    settings.setValue("key/serial", arg1);
 }

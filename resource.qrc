@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="directory">images/directory.png</file>
+        <file alias="cd_up">images/cd_up.png</file>
+    </qresource>
+</RCC>

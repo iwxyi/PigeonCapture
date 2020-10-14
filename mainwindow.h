@@ -11,8 +11,10 @@
 #include <QTimer>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QDesktopServices>
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
+#include "picturebrowser.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -49,13 +51,24 @@ private slots:
     void on_modeTab_currentChanged(int index);
 
     void runCapture();
+    void triggerFastCapture();
+    void triggerSerialCapture();
     void areaSelectorMoved(QRect rect);
 
     void on_showAreaSelector_clicked();
 
+    void on_actionOpen_Directory_triggered();
+
+    void on_actionCapture_History_triggered();
+
+    void on_fastCaptureEdit_textEdited(const QString &arg1);
+
+    void on_serialCaptureEdit_textEdited(const QString &arg1);
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
+    void resizeEvent(QResizeEvent* event);
 
 private:
     Ui::MainWindow *ui;

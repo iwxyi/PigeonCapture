@@ -20,16 +20,22 @@ include($$PWD/qxtglobalshortcut5/qxt.pri)
 SOURCES += \
     areaselector.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    picturebrowser.cpp
 
 HEADERS += \
     areaselector.h \
-    mainwindow.h
+    mainwindow.h \
+    picturebrowser.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    picturebrowser.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resource.qrc

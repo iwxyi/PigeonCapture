@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>345</width>
-    <height>414</height>
+    <height>366</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>鸽鸽子表情包抓截工具</string>
+   <string>实时表情包抓截工具</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,1">
@@ -62,7 +62,7 @@
       <item>
        <widget class="QPushButton" name="fastCaptureShortcut">
         <property name="text">
-         <string>设置</string>
+         <string> 开始</string>
         </property>
        </widget>
       </item>
@@ -90,7 +90,7 @@
       <item>
        <widget class="QPushButton" name="serialCaptureShortcut">
         <property name="text">
-         <string>设置</string>
+         <string>开始</string>
         </property>
        </widget>
       </item>
@@ -163,20 +163,6 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QPushButton" name="pushButton_3">
-          <property name="text">
-           <string>查看</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pushButton_4">
-          <property name="text">
-           <string>制作</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -208,6 +194,8 @@
     <property name="title">
      <string>文件</string>
     </property>
+    <addaction name="actionCapture_History"/>
+    <addaction name="actionOpen_Directory"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -228,7 +216,7 @@
   </widget>
   <action name="actionEmoji_Creator">
    <property name="text">
-    <string>表情包制造者</string>
+    <string>表情包制造</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -239,6 +227,16 @@
   <action name="actionHelp">
    <property name="text">
     <string>帮助</string>
+   </property>
+  </action>
+  <action name="actionCapture_History">
+   <property name="text">
+    <string>截图管理</string>
+   </property>
+  </action>
+  <action name="actionOpen_Directory">
+   <property name="text">
+    <string>打开保存位置</string>
    </property>
   </action>
  </widget>
