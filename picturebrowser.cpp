@@ -44,7 +44,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
 
     // 读取目录的图片和文件夹
     QDir dir(targetDir);
-    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Time | QDir::Reversed);
+    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
     foreach (QFileInfo info, infos)
     {
         QString name = info.baseName();
@@ -69,7 +69,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
         else
             continue;
         item->setData(FilePathRole, info.absoluteFilePath());
-        item->setToolTip(info.baseName());
+        item->setToolTip(info.fileName());
     }
 
     restoreCurrentViewPos();

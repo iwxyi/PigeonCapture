@@ -15,7 +15,7 @@ class AreaSelector : public QWidget
 {
     Q_OBJECT
 public:
-    AreaSelector(QWidget *parent = nullptr);
+    AreaSelector(QWidget *);
 
     void setPaint(bool paint);
     QRect getArea();
@@ -25,8 +25,8 @@ protected:
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
-    void resizeEvent(QResizeEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
 signals:
     void areaChanged(QRect rect);

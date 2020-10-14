@@ -78,8 +78,6 @@ private slots:
 
     void on_spinBox_valueChanged(int arg1);
 
-    void on_comboBox_activated(int index);
-
     void on_actionRestore_Geometry_triggered();
 
     void on_prevCaptureCheckBox_stateChanged(int arg1);
@@ -95,7 +93,7 @@ private slots:
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent*);
 
     QString timeToFile();
     qint64 getTimestamp();
@@ -115,6 +113,6 @@ private:
 
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
-    qint64 prevCaptureMaxTime = 60000; // 最大提前截取60s，超过的舍弃掉
+    qint64 prevCaptureMaxTime = 61000; // 最大提前截取60s，超过的舍弃掉
 };
 #endif // MAINWINDOW_H

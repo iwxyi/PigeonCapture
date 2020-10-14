@@ -21,12 +21,14 @@ SOURCES += \
     areaselector.cpp \
     main.cpp \
     mainwindow.cpp \
-    picturebrowser.cpp
+    picturebrowser.cpp \
+    resizablepicture.cpp
 
 HEADERS += \
     areaselector.h \
     mainwindow.h \
-    picturebrowser.h
+    picturebrowser.h \
+    resizablepicture.h
 
 FORMS += \
     mainwindow.ui \

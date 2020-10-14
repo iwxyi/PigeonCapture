@@ -1,8 +1,9 @@
 #include "areaselector.h"
 
-AreaSelector::AreaSelector(QWidget *parent)
+AreaSelector::AreaSelector(QWidget *)
     : QWidget(nullptr)
 {
+    this->setWindowTitle("选择截图区域");
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);      //设置为无边框置顶窗口
     this->setMinimumSize(45,45);                        //设置最小尺寸
     this->setStyleSheet("background:#D1EEEE");          //设置背景颜色
@@ -25,18 +26,19 @@ QRect AreaSelector::getArea()
 
 void AreaSelector::setArea(QRect rect)
 {
-
+    Q_UNUSED(rect)
 }
 
 bool AreaSelector::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
-    MSG* msg = (MSG*)message;
+    Q_UNUSED(eventType)
+    MSG* msg = static_cast<MSG*>(message);
     switch(msg->message)
     {
     case WM_NCHITTEST:
         const auto ratio = devicePixelRatioF(); // 解决4K下的问题
-        int xPos = GET_X_LPARAM(msg->lParam) / ratio - this->frameGeometry().x();
-        int yPos = GET_Y_LPARAM(msg->lParam) / ratio - this->frameGeometry().y();
+        int xPos = static_cast<int>(GET_X_LPARAM(msg->lParam) / ratio - this->frameGeometry().x());
+        int yPos = static_cast<int>(GET_Y_LPARAM(msg->lParam) / ratio - this->frameGeometry().y());
         if(xPos < boundaryWidth && yPos>=fontHeight&&yPos<boundaryWidth+fontHeight)                    //左上角
             *result = HTTOPLEFT;
         else if(xPos>=width()-boundaryWidth&&yPos>=fontHeight&&yPos<boundaryWidth+fontHeight)          //右上角
@@ -74,14 +76,14 @@ void AreaSelector::mouseMoveEvent(QMouseEvent *e)
     }
 }
 
-void AreaSelector::resizeEvent(QResizeEvent *event)
+void AreaSelector::resizeEvent(QResizeEvent *)
 {
     QTimer::singleShot(0, [=]{
         emit areaChanged(geometry());
     });
 }
 
-void AreaSelector::paintEvent(QPaintEvent *event)
+void AreaSelector::paintEvent(QPaintEvent *)
 {
     QColor c(30, 144, 255, 192);
     int penW = boundaryShowed;
@@ -92,7 +94,7 @@ void AreaSelector::paintEvent(QPaintEvent *event)
     painter.drawRect(boundaryWidth-boundaryShowed/2, fontHeight + boundaryWidth-boundaryShowed/2, width()-boundaryWidth*2+boundaryShowed, height()-fontHeight-boundaryWidth*2+boundaryShowed);
 
     // 绘制坐标文字
-    QRect g = geometry();
+    QRect g = getArea();
     painter.drawText(penW, fontHeight,
                      QString("(%1,%2) %3×%4").arg(g.left()).arg(g.top()).arg(g.width()).arg(g.height()));
 

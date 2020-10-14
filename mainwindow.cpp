@@ -50,7 +50,8 @@ MainWindow::MainWindow(QWidget *parent)
     tipTimer->setSingleShot(0);
     connect(tipTimer, &QTimer::timeout, this, [=]{
         ui->fastCaptureShortcut->setText("开始");
-        ui->serialCaptureShortcut->setText("开始");
+        if (!serialTimer->isActive())
+            ui->serialCaptureShortcut->setText("开始");
     });
 
     // 连续截图
@@ -71,9 +72,15 @@ MainWindow::MainWindow(QWidget *parent)
         if (!prevCapturedList) // 可能是多线程冲突
             return ;
         qint64 timestamp = getTimestamp();
-        prevCapturedList->append(CaptureInfo{timestamp,
-                                             timeToFile()+".jpg",
-                                             new QPixmap(getScreenShot())});
+        bool failed = false;
+        try {
+            prevCapturedList->append(CaptureInfo{timestamp,
+                                                 timeToFile()+".jpg",
+                                                 new QPixmap(getScreenShot())});
+        } catch (...) {
+            failed = true;
+            return ;
+        }
 
         while (prevCapturedList->size())
         {
@@ -82,9 +89,10 @@ MainWindow::MainWindow(QWidget *parent)
             else
                 break;
         }
-        ui->prevCaptureCheckBox->setText(QString("已有%1张(%2s)")
+        ui->prevCaptureCheckBox->setText(QString("已有%1张(%2s)%3")
                                          .arg(prevCapturedList->size())
-                                         .arg((timestamp-prevCapturedList->first().time)/1000));
+                                         .arg((timestamp-prevCapturedList->first().time)/1000)
+                                         .arg(failed ? " 内存不足，建议降低间隔" : ""));
     });
 
     // 单次截图信号槽
@@ -99,15 +107,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 获取显示器的信息
     QDesktopWidget * desktop = QApplication::desktop();
-    int monitorCount = desktop->screenCount();
+    auto screens = QGuiApplication::screens();
+//    int monitorCount = desktop->screenCount();
+    int monitorCount = screens.size();
     int currentMonitor = desktop->screenNumber(this);
     for (int i = 0; i < monitorCount; i++)
     {
-        QRect rect = desktop->screenGeometry(i);
+//        QRect rect = desktop->screenGeometry(i);
+        QRect rect = screens.at(i)->geometry();
         QString name = QString("%1 (%2,%3 %4×%5)")
                 .arg(i).arg(rect.left()).arg(rect.top()).arg(rect.width()).arg(rect.height());
         ui->comboBox->addItem(name);
     }
+    ui->comboBox->setCurrentIndex(currentMonitor);
 }
 
 MainWindow::~MainWindow()
@@ -169,15 +181,20 @@ void MainWindow::runCapture()
 {
     QString savePath = getCurrentSavePath();
 
-    QPixmap pixmap = getScreenShot();
-    if (pixmap.save(savePath, "jpg"))
-    {
-        qDebug() << "截图成功：" << savePath;
+    try {
+        QPixmap pixmap = getScreenShot();
+        if (pixmap.save(savePath, "jpg"))
+        {
+            qDebug() << "截图成功：" << savePath;
+        }
+        else
+        {
+            qDebug() << "保存失败";
+        }
+    } catch (...) {
+        qDebug() << "截图失败，可能是内存不足";
     }
-    else
-    {
-        qDebug() << "保存失败";
-    }
+
 }
 
 void MainWindow::triggerFastCapture()
@@ -305,13 +322,12 @@ void MainWindow::setFastShortcut(QString s)
     {
         if (tipTimer)
             ui->fastCaptureShortcut->setText("设置成功");
-       qDebug() << "设置快速截图快捷键：" << s;
     }
     else
     {
         if (tipTimer)
             ui->fastCaptureShortcut->setText("冲突");
-       qDebug() << "快捷键设置失败，或许是冲突了" << s;
+       qDebug() << "快速截图快捷键设置失败，或许是冲突了" << s;
     }
     if (tipTimer)
         tipTimer->start();
@@ -326,13 +342,12 @@ void MainWindow::setSerialShortcut(QString s)
     {
         if (tipTimer)
             ui->serialCaptureShortcut->setText("设置成功");
-       qDebug() << "设置连续截图快捷键：" << s;
     }
     else
     {
         if (tipTimer)
             ui->serialCaptureShortcut->setText("冲突");
-       qDebug() << "快捷键设置失败，或许是冲突了" << s;
+       qDebug() << "连续截图快捷键设置失败，或许是冲突了" << s;
     }
     if (tipTimer)
         tipTimer->start();
@@ -390,7 +405,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QMainWindow::closeEvent(event);
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindow::resizeEvent(QResizeEvent *)
 {
     showPreview(getScreenShot());
 }
@@ -467,12 +482,6 @@ void MainWindow::on_spinBox_valueChanged(int arg1)
     settings.setValue("serial/interval", arg1);
     serialTimer->setInterval(arg1);
     prevTimer->setInterval(arg1);
-}
-
-void MainWindow::on_comboBox_activated(int index)
-{
-    QDesktopWidget * desktop = QApplication::desktop();
-    QRect rect = desktop->screenGeometry(index);
 }
 
 void MainWindow::on_actionRestore_Geometry_triggered()
