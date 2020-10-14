@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 连续截图
     serialTimer = new QTimer(this);
     int interval = settings.value("serial/interval", 100).toInt();
+    ui->spinBox->setValue(interval);
     serialTimer->setInterval(interval);
     connect(serialTimer, &QTimer::timeout, this, [=]{
         runCapture();
@@ -73,6 +74,18 @@ MainWindow::MainWindow(QWidget *parent)
     connect(serialCaptureShortcut, &QxtGlobalShortcut::activated,[=]() {
         triggerSerialCapture();
     });
+
+    // 获取显示器的信息
+    QDesktopWidget * desktop = QApplication::desktop();
+    int monitorCount = desktop->screenCount();
+    int currentMonitor = desktop->screenNumber(this);
+    for (int i = 0; i < monitorCount; i++)
+    {
+        QRect rect = desktop->screenGeometry(i);
+        QString name = QString("%1 (%2,%3 %4×%5)")
+                .arg(i).arg(rect.left()).arg(rect.top()).arg(rect.width()).arg(rect.height());
+        ui->comboBox->addItem(name);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -94,7 +107,7 @@ QPixmap MainWindow::getScreenShot()
     QScreen *screen = QGuiApplication::primaryScreen();
     if (mode == FullScreen) // 全屏截图
     {
-        QPixmap pixmap = screen->grabWindow(0);
+        QPixmap pixmap = screen->grabWindow(ui->comboBox->currentIndex());
         return pixmap;
     }
     else if (mode == ScreenArea) // 区域截图
@@ -182,6 +195,7 @@ void MainWindow::triggerSerialCapture()
 
 void MainWindow::areaSelectorMoved(QRect rect)
 {
+    currentRect = rect;
     showPreview(getScreenShot());
 }
 
@@ -340,4 +354,17 @@ void MainWindow::on_serialCaptureEdit_textEdited(const QString &arg1)
 {
     setSerialShortcut(arg1);
     settings.setValue("key/serial", arg1);
+}
+
+void MainWindow::on_spinBox_valueChanged(int arg1)
+{
+    settings.setValue("serial/interval", arg1);
+    serialTimer->setInterval(arg1);
+}
+
+void MainWindow::on_comboBox_activated(int index)
+{
+    QDesktopWidget * desktop = QApplication::desktop();
+    QRect rect = desktop->screenGeometry(index);
+    currentRect = rect;
 }

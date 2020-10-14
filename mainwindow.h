@@ -65,6 +65,10 @@ private slots:
 
     void on_serialCaptureEdit_textEdited(const QString &arg1);
 
+    void on_spinBox_valueChanged(int arg1);
+
+    void on_comboBox_activated(int index);
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);

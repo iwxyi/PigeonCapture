@@ -88,6 +88,31 @@
        </widget>
       </item>
       <item>
+       <widget class="QSpinBox" name="spinBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>连续截图间隔，单位：毫秒</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>3600000</number>
+        </property>
+        <property name="singleStep">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="serialCaptureShortcut">
         <property name="text">
          <string>开始</string>
@@ -99,7 +124,7 @@
     <item>
      <widget class="QTabWidget" name="modeTab">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="fullScreen">
        <attribute name="title">
