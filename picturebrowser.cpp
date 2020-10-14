@@ -316,6 +316,9 @@ void PictureBrowser::on_actionDelete_Selected_triggered()
 void PictureBrowser::on_actionExtra_Selected_triggered()
 {
     auto items = ui->listWidget->selectedItems();
+    if (!items.size())
+        return ;
+    int firstRow = ui->listWidget->row(items.first());
     foreach(auto item, items)
     {
         QString path = item->data(FilePathRole).toString();
@@ -335,11 +338,14 @@ void PictureBrowser::on_actionExtra_Selected_triggered()
         int row = ui->listWidget->row(item);
         ui->listWidget->takeItem(row);
     }
+    ui->listWidget->setCurrentRow(firstRow);
 }
 
 void PictureBrowser::on_actionDelete_Unselected_triggered()
 {
     auto items = ui->listWidget->selectedItems();
+    if (!items.size())
+        return ;
     for (int i = 0; i < ui->listWidget->count(); i++)
     {
         auto item = ui->listWidget->item(i);
@@ -363,6 +369,8 @@ void PictureBrowser::on_actionDelete_Unselected_triggered()
 void PictureBrowser::on_actionExtra_And_Delete_triggered()
 {
     auto items = ui->listWidget->selectedItems();
+    if (!items.size())
+        return ;
     QStringList paths;
 
     // 提取文件
