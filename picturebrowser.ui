@@ -193,6 +193,9 @@
    <property name="text">
     <string>提取选中并舍弃其他</string>
    </property>
+   <property name="toolTip">
+    <string>提取选中并删除其他</string>
+   </property>
   </action>
   <action name="actionOrigin_Size">
    <property name="text">

@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-qDebug() << settings.fileName();
+
     // 读取路径
     saveDir = settings.value("path/save").toString();
     if (saveDir.isEmpty())
@@ -56,13 +56,35 @@ qDebug() << settings.fileName();
     // 连续截图
     serialTimer = new QTimer(this);
     int interval = settings.value("serial/interval", 100).toInt();
-    ui->spinBox->setValue(interval);
     serialTimer->setInterval(interval);
     connect(serialTimer, &QTimer::timeout, this, [=]{
         runCapture();
         serialCaptureCount++;
         ui->serialCaptureShortcut->setText("已截" + QString::number(serialCaptureCount) + "张");
-        qDebug() << "连续截图：已截" << serialCaptureCount << "张";
+    });
+
+    // 预先截图
+    prevTimer = new QTimer(this);
+    prevTimer->setInterval(interval);
+    ui->spinBox->setValue(interval);
+    connect(prevTimer, &QTimer::timeout, this, [=]{
+        if (!prevCapturedList) // 可能是多线程冲突
+            return ;
+        qint64 timestamp = getTimestamp();
+        prevCapturedList->append(CaptureInfo{timestamp,
+                                             timeToFile()+".jpg",
+                                             new QPixmap(getScreenShot())});
+
+        while (prevCapturedList->size())
+        {
+            if (prevCapturedList->first().time + prevCaptureMaxTime < timestamp)
+                delete prevCapturedList->takeFirst().pixmap;
+            else
+                break;
+        }
+        ui->prevCaptureCheckBox->setText(QString("已有%1张(%2s)")
+                                         .arg(prevCapturedList->size())
+                                         .arg((timestamp-prevCapturedList->first().time)/1000));
     });
 
     // 单次截图信号槽
@@ -132,7 +154,7 @@ QPixmap MainWindow::getScreenShot()
  */
 QString MainWindow::getCurrentSavePath()
 {
-    QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz.jpg");
+    QString fileName = timeToFile() + ".jpg";
     QDir dir(saveDir);
     if (serialTimer->isActive())
         dir = QDir(dir.filePath(serialCaptureDir));
@@ -179,7 +201,7 @@ void MainWindow::triggerSerialCapture()
     }
     else
     {
-        serialCaptureDir = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz");
+        serialCaptureDir = "连"+timeToFile();
         QDir(saveDir).mkdir(serialCaptureDir);
 
         serialCaptureCount = 0;
@@ -193,7 +215,80 @@ void MainWindow::triggerSerialCapture()
     }
 }
 
-void MainWindow::areaSelectorMoved(QRect rect)
+/**
+ * 开启预先截图
+ */
+void MainWindow::startPrevCapture()
+{
+    if (prevCapturedList)
+    {
+        clearPrevCapture();
+    }
+
+    prevTimer->start();
+    prevCapturedList = new QList<CaptureInfo>();
+}
+
+/**
+ * 保存一段时间之前的预先截图
+ * 所有的截图都将转移至另一线程，超出指定时间的截图都会舍弃掉
+ * 接着会重新预先截图
+ */
+void MainWindow::savePrevCapture(qint64 delta)
+{
+    auto list = this->prevCapturedList;
+    this->prevCapturedList = nullptr;
+    startPrevCapture(); // 重新开始一轮新的
+    if (!list)
+        return ;
+    qint64 currentTime = getTimestamp();
+    QtConcurrent::run([=]{
+        QString dirName = timeToFile();
+        // 获取保存的路径
+        QDir rootDir(saveDir);
+        QDir saveDir(rootDir.absoluteFilePath("预"+dirName));
+        saveDir.mkdir(saveDir.absolutePath());
+
+        // 计算要保存的起始位置
+        int maxSize = list->size();
+        int start = maxSize;
+        while (start > 0 && list->at(start-1).time + delta >= currentTime)
+        {
+            start--;
+        }
+
+        // 清理无用的
+        for (int i = 0; i < start; i++)
+            delete list->at(i).pixmap;
+
+        // 开始保存
+        for (int i = start; i < maxSize; i++)
+        {
+            auto cap = list->at(i);
+            cap.pixmap->save(saveDir.absoluteFilePath(cap.name+".jpg"), "jpg");
+            delete cap.pixmap;
+        }
+        qDebug() << "已保存" << (maxSize-start) << "张预先截图";
+        delete list;
+    });
+}
+
+void MainWindow::clearPrevCapture()
+{
+    prevTimer->stop();
+    if (prevCapturedList)
+    {
+        qDebug() << "清理" << prevCapturedList->size() << "张截图";
+        foreach (auto cap, *prevCapturedList)
+        {
+            delete cap.pixmap;
+        }
+        delete prevCapturedList;
+        prevCapturedList = nullptr;
+    }
+}
+
+void MainWindow::areaSelectorMoved(QRect)
 {
     showPreview(getScreenShot());
 }
@@ -300,6 +395,16 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     showPreview(getScreenShot());
 }
 
+QString MainWindow::timeToFile()
+{
+    return QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz");
+}
+
+qint64 MainWindow::getTimestamp()
+{
+    return QDateTime::currentDateTime().toMSecsSinceEpoch();
+}
+
 void MainWindow::on_modeTab_currentChanged(int index)
 {
     if (index == FullScreen && !areaSelector->isHidden())
@@ -343,22 +448,25 @@ void MainWindow::on_actionCapture_History_triggered()
     pb->show();
 }
 
-void MainWindow::on_fastCaptureEdit_textEdited(const QString &arg1)
+void MainWindow::on_fastCaptureEdit_editingFinished()
 {
-    setFastShortcut(arg1);
-    settings.setValue("key/capture", arg1);
+    QString s = ui->fastCaptureEdit->text();
+    setFastShortcut(s);
+    settings.setValue("key/capture", s);
 }
 
-void MainWindow::on_serialCaptureEdit_textEdited(const QString &arg1)
+void MainWindow::on_serialCaptureEdit_editingFinished()
 {
-    setSerialShortcut(arg1);
-    settings.setValue("key/serial", arg1);
+    QString s = ui->serialCaptureEdit->text();
+    setSerialShortcut(s);
+    settings.setValue("key/serial", s);
 }
 
 void MainWindow::on_spinBox_valueChanged(int arg1)
 {
     settings.setValue("serial/interval", arg1);
     serialTimer->setInterval(arg1);
+    prevTimer->setInterval(arg1);
 }
 
 void MainWindow::on_comboBox_activated(int index)
@@ -378,4 +486,44 @@ void MainWindow::on_actionRestore_Geometry_triggered()
     settings.remove("picturebrowser/splitState");
     areaSelector->deleteLater();
     areaSelector = new AreaSelector(nullptr);
+}
+
+void MainWindow::on_prevCaptureCheckBox_stateChanged(int)
+{
+    bool check = ui->prevCaptureCheckBox->isChecked();
+    if (check)
+    {
+        // 开启预先截图
+        startPrevCapture();
+    }
+    else
+    {
+        // 关闭预先截图
+        clearPrevCapture();
+    }
+
+    ui->capturePrev3sButton->setEnabled(check);
+    ui->capturePrev5sButton->setEnabled(check);
+    ui->capturePrev10sButton->setEnabled(check);
+    ui->capturePrev30sButton->setEnabled(check);
+}
+
+void MainWindow::on_capturePrev3sButton_clicked()
+{
+    savePrevCapture(3000);
+}
+
+void MainWindow::on_capturePrev5sButton_clicked()
+{
+    savePrevCapture(5000);
+}
+
+void MainWindow::on_capturePrev10sButton_clicked()
+{
+    savePrevCapture(10000);
+}
+
+void MainWindow::on_capturePrev30sButton_clicked()
+{
+    savePrevCapture(30000);
 }

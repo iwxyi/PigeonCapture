@@ -59,6 +59,10 @@ void PictureBrowser::enterDirectory(QString targetDir)
         {
             if (name.contains("."))
                 name = name.left(name.lastIndexOf("."));
+            QString suffix = info.suffix();
+            if (suffix != "jpg" && suffix != "png"
+                    && suffix != "jpeg" && suffix != "gif")
+                continue;
             QIcon icon(info.absoluteFilePath());
             item = new QListWidgetItem(icon, name, ui->listWidget);
         }

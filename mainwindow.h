@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QDesktopServices>
+#include <QtConcurrent/QtConcurrent>
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
@@ -35,6 +36,13 @@ public:
         OneWindow
     };
 
+    struct CaptureInfo
+    {
+        qint64 time;
+        QString name;
+        QPixmap* pixmap;
+    };
+
     void selectArea();
 
     QPixmap getScreenShot();
@@ -53,6 +61,9 @@ private slots:
     void runCapture();
     void triggerFastCapture();
     void triggerSerialCapture();
+    void startPrevCapture();
+    void savePrevCapture(qint64 delta);
+    void clearPrevCapture();
     void areaSelectorMoved(QRect rect);
 
     void on_showAreaSelector_clicked();
@@ -61,9 +72,9 @@ private slots:
 
     void on_actionCapture_History_triggered();
 
-    void on_fastCaptureEdit_textEdited(const QString &arg1);
+    void on_fastCaptureEdit_editingFinished();
 
-    void on_serialCaptureEdit_textEdited(const QString &arg1);
+    void on_serialCaptureEdit_editingFinished();
 
     void on_spinBox_valueChanged(int arg1);
 
@@ -71,10 +82,23 @@ private slots:
 
     void on_actionRestore_Geometry_triggered();
 
+    void on_prevCaptureCheckBox_stateChanged(int arg1);
+
+    void on_capturePrev3sButton_clicked();
+
+    void on_capturePrev5sButton_clicked();
+
+    void on_capturePrev10sButton_clicked();
+
+    void on_capturePrev30sButton_clicked();
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
     void resizeEvent(QResizeEvent* event);
+
+    QString timeToFile();
+    qint64 getTimestamp();
 
 private:
     Ui::MainWindow *ui;
@@ -82,12 +106,15 @@ private:
     QString saveDir;
     QxtGlobalShortcut *fastCaptureShortcut = nullptr;
     QxtGlobalShortcut *serialCaptureShortcut = nullptr;
+    AreaSelector* areaSelector = nullptr;
 
     QTimer* tipTimer = nullptr;
     QTimer* serialTimer = nullptr;
     QString serialCaptureDir;
     int serialCaptureCount = 0;
 
-    AreaSelector* areaSelector = nullptr;
+    QTimer* prevTimer = nullptr;
+    QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
+    qint64 prevCaptureMaxTime = 60000; // 最大提前截取60s，超过的舍弃掉
 };
 #endif // MAINWINDOW_H
