@@ -44,6 +44,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QLabel" name="label">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;为着后来的回忆，小心着意地描绘你现在的图画&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>快速截图</string>
         </property>
@@ -75,6 +78,9 @@
       </property>
       <item>
        <widget class="QLabel" name="label_3">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;往者不可谏，来者犹可追&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>连续截图</string>
         </property>
@@ -140,7 +146,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;提前进行【连续截图】操作，点击下方按钮保存前x秒连续截图&lt;/p&gt;&lt;p&gt;注意：将占用大量内存&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;不要等到日子过去了才找出它们的可爱之点&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>预先截图</string>
@@ -150,7 +156,7 @@
         <item>
          <widget class="QCheckBox" name="prevCaptureCheckBox">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;关闭将清理所有预先截图&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;提前进行【连续截图】操作，点击下方按钮保存前x秒连续截图&lt;/p&gt;&lt;p&gt;注意：将占用大量内存，关闭后清理所有未保存的截图&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>开启</string>
@@ -227,7 +233,7 @@
     <item>
      <widget class="QTabWidget" name="modeTab">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="fullScreen">
        <attribute name="title">

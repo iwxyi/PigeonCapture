@@ -579,22 +579,22 @@ void MainWindow::on_prevCaptureCheckBox_stateChanged(int)
 
 void MainWindow::on_capturePrev5sButton_clicked()
 {
-    savePrevCapture(3000);
+    savePrevCapture(5000);
 }
 
 void MainWindow::on_capturePrev13sButton_clicked()
 {
-    savePrevCapture(5000);
+    savePrevCapture(13000);
 }
 
 void MainWindow::on_capturePrev30sButton_clicked()
 {
-    savePrevCapture(10000);
+    savePrevCapture(30000);
 }
 
 void MainWindow::on_capturePrev60sButton_clicked()
 {
-    savePrevCapture(30000);
+    savePrevCapture(60000);
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -635,10 +635,6 @@ void MainWindow::on_refreshWindows_clicked()
             if (pWnd == currentHwnd)
                 ui->windowsCombo->setCurrentIndex(ui->windowsCombo->count()-1);
         }
-
-        /*QScreen *screen = QGuiApplication::primaryScreen();
-        QPixmap map = screen->grabWindow(reinterpret_cast<WId>(currentHwnd));
-        qDebug() << get_window_title(pWnd) << map.isQBitmap();*/
 
         pWnd = next_window(pWnd, EXCLUDE_MINIMIZED); // 得到下一个窗口句柄
     }
