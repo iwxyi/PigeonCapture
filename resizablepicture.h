@@ -18,6 +18,9 @@ public:
     void resetScale();
 
     void setScaleCache(bool enable);
+    void scaleTo(double scale, QPoint pos);
+    void scaleToFill();
+    void scaleToOrigin();
 
 protected:
     void wheelEvent(QWheelEvent *event) override;

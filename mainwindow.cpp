@@ -541,3 +541,19 @@ void MainWindow::on_capturePrev60sButton_clicked()
 {
     savePrevCapture(30000);
 }
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QString text;
+    text.append("本程序用来看直播时抓截主播各种沙雕表情包\n\n");
+    text.append("支持穿越时空，通过快速截图、连续截图、预先截图等功能，\n获取 过去、当下、未来 的任意截图\n");
+    text.append("自带极其方便的图片管理工具，尤其是连续截图提取功能。\n\n");
+    text.append("开发者：MRXY001\n");
+    text.append("GitHub：https://github.com/MRXY001");
+    QMessageBox::information(this, "关于", text);
+}
+
+void MainWindow::on_actionGitHub_triggered()
+{
+    QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/MRXY001/LiveEmojiCapture")));
+}

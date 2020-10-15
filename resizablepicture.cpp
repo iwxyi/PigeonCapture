@@ -16,7 +16,7 @@ bool ResizablePicture::setPixmap(const QPixmap &pixmap)
     }
 
     // 加载图片
-    currentPixmap = originPixmap = pixmap;
+    originPixmap = pixmap;
     if (originPixmap.isNull())
         return false;
 
@@ -50,6 +50,8 @@ void ResizablePicture::resetScale()
     // 缩小大图片大小
     if (originPixmap.width() > width() || originPixmap.height() >= height())
         currentPixmap = originPixmap.scaled(size(), Qt::AspectRatioMode::KeepAspectRatio);
+    else
+        currentPixmap = originPixmap;
 
     // label缩小到pixmap的大小
     label->resize(currentPixmap.size());
@@ -60,6 +62,50 @@ void ResizablePicture::resetScale()
 void ResizablePicture::setScaleCache(bool enable)
 {
     this->scaleCacheEnabled = enable;
+}
+
+void ResizablePicture::scaleTo(double scale, QPoint pos)
+{
+    // 根据不同的位置进行缩放
+    double xProp = double(pos.x() - label->x()) / label->width();
+    double yProp = double(pos.y() - label->y()) / label->height();
+    label->move(static_cast<int>(label->x() - label->width()*xProp*(scale-1)),
+                static_cast<int>(label->y() - label->height()*yProp*(scale-1)));
+    currentPixmap = originPixmap.scaled(static_cast<int>(label->width() * scale),
+                                        static_cast<int>(label->height() * scale));
+    label->resize(currentPixmap.size());
+    label->setPixmap(currentPixmap);
+
+    scaleCache[sizeToLL(originPixmap.size())] = label->geometry();
+}
+
+/**
+ * 缩放到填充屏幕（短边）
+ */
+void ResizablePicture::scaleToFill()
+{
+    if (originPixmap.isNull())
+        return ;
+
+    currentPixmap = originPixmap.scaled(size(), Qt::AspectRatioMode::KeepAspectRatio);
+
+    label->resize(currentPixmap.size());
+    label->setPixmap(currentPixmap);
+    label->move((width()-label->width())/2, (height()-label->height())/2);
+}
+
+/**
+ * 缩放到图片原始大小
+ */
+void ResizablePicture::scaleToOrigin()
+{
+    if (originPixmap.isNull())
+        return ;
+
+    currentPixmap = originPixmap;
+    label->resize(currentPixmap.size());
+    label->setPixmap(currentPixmap);
+    label->move((width()-label->width())/2, (height()-label->height())/2);
 }
 
 void ResizablePicture::wheelEvent(QWheelEvent *event)
@@ -81,15 +127,7 @@ void ResizablePicture::wheelEvent(QWheelEvent *event)
     else
         return ;
 
-    // 根据不同的位置进行缩放
-    double xProp = double(pos.x() - label->x()) / label->width();
-    double yProp = double(pos.y() - label->y()) / label->height();
-    label->move(label->x() - label->width()*xProp*(scale-1), label->y() - label->height()*yProp*(scale-1));
-    currentPixmap = originPixmap.scaled(label->width() * scale, label->height() * scale);
-    label->resize(currentPixmap.size());
-    label->setPixmap(currentPixmap);
-
-    scaleCache[sizeToLL(originPixmap.size())] = label->geometry();
+    scaleTo(scale, pos);
 }
 
 void ResizablePicture::mousePressEvent(QMouseEvent *event)

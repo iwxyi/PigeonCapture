@@ -68,7 +68,7 @@
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
-     <string>视图</string>
+     <string>列表</string>
     </property>
     <addaction name="actionIcon_Largest"/>
     <addaction name="actionIcon_Large"/>
@@ -89,12 +89,12 @@
      <string>选择</string>
     </property>
     <addaction name="actionCopy_File"/>
-    <addaction name="separator"/>
-    <addaction name="actionDelete_Selected"/>
-    <addaction name="actionExtra_Selected"/>
-    <addaction name="actionDelete_Unselected"/>
-    <addaction name="actionExtra_And_Delete"/>
     <addaction name="actionOpen_Select_In_Explore"/>
+    <addaction name="separator"/>
+    <addaction name="actionExtra_Selected"/>
+    <addaction name="actionExtra_And_Delete"/>
+    <addaction name="actionDelete_Selected"/>
+    <addaction name="actionDelete_Unselected"/>
     <addaction name="actionDelete_Up_Files"/>
     <addaction name="actionDelete_Down_Files"/>
    </widget>
@@ -104,11 +104,10 @@
     </property>
     <addaction name="actionZoom_In"/>
     <addaction name="actionZoom_Out"/>
+    <addaction name="actionRestore_Size"/>
     <addaction name="separator"/>
     <addaction name="actionOrigin_Size"/>
     <addaction name="actionFill_Size"/>
-    <addaction name="separator"/>
-    <addaction name="actionRestore_Size"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
@@ -149,6 +148,9 @@
    </property>
   </action>
   <action name="actionFind_Similar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>寻找相似图</string>
    </property>
@@ -157,40 +159,56 @@
    <property name="text">
     <string>删除选中</string>
    </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
   </action>
   <action name="actionZoom_In">
    <property name="text">
     <string>放大图片</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
    </property>
   </action>
   <action name="actionZoom_Out">
    <property name="text">
     <string>缩小图片</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
   </action>
   <action name="actionIcon_Lager">
    <property name="text">
     <string>更大的图标</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+=</string>
    </property>
   </action>
   <action name="actionIcon_Smaller">
    <property name="text">
     <string>更小的图标</string>
    </property>
-  </action>
-  <action name="actionRestore_Size">
-   <property name="text">
-    <string>还原大小</string>
+   <property name="shortcut">
+    <string>Ctrl+Shift+-</string>
    </property>
   </action>
   <action name="actionFill_Size">
    <property name="text">
     <string>填充大小</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
+   </property>
   </action>
   <action name="actionExtra_Selected">
    <property name="text">
     <string>提取选中</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="actionDelete_Unselected">
@@ -210,6 +228,9 @@
    <property name="text">
     <string>原始大小</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+1</string>
+   </property>
   </action>
   <action name="actionOpen_Select_In_Explore">
    <property name="text">
@@ -225,15 +246,24 @@
    <property name="text">
     <string>返回上一级</string>
    </property>
+   <property name="shortcut">
+    <string>Backspace</string>
+   </property>
   </action>
   <action name="actionCopy_File">
    <property name="text">
     <string>复制选中</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
   </action>
   <action name="actionCut_File">
    <property name="text">
     <string>剪切选中</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
    </property>
   </action>
   <action name="actionDelete_Up_Files">
@@ -244,6 +274,14 @@
   <action name="actionDelete_Down_Files">
    <property name="text">
     <string>删除后面所有</string>
+   </property>
+  </action>
+  <action name="actionRestore_Size">
+   <property name="text">
+    <string>还原大小</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+9</string>
    </property>
   </action>
  </widget>

@@ -13,6 +13,7 @@
 #include <QDesktopWidget>
 #include <QDesktopServices>
 #include <QtConcurrent/QtConcurrent>
+#include <QMessageBox>
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
@@ -89,6 +90,10 @@ private slots:
     void on_capturePrev30sButton_clicked();
 
     void on_capturePrev60sButton_clicked();
+
+    void on_actionAbout_triggered();
+
+    void on_actionGitHub_triggered();
 
 protected:
     void showEvent(QShowEvent* event);

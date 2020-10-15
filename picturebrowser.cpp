@@ -279,19 +279,32 @@ void PictureBrowser::on_actionIcon_Smaller_triggered()
     setListWidgetIconSize(size);
 }
 
+void PictureBrowser::on_actionZoom_In_triggered()
+{
+    ui->previewPicture->scaleTo(1.25, ui->previewPicture->geometry().center());
+}
+
+void PictureBrowser::on_actionZoom_Out_triggered()
+{
+    ui->previewPicture->scaleTo(0.8, ui->previewPicture->geometry().center());
+}
+
 void PictureBrowser::on_actionRestore_Size_triggered()
 {
     // 还原预览图默认大小
+    ui->previewPicture->resetScale();
 }
 
 void PictureBrowser::on_actionFill_Size_triggered()
 {
     // 预览图填充屏幕
+    ui->previewPicture->scaleToFill();
 }
 
 void PictureBrowser::on_actionOrigin_Size_triggered()
 {
     // 原始大小
+    ui->previewPicture->scaleToOrigin();
 }
 
 void PictureBrowser::on_actionDelete_Selected_triggered()

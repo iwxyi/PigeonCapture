@@ -73,6 +73,10 @@ private slots:
 
     void on_actionIcon_Smaller_triggered();
 
+    void on_actionZoom_In_triggered();
+
+    void on_actionZoom_Out_triggered();
+
     void on_actionRestore_Size_triggered();
 
     void on_actionFill_Size_triggered();
