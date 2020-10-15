@@ -125,8 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
     ui->screensCombo->setCurrentIndex(currentMonitor);
 
-    // 获取窗口信息
-    on_refreshWindows_clicked();
+//    ui->modeTab->hide();
 }
 
 MainWindow::~MainWindow()
@@ -473,18 +472,19 @@ QString MainWindow::get_window_class(HWND hwnd)
 
 void MainWindow::on_modeTab_currentChanged(int index)
 {
-    if (index == FullScreen && !areaSelector->isHidden())
+    if (index != ScreenArea && !areaSelector->isHidden())
         areaSelector->hide();
-    else if (index != FullScreen && settings.value("capture/showAreaSelector", true).toBool())
+    else if (index == ScreenArea && settings.value("capture/showAreaSelector", true).toBool())
         areaSelector->show();
 
     if (index == FullScreen)
     {
-
+        // 刷新显示器
     }
     else if (index == OneWindow)
     {
-        on_refreshWindows_clicked(); // 刷新窗口
+        // 刷新窗口对象
+        on_refreshWindows_clicked();
     }
 
     settings.setValue("capture/mode", index);

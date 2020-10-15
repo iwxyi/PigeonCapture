@@ -180,6 +180,9 @@
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetMinimumSize</enum>
+        </property>
         <property name="leftMargin">
          <number>0</number>
         </property>
@@ -213,6 +216,9 @@
           </property>
           <property name="text">
            <string>30s</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
