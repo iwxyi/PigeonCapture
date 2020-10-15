@@ -4,7 +4,7 @@ AreaSelector::AreaSelector(QWidget *)
     : QWidget(nullptr)
 {
     this->setWindowTitle("选择截图区域");
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);      //设置为无边框置顶窗口
+    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);      //设置为无边框置顶窗口
     this->setMinimumSize(45,45);                        //设置最小尺寸
     this->setAttribute(Qt::WA_TranslucentBackground, true); // 设置窗口透明
 

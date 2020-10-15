@@ -27,7 +27,7 @@ protected:
     WindowSelector(QRect* p_result) : QDialog(nullptr), p_result(p_result)
     {
         this->setWindowTitle("选择窗口区域");
-        this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog);      //设置为无边框置顶窗口
+        this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);      //设置为无边框置顶窗口
         this->setAttribute(Qt::WA_TranslucentBackground, true); // 设置窗口透明
         this->setAttribute(Qt::WA_DeleteOnClose, true); // 自动删除
         this->setMouseTracking(true); // 监听鼠标位置
@@ -41,6 +41,7 @@ protected:
         borderLabel->move(QCursor::pos());
 
         this->grabMouse();
+        this->grabKeyboard();
     }
 
     struct WindowInfo
