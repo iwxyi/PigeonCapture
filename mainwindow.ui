@@ -244,7 +244,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="screensCombo"/>
           </item>
          </layout>
         </item>
@@ -274,11 +274,21 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,1,0">
           <item>
-           <widget class="QPushButton" name="selectTargetWindow">
+           <widget class="QLabel" name="label_6">
             <property name="text">
-             <string>选择窗口</string>
+             <string>目标窗口</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="windowsCombo"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="refreshWindows">
+            <property name="text">
+             <string>刷新</string>
             </property>
            </widget>
           </item>

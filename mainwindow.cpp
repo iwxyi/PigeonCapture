@@ -113,18 +113,20 @@ MainWindow::MainWindow(QWidget *parent)
     // 获取显示器的信息
     QDesktopWidget * desktop = QApplication::desktop();
     auto screens = QGuiApplication::screens();
-//    int monitorCount = desktop->screenCount();
     int monitorCount = screens.size();
     int currentMonitor = desktop->screenNumber(this);
+    ui->screensCombo->clear();
     for (int i = 0; i < monitorCount; i++)
     {
-//        QRect rect = desktop->screenGeometry(i);
         QRect rect = screens.at(i)->geometry();
         QString name = QString("%1 (%2,%3 %4×%5)")
                 .arg(i).arg(rect.left()).arg(rect.top()).arg(rect.width()).arg(rect.height());
-        ui->comboBox->addItem(name);
+        ui->screensCombo->addItem(name);
     }
-    ui->comboBox->setCurrentIndex(currentMonitor);
+    ui->screensCombo->setCurrentIndex(currentMonitor);
+
+    // 获取窗口信息
+    on_refreshWindows_clicked();
 }
 
 MainWindow::~MainWindow()
@@ -146,7 +148,7 @@ QPixmap MainWindow::getScreenShot()
     QScreen *screen = QGuiApplication::primaryScreen();
     if (mode == FullScreen) // 全屏截图
     {
-        QPixmap pixmap = screen->grabWindow(ui->comboBox->currentIndex());
+        QPixmap pixmap = screen->grabWindow(ui->screensCombo->currentIndex());
         return pixmap;
     }
     else if (mode == ScreenArea) // 区域截图
@@ -161,6 +163,18 @@ QPixmap MainWindow::getScreenShot()
 
         areaSelector->setPaint(true);
         return pixmap;
+    }
+    else if (mode == OneWindow) // 窗口截图
+    {
+        if (!currentHwnd)
+            return QPixmap();
+        try {
+            QScreen *screen = QGuiApplication::primaryScreen();
+            QPixmap map = screen->grabWindow(reinterpret_cast<WId>(currentHwnd)); // 参数0表示全屏
+            return map;
+        } catch (...) {
+            qDebug() << "窗口截图失败";
+        }
     }
 
     return QPixmap();
@@ -425,12 +439,53 @@ qint64 MainWindow::getTimestamp()
     return QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
+QString MainWindow::get_window_title(HWND hwnd)
+{
+    QString retStr;
+    wchar_t *temp;
+    int len;
+
+    len = GetWindowTextLengthW(hwnd);
+    if (!len)
+        return retStr;
+
+    temp = (wchar_t *)malloc(sizeof(wchar_t) * (len+1));
+    if (GetWindowTextW(hwnd, temp, len+1))
+    {
+        retStr = QString::fromWCharArray(temp);
+    }
+    free(temp);
+    return retStr;
+}
+
+QString MainWindow::get_window_class(HWND hwnd)
+{
+    QString retStr;
+    wchar_t temp[256];
+
+    temp[0] = 0;
+    if (GetClassNameW(hwnd, temp, sizeof(temp) / sizeof(wchar_t)))
+    {
+        retStr = QString::fromWCharArray(temp);
+    }
+    return retStr;
+}
+
 void MainWindow::on_modeTab_currentChanged(int index)
 {
     if (index == FullScreen && !areaSelector->isHidden())
         areaSelector->hide();
     else if (index != FullScreen && settings.value("capture/showAreaSelector", true).toBool())
         areaSelector->show();
+
+    if (index == FullScreen)
+    {
+
+    }
+    else if (index == OneWindow)
+    {
+        on_refreshWindows_clicked(); // 刷新窗口
+    }
 
     settings.setValue("capture/mode", index);
     showPreview(getScreenShot());
@@ -556,4 +611,35 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_actionGitHub_triggered()
 {
     QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/MRXY001/LiveEmojiCapture")));
+}
+
+void MainWindow::on_windowsCombo_activated(int)
+{
+    currentHwnd = reinterpret_cast<HWND>(ui->windowsCombo->currentData(Qt::UserRole).toLongLong());
+
+    showPreview(getScreenShot());
+}
+
+void MainWindow::on_refreshWindows_clicked()
+{
+    ui->windowsCombo->clear();
+    HWND pWnd = first_window(EXCLUDE_MINIMIZED); // 得到第一个窗口句柄
+    while (pWnd)
+    {
+        QString title = get_window_title(pWnd);
+        QString clss = get_window_class(pWnd);
+
+        if (!title.isEmpty())
+        {
+            ui->windowsCombo->addItem(title + " (" + clss + ")", QVariant(reinterpret_cast<qint64>(pWnd)));
+            if (pWnd == currentHwnd)
+                ui->windowsCombo->setCurrentIndex(ui->windowsCombo->count()-1);
+        }
+
+        /*QScreen *screen = QGuiApplication::primaryScreen();
+        QPixmap map = screen->grabWindow(reinterpret_cast<WId>(currentHwnd));
+        qDebug() << get_window_title(pWnd) << map.isQBitmap();*/
+
+        pWnd = next_window(pWnd, EXCLUDE_MINIMIZED); // 得到下一个窗口句柄
+    }
 }

@@ -17,6 +17,7 @@
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
+#include "windowshwnd.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -95,6 +96,10 @@ private slots:
 
     void on_actionGitHub_triggered();
 
+    void on_windowsCombo_activated(int);
+
+    void on_refreshWindows_clicked();
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
@@ -102,6 +107,9 @@ protected:
 
     QString timeToFile();
     qint64 getTimestamp();
+
+    QString get_window_title(HWND hwnd);
+    QString get_window_class(HWND hwnd);
 
 private:
     Ui::MainWindow *ui;
@@ -119,5 +127,7 @@ private:
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
     qint64 prevCaptureMaxTime = 61000; // 最大提前截取60s，超过的舍弃掉
+
+    HWND currentHwnd = nullptr;
 };
 #endif // MAINWINDOW_H

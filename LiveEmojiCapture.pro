@@ -28,7 +28,8 @@ HEADERS += \
     areaselector.h \
     mainwindow.h \
     picturebrowser.h \
-    resizablepicture.h
+    resizablepicture.h \
+    windowshwnd.h
 
 FORMS += \
     mainwindow.ui \
