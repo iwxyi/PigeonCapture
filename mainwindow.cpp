@@ -79,6 +79,12 @@ MainWindow::MainWindow(QWidget *parent)
                                                  new QPixmap(getScreenShot())});
         } catch (...) {
             failed = true;
+
+            // 强制删除一张，空出内存
+            if (prevCapturedList->size())
+            {
+                delete prevCapturedList->takeFirst().pixmap;
+            }
         }
 
         while (prevCapturedList->size())
@@ -510,28 +516,28 @@ void MainWindow::on_prevCaptureCheckBox_stateChanged(int)
         clearPrevCapture();
     }
 
-    ui->capturePrev3sButton->setEnabled(check);
     ui->capturePrev5sButton->setEnabled(check);
-    ui->capturePrev10sButton->setEnabled(check);
+    ui->capturePrev13sButton->setEnabled(check);
     ui->capturePrev30sButton->setEnabled(check);
-}
-
-void MainWindow::on_capturePrev3sButton_clicked()
-{
-    savePrevCapture(3000);
+    ui->capturePrev60sButton->setEnabled(check);
 }
 
 void MainWindow::on_capturePrev5sButton_clicked()
 {
+    savePrevCapture(3000);
+}
+
+void MainWindow::on_capturePrev13sButton_clicked()
+{
     savePrevCapture(5000);
 }
 
-void MainWindow::on_capturePrev10sButton_clicked()
+void MainWindow::on_capturePrev30sButton_clicked()
 {
     savePrevCapture(10000);
 }
 
-void MainWindow::on_capturePrev30sButton_clicked()
+void MainWindow::on_capturePrev60sButton_clicked()
 {
     savePrevCapture(30000);
 }

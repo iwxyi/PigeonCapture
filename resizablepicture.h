@@ -16,13 +16,14 @@ public:
 
     bool setPixmap(const QPixmap& pixmap);
     void resetScale();
-    void restoreScale();
 
     void setScaleCache(bool enable);
 
 protected:
     void wheelEvent(QWheelEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *) override;
 
     qint64 sizeToLL(QSize size);
@@ -34,6 +35,7 @@ public slots:
 private:
     QLabel* label;
 
+    QPoint pressPos;
     QPixmap originPixmap;
     QPixmap currentPixmap;
     bool scaleCacheEnabled = true;

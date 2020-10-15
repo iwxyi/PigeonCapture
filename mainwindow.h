@@ -82,13 +82,13 @@ private slots:
 
     void on_prevCaptureCheckBox_stateChanged(int arg1);
 
-    void on_capturePrev3sButton_clicked();
-
     void on_capturePrev5sButton_clicked();
 
-    void on_capturePrev10sButton_clicked();
+    void on_capturePrev13sButton_clicked();
 
     void on_capturePrev30sButton_clicked();
+
+    void on_capturePrev60sButton_clicked();
 
 protected:
     void showEvent(QShowEvent* event);

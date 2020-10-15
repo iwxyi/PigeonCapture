@@ -30,7 +30,13 @@ void PictureBrowser::readDirectory(QString targetDir)
 void PictureBrowser::enterDirectory(QString targetDir)
 {
     currentDirPath = targetDir;
-    ui->actionBack_Prev_Directory->setEnabled(currentDirPath != rootDirPath);
+    bool isSubDir = currentDirPath != rootDirPath;
+    ui->actionBack_Prev_Directory->setEnabled(isSubDir);
+    ui->actionExtra_Selected->setEnabled(isSubDir);
+    ui->actionExtra_And_Delete->setEnabled(isSubDir);
+    ui->actionDelete_Unselected->setEnabled(isSubDir);
+    ui->actionDelete_Up_Files->setEnabled(isSubDir);
+    ui->actionDelete_Down_Files->setEnabled(isSubDir);
 
     ui->listWidget->clear();
     if (targetDir.isEmpty())
