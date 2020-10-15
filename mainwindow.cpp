@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
     if (settings.contains("capture/area"))
         areaSelector->setGeometry(settings.value("capture/area").toRect());
     connect(areaSelector, SIGNAL(areaChanged(QRect)), this, SLOT(areaSelectorMoved(QRect)));
+    connect(areaSelector, SIGNAL(toHide()), this, SLOT(on_showAreaSelector_clicked()));
+    connect(areaSelector, SIGNAL(toSelectWindow()), this, SLOT(on_selectScreenWindow_clicked()));
 
     // 设置截图模式
     int mode = settings.value("capture/mode", 0).toInt();
@@ -499,7 +501,6 @@ void MainWindow::on_showAreaSelector_clicked()
         areaSelector->show();
         settings.setValue("capture/showAreaSelector", true);
         ui->showAreaSelector->setText("隐藏截图区域");
-        qDebug() << "显示区域选择器" << areaSelector->geometry();
     }
     else
     {
@@ -507,7 +508,6 @@ void MainWindow::on_showAreaSelector_clicked()
         settings.setValue("capture/showAreaSelector", false);
         ui->showAreaSelector->setText("显示截图区域");
         settings.setValue("capture/area", areaSelector->geometry());
-        qDebug() << "隐藏区域选择器" << areaSelector->geometry();
     }
 }
 

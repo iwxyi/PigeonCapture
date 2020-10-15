@@ -37,6 +37,8 @@ protected:
         borderLabel->setStyleSheet("background: #2F4F4F64; border: 3px solid #F08080; color: black; font: 20px;");
         borderLabel->setMouseTracking(false);
         borderLabel->setAlignment(Qt::AlignCenter);
+        borderLabel->resize(1, 1);
+        borderLabel->move(QCursor::pos());
 
         this->grabMouse();
     }
@@ -112,6 +114,13 @@ protected:
         if (event->button() == Qt::LeftButton)
         {
             pressPos = event->pos();
+
+            if (movingAni)
+            {
+                borderLabel->setGeometry(currentRect);
+                movingAni->deleteLater();
+                movingAni = nullptr;
+            }
         }
     }
 
@@ -146,13 +155,18 @@ protected:
                     }
                     if (!borderLabel->isHidden())
                     {
-                        QPropertyAnimation* ani = new QPropertyAnimation(borderLabel, "geometry");
-                        ani->setStartValue(borderLabel->geometry());
-                        ani->setEndValue(rect);
-                        ani->setDuration(300);
-                        ani->setEasingCurve(QEasingCurve::OutCubic);
-                        connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
-                        ani->start();
+                        if (movingAni)
+                            movingAni->deleteLater();
+                        movingAni = new QPropertyAnimation(borderLabel, "geometry");
+                        movingAni->setStartValue(borderLabel->geometry());
+                        movingAni->setEndValue(rect);
+                        movingAni->setDuration(300);
+                        movingAni->setEasingCurve(QEasingCurve::OutCubic);
+                        connect(movingAni, &QPropertyAnimation::finished, this, [=]{
+                            movingAni->deleteLater();
+                            movingAni = nullptr;
+                        });
+                        movingAni->start();
                     }
                     else // 隐藏了，直接设置大小
                     {
@@ -240,6 +254,7 @@ private:
     QRect currentRect;
     QLabel* borderLabel;
     QRect* p_result;
+    QPropertyAnimation* movingAni = nullptr;
 };
 
 #endif // WINDOWSELECTOR_H

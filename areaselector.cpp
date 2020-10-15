@@ -10,6 +10,9 @@ AreaSelector::AreaSelector(QWidget *)
 
     QFontMetrics fm(this->font());
     fontHeight = fm.height();
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showMenu()));
 }
 
 void AreaSelector::setPaint(bool paint)
@@ -20,12 +23,18 @@ void AreaSelector::setPaint(bool paint)
 
 QRect AreaSelector::getArea()
 {
-    return QRect(x() + boundaryWidth, y() + fontHeight + boundaryWidth, width()-boundaryWidth*2, height()-fontHeight-boundaryWidth*2);
+    return QRect(x() + boundaryWidth,
+                 y() + fontHeight + boundaryWidth,
+                 width()-boundaryWidth*2,
+                 height()-fontHeight-boundaryWidth*2);
 }
 
 void AreaSelector::setArea(QRect rect)
 {
-    this->setGeometry(rect);
+    setGeometry(rect.x() - boundaryWidth,
+                rect.y() - fontHeight - boundaryWidth,
+                rect.width() + boundaryWidth*2,
+                rect.height()+fontHeight+boundaryWidth*2);
 }
 
 bool AreaSelector::nativeEvent(const QByteArray &eventType, void *message, long *result)
@@ -105,4 +114,18 @@ void AreaSelector::paintEvent(QPaintEvent *)
 
     // 绘制顶部可移动的边框
     painter.drawRect(0, 0, width(), fontHeight);
+}
+
+void AreaSelector::showMenu()
+{
+    QMenu* menu = new QMenu(this);
+    QAction* hideAction = new QAction("隐藏", this);
+    QAction* selectWindowAction = new QAction("选择窗口", this);
+    menu->addAction(hideAction);
+    menu->addAction(selectWindowAction);
+
+    connect(hideAction, SIGNAL(triggered()), this, SIGNAL(toHide()));
+    connect(selectWindowAction, SIGNAL(triggered()), this, SIGNAL(toSelectWindow()));
+
+    menu->exec(QCursor::pos());
 }

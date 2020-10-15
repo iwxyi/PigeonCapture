@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QFontMetrics>
 #include <QTimer>
+#include <QMenu>
 
 class AreaSelector : public QWidget
 {
@@ -30,6 +31,11 @@ protected:
 
 signals:
     void areaChanged(QRect rect);
+    void toHide();
+    void toSelectWindow();
+
+public slots:
+    void showMenu();
 
 private:
     int fontHeight = 0;

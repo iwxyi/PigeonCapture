@@ -239,7 +239,7 @@
     <item>
      <widget class="QTabWidget" name="modeTab">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="fullScreen">
        <attribute name="title">
@@ -296,6 +296,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,1,0">
           <item>
            <widget class="QLabel" name="label_6">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;需要在任务栏的窗口才能截到图&lt;/p&gt;&lt;p&gt;允许目标窗口被遮挡（非最小化）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string>目标窗口</string>
             </property>
