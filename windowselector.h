@@ -51,7 +51,7 @@ protected:
         HWND hwnd;
     };
 
-    void showEvent(QShowEvent *event) override
+    void showEvent(QShowEvent *) override
     {
         // 获取显示器的所有位置
         auto screens = QGuiApplication::screens();

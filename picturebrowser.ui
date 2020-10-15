@@ -152,7 +152,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>寻找相似图</string>
+    <string>检测相似图</string>
    </property>
   </action>
   <action name="actionDelete_Selected">

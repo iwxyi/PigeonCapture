@@ -49,7 +49,6 @@ public:
     void selectArea();
 
     QPixmap getScreenShot();
-    QString getCurrentSavePath();
 
     void setFastShortcut(QString s);
     void setSerialShortcut(QString s);
@@ -97,7 +96,7 @@ private slots:
 
     void on_actionGitHub_triggered();
 
-    void on_windowsCombo_activated(int);
+    void on_windowsCombo_activated(int index);
 
     void on_refreshWindows_clicked();
 

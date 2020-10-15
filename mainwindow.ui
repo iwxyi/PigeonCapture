@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>实时表情包抓截工具</string>
+   <string>鸽鸽子时光截图</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,1">
@@ -156,7 +156,7 @@
         <item>
          <widget class="QCheckBox" name="prevCaptureCheckBox">
           <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;提前进行【连续截图】操作，点击下方按钮保存前x秒连续截图&lt;/p&gt;&lt;p&gt;注意：将占用大量内存，关闭后清理所有未保存的截图&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;提前进行【连续截图】操作，点击下方按钮保存前x秒连续截图&lt;/p&gt;&lt;p&gt;注意：将占用大量内存，关闭后会清理所有未保存的截图&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="text">
            <string>开启</string>
@@ -194,8 +194,14 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>5s</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+1</string>
           </property>
          </widget>
         </item>
@@ -204,8 +210,14 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="text">
            <string>13s</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+2</string>
           </property>
          </widget>
         </item>
@@ -216,6 +228,9 @@
           </property>
           <property name="text">
            <string>30s</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+3</string>
           </property>
           <property name="flat">
            <bool>false</bool>
@@ -229,6 +244,9 @@
           </property>
           <property name="text">
            <string>60s</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+4</string>
           </property>
          </widget>
         </item>

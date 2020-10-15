@@ -61,7 +61,18 @@ MainWindow::MainWindow(QWidget *parent)
     int interval = settings.value("serial/interval", 100).toInt();
     serialTimer->setInterval(interval);
     connect(serialTimer, &QTimer::timeout, this, [=]{
-        runCapture();
+        QString fileName = timeToFile() + ".jpg";
+        QDir dir(saveDir);
+        dir = QDir(dir.filePath(serialCaptureDir));
+        QString savePath = dir.filePath(fileName);
+
+        try {
+            QPixmap pixmap = getScreenShot();
+            pixmap.save(savePath, "jpg");
+        } catch (...) {
+            qDebug() << "截图失败，可能是内存不足";
+        }
+
         serialCaptureCount++;
         ui->serialCaptureShortcut->setText("已截" + QString::number(serialCaptureCount) + "张");
     });
@@ -101,6 +112,10 @@ MainWindow::MainWindow(QWidget *parent)
                                          .arg((timestamp-prevCapturedList->first().time)/1000)
                                          .arg(failed ? " 内存不足" : ""));
     });
+    if (settings.value("capture/prev", false).toBool())
+    {
+        ui->prevCaptureCheckBox->setChecked(true);
+    }
 
     // 单次截图信号槽
     connect(fastCaptureShortcut, &QxtGlobalShortcut::activated,[=]() {
@@ -182,24 +197,12 @@ QPixmap MainWindow::getScreenShot()
 }
 
 /**
- * 获取保存的位置
- */
-QString MainWindow::getCurrentSavePath()
-{
-    QString fileName = timeToFile() + ".jpg";
-    QDir dir(saveDir);
-    if (serialTimer->isActive())
-        dir = QDir(dir.filePath(serialCaptureDir));
-    QString savePath = dir.filePath(fileName);
-    return savePath;
-}
-
-/**
  * 开始截图
  */
 void MainWindow::runCapture()
 {
-    QString savePath = getCurrentSavePath();
+    QString fileName = timeToFile() + ".jpg";
+    QString savePath = QDir(saveDir).filePath(fileName);
 
     try {
         QPixmap pixmap = getScreenShot();
@@ -209,7 +212,7 @@ void MainWindow::runCapture()
         }
         else
         {
-            qDebug() << "保存失败";
+            qDebug() << "保存失败" << savePath;
         }
     } catch (...) {
         qDebug() << "截图失败，可能是内存不足";
@@ -417,6 +420,8 @@ void MainWindow::showEvent(QShowEvent *event)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    clearPrevCapture();
+
     settings.setValue("capture/area", areaSelector->geometry());
     areaSelector->deleteLater();
     settings.setValue("mainwindow/geometry", this->saveGeometry());
@@ -571,6 +576,8 @@ void MainWindow::on_prevCaptureCheckBox_stateChanged(int)
         clearPrevCapture();
     }
 
+    settings.setValue("capture/prev", check);
+
     ui->capturePrev5sButton->setEnabled(check);
     ui->capturePrev13sButton->setEnabled(check);
     ui->capturePrev30sButton->setEnabled(check);
@@ -613,11 +620,13 @@ void MainWindow::on_actionGitHub_triggered()
     QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/MRXY001/LiveEmojiCapture")));
 }
 
-void MainWindow::on_windowsCombo_activated(int)
+void MainWindow::on_windowsCombo_activated(int index)
 {
+    if (index == -1)
+        return ;
     currentHwnd = reinterpret_cast<HWND>(ui->windowsCombo->currentData(Qt::UserRole).toLongLong());
-
-    showPreview(getScreenShot());
+    if (currentHwnd && ui->modeTab->currentIndex() == OneWindow)
+        showPreview(getScreenShot());
 }
 
 void MainWindow::on_refreshWindows_clicked()

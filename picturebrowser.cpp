@@ -7,9 +7,13 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->splitter, &QSplitter::splitterMoved, this, [=](int, int){
-//        showCurrentItemPreview();
+    if (settings.contains("picturebrowser/iconSize"))
+    {
+        int size = settings.value("picturebrowser/iconSize").toInt();
+        ui->listWidget->setIconSize(QSize(size, size));
+    }
 
+    connect(ui->splitter, &QSplitter::splitterMoved, this, [=](int, int){
         QSize size(ui->listWidget->iconSize());
         ui->listWidget->setIconSize(QSize(1, 1));
         ui->listWidget->setIconSize(size);
@@ -52,6 +56,8 @@ void PictureBrowser::enterDirectory(QString targetDir)
     QDir dir(targetDir);
     QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
     QSize maxIconSize = ui->listWidget->iconSize();
+    if (maxIconSize.width() <= 16 || maxIconSize.height() <= 16)
+        maxIconSize = QSize(32, 32);
     foreach (QFileInfo info, infos)
     {
         QString name = info.baseName();
@@ -100,6 +106,7 @@ void PictureBrowser::showEvent(QShowEvent *event)
     ui->splitter->restoreState(settings.value("picturebrowser/splitterState").toByteArray());
 
     int is = settings.value("picturebrowser/iconSize", 64).toInt();
+    ui->listWidget->setIconSize(QSize(1, 1));
     ui->listWidget->setIconSize(QSize(is, is));
 }
 
@@ -310,6 +317,9 @@ void PictureBrowser::on_actionOrigin_Size_triggered()
 void PictureBrowser::on_actionDelete_Selected_triggered()
 {
     auto items = ui->listWidget->selectedItems();
+    if (!items.size())
+        return ;
+    int firstRow = ui->listWidget->row(items.first());
     foreach (auto item, items)
     {
         QString path = item->data(FilePathRole).toString();
@@ -330,6 +340,7 @@ void PictureBrowser::on_actionDelete_Selected_triggered()
         int row = ui->listWidget->row(item);
         ui->listWidget->takeItem(row);
     }
+    ui->listWidget->setCurrentRow(firstRow);
 }
 
 void PictureBrowser::on_actionExtra_Selected_triggered()
@@ -545,6 +556,6 @@ void PictureBrowser::on_actionDelete_Down_Files_triggered()
 void PictureBrowser::on_listWidget_itemSelectionChanged()
 {
     int count = ui->listWidget->selectedItems().size();
-    ui->actionDelete_Up_Files->setEnabled(count == 1);
-    ui->actionDelete_Down_Files->setEnabled(count == 1);
+    ui->actionDelete_Up_Files->setEnabled(count == 1 && currentDirPath != rootDirPath);
+    ui->actionDelete_Down_Files->setEnabled(count == 1 && currentDirPath != rootDirPath);
 }
