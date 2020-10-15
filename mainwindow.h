@@ -18,6 +18,7 @@
 #include "areaselector.h"
 #include "picturebrowser.h"
 #include "windowshwnd.h"
+#include "windowselector.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -99,6 +100,8 @@ private slots:
     void on_windowsCombo_activated(int);
 
     void on_refreshWindows_clicked();
+
+    void on_selectScreenWindow_clicked();
 
 protected:
     void showEvent(QShowEvent* event);

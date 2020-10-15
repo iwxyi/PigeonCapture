@@ -639,3 +639,18 @@ void MainWindow::on_refreshWindows_clicked()
         pWnd = next_window(pWnd, EXCLUDE_MINIMIZED); // 得到下一个窗口句柄
     }
 }
+
+void MainWindow::on_selectScreenWindow_clicked()
+{
+    bool hidden = areaSelector->isHidden();
+    areaSelector->hide();
+    QRect rect = WindowSelector::getArea();
+    if (!hidden)
+        areaSelector->show();
+
+    if (rect.width() == 0)
+        return ;
+
+    // 设置area为结果
+    areaSelector->setArea(rect);
+}

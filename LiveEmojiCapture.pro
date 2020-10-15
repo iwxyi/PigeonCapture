@@ -29,6 +29,7 @@ HEADERS += \
     mainwindow.h \
     picturebrowser.h \
     resizablepicture.h \
+    windowselector.h \
     windowshwnd.h
 
 FORMS += \

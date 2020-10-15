@@ -6,7 +6,6 @@ AreaSelector::AreaSelector(QWidget *)
     this->setWindowTitle("选择截图区域");
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);      //设置为无边框置顶窗口
     this->setMinimumSize(45,45);                        //设置最小尺寸
-    this->setStyleSheet("background:#D1EEEE");          //设置背景颜色
     this->setAttribute(Qt::WA_TranslucentBackground, true); // 设置窗口透明
 
     QFontMetrics fm(this->font());
@@ -26,7 +25,7 @@ QRect AreaSelector::getArea()
 
 void AreaSelector::setArea(QRect rect)
 {
-    Q_UNUSED(rect)
+    this->setGeometry(rect);
 }
 
 bool AreaSelector::nativeEvent(const QByteArray &eventType, void *message, long *result)

@@ -272,7 +272,14 @@
           <item>
            <widget class="QPushButton" name="showAreaSelector">
             <property name="text">
-             <string>显示截图区域</string>
+             <string>显示截图边界</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="selectScreenWindow">
+            <property name="text">
+             <string>选择窗口区域</string>
             </property>
            </widget>
           </item>
