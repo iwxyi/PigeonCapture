@@ -75,7 +75,7 @@ protected:
         setGeometry(minLeft, minTop, maxRight, maxBottom);
 
         // 黑名单
-        QStringList blacks{"", "选择截图区域", "选择窗口区域", "Snipaste"};
+        QStringList blacks{"", "选择截图区域", "选择窗口区域", "Snipaste", "Window"};
 
         // 获取所有窗口信息
         HWND pWnd = first_window(EXCLUDE_MINIMIZED); // 得到第一个窗口句柄
