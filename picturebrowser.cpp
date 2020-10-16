@@ -369,10 +369,7 @@ void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
     menu->addAction(ui->actionMark_None);
     menu->addSeparator();
     menu->addAction(ui->actionExtra_Selected);
-    menu->addAction(ui->actionExtra_And_Delete);
     menu->addAction(ui->actionDelete_Selected);
-    menu->addAction(ui->actionDelete_Unselected);
-    menu->addSeparator();
     menu->addAction(ui->actionDelete_Up_Files);
     menu->addAction(ui->actionDelete_Down_Files);
     menu->addSeparator();
@@ -814,4 +811,45 @@ void PictureBrowser::on_actionSelect_Red_Marked_triggered()
             ui->listWidget->setCurrentItem(item, QItemSelectionModel::Select);
         }
     }
+}
+
+void PictureBrowser::on_actionPlace_Red_Top_triggered()
+{
+    int index = 0;
+    if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
+        index++;
+    for (int i = index+1; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (item->background() == redMark)
+        {
+            ui->listWidget->takeItem(i);
+            ui->listWidget->insertItem(index++, item);
+        }
+    }
+    ui->listWidget->scrollToTop();
+}
+
+void PictureBrowser::on_actionPlace_Green_Top_triggered()
+{
+    int index = 0;
+    if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
+        index++;
+    for (int i = index+1; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (item->background() == greenMark)
+        {
+            ui->listWidget->takeItem(i);
+            ui->listWidget->insertItem(index++, item);
+        }
+    }
+    ui->listWidget->scrollToTop();
+}
+
+void PictureBrowser::on_actionOpen_Directory_triggered()
+{
+    QString path = QFileDialog::getExistingDirectory(this, "选择要打开的文件夹", rootDirPath);
+    if (!path.isEmpty())
+        readDirectory(path);
 }

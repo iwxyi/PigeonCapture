@@ -64,6 +64,7 @@
     <addaction name="actionOpen_In_Explore"/>
     <addaction name="actionBack_Prev_Directory"/>
     <addaction name="separator"/>
+    <addaction name="actionOpen_Directory"/>
     <addaction name="actionRefresh"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -117,6 +118,9 @@
      <string>工具</string>
     </property>
     <addaction name="actionFind_Similar"/>
+    <addaction name="actionEmoji_Factory"/>
+    <addaction name="actionImage_Theme_Colors"/>
+    <addaction name="actionBatch_Clip"/>
    </widget>
    <widget class="QMenu" name="menu_4">
     <property name="title">
@@ -124,12 +128,6 @@
     </property>
     <addaction name="actionCopy_File"/>
     <addaction name="actionOpen_Select_In_Explore"/>
-    <addaction name="separator"/>
-    <addaction name="actionMark_Red"/>
-    <addaction name="actionMark_Green"/>
-    <addaction name="actionMark_None"/>
-    <addaction name="actionSelect_Red_Marked"/>
-    <addaction name="actionSelect_Green_Marked"/>
     <addaction name="separator"/>
     <addaction name="actionExtra_Selected"/>
     <addaction name="actionExtra_And_Delete"/>
@@ -150,8 +148,23 @@
     <addaction name="actionOrigin_Size"/>
     <addaction name="actionFill_Size"/>
    </widget>
+   <widget class="QMenu" name="menu_6">
+    <property name="title">
+     <string>标记</string>
+    </property>
+    <addaction name="actionMark_Red"/>
+    <addaction name="actionMark_Green"/>
+    <addaction name="actionMark_None"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelect_Red_Marked"/>
+    <addaction name="actionSelect_Green_Marked"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlace_Red_Top"/>
+    <addaction name="actionPlace_Green_Top"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
+   <addaction name="menu_6"/>
    <addaction name="menu_2"/>
    <addaction name="menu_5"/>
    <addaction name="menu_3"/>
@@ -292,7 +305,7 @@
   </action>
   <action name="actionOpen_In_Explore">
    <property name="text">
-    <string>打开当前位置</string>
+    <string>显示当前位置</string>
    </property>
   </action>
   <action name="actionBack_Prev_Directory">
@@ -467,6 +480,51 @@
   <action name="actionSelect_Red_Marked">
    <property name="text">
     <string>选中所有红标记项</string>
+   </property>
+  </action>
+  <action name="actionPlace_Red_Top">
+   <property name="text">
+    <string>置顶所有红标记项</string>
+   </property>
+  </action>
+  <action name="actionPlace_Green_Top">
+   <property name="text">
+    <string>置顶所有绿标记项</string>
+   </property>
+   <property name="toolTip">
+    <string>置顶所有绿标记项</string>
+   </property>
+  </action>
+  <action name="actionEmoji_Factory">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>表情包制作</string>
+   </property>
+  </action>
+  <action name="actionBatch_Clip">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>批量裁剪边缘</string>
+   </property>
+   <property name="toolTip">
+    <string>批量裁剪尺寸</string>
+   </property>
+  </action>
+  <action name="actionImage_Theme_Colors">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>提取主题色</string>
+   </property>
+  </action>
+  <action name="actionOpen_Directory">
+   <property name="text">
+    <string>打开文件夹</string>
    </property>
   </action>
  </widget>

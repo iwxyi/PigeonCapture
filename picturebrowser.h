@@ -17,6 +17,7 @@
 #include <QMimeData>
 #include <QTimer>
 #include <QDateTime>
+#include <QFileDialog>
 
 #define BACK_PREV_DIRECTORY ".."
 #define FilePathRole (Qt::UserRole)
@@ -148,6 +149,12 @@ private slots:
     void on_actionSelect_Green_Marked_triggered();
 
     void on_actionSelect_Red_Marked_triggered();
+
+    void on_actionPlace_Red_Top_triggered();
+
+    void on_actionPlace_Green_Top_triggered();
+
+    void on_actionOpen_Directory_triggered();
 
 private:
 
