@@ -125,8 +125,15 @@
     <addaction name="actionCopy_File"/>
     <addaction name="actionOpen_Select_In_Explore"/>
     <addaction name="separator"/>
+    <addaction name="actionMark_Red"/>
+    <addaction name="actionMark_Green"/>
+    <addaction name="actionMark_None"/>
+    <addaction name="actionSelect_Red_Marked"/>
+    <addaction name="actionSelect_Green_Marked"/>
+    <addaction name="separator"/>
     <addaction name="actionExtra_Selected"/>
     <addaction name="actionExtra_And_Delete"/>
+    <addaction name="separator"/>
     <addaction name="actionDelete_Selected"/>
     <addaction name="actionDelete_Unselected"/>
     <addaction name="actionDelete_Up_Files"/>
@@ -298,7 +305,10 @@
   </action>
   <action name="actionCopy_File">
    <property name="text">
-    <string>复制选中</string>
+    <string>复制选中文件</string>
+   </property>
+   <property name="toolTip">
+    <string>复制选中文件，可在资源管理器中粘贴</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
@@ -306,7 +316,7 @@
   </action>
   <action name="actionCut_File">
    <property name="text">
-    <string>剪切选中</string>
+    <string>剪切选中文件</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+X</string>
@@ -365,6 +375,9 @@
   <action name="actionStart_Play_GIF">
    <property name="text">
     <string>自动播放</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+P</string>
    </property>
   </action>
   <action name="actionSlide_100ms">
@@ -429,6 +442,31 @@
    </property>
    <property name="text">
     <string>每隔 33ms</string>
+   </property>
+  </action>
+  <action name="actionMark_Red">
+   <property name="text">
+    <string>红标记</string>
+   </property>
+  </action>
+  <action name="actionMark_Green">
+   <property name="text">
+    <string>绿标记</string>
+   </property>
+  </action>
+  <action name="actionMark_None">
+   <property name="text">
+    <string>取消标记</string>
+   </property>
+  </action>
+  <action name="actionSelect_Green_Marked">
+   <property name="text">
+    <string>选中所有绿标记项</string>
+   </property>
+  </action>
+  <action name="actionSelect_Red_Marked">
+   <property name="text">
+    <string>选中所有红标记项</string>
    </property>
   </action>
  </widget>

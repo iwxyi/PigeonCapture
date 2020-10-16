@@ -364,6 +364,10 @@ void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
     menu->addAction(ui->actionOpen_Select_In_Explore);
     menu->addAction(ui->actionCopy_File);
     menu->addSeparator();
+    menu->addAction(ui->actionMark_Red);
+    menu->addAction(ui->actionMark_Green);
+    menu->addAction(ui->actionMark_None);
+    menu->addSeparator();
     menu->addAction(ui->actionExtra_Selected);
     menu->addAction(ui->actionExtra_And_Delete);
     menu->addAction(ui->actionDelete_Selected);
@@ -720,25 +724,25 @@ void PictureBrowser::on_actionSlide_100ms_triggered()
 void PictureBrowser::on_actionSlide_200ms_triggered()
 {
     setSlideInterval(200);
-    ui->actionSlide_100ms->setChecked(true);
+    ui->actionSlide_200ms->setChecked(true);
 }
 
 void PictureBrowser::on_actionSlide_500ms_triggered()
 {
     setSlideInterval(500);
-    ui->actionSlide_100ms->setChecked(true);
+    ui->actionSlide_500ms->setChecked(true);
 }
 
 void PictureBrowser::on_actionSlide_1000ms_triggered()
 {
     setSlideInterval(1000);
-    ui->actionSlide_100ms->setChecked(true);
+    ui->actionSlide_1000ms->setChecked(true);
 }
 
 void PictureBrowser::on_actionSlide_3000ms_triggered()
 {
     setSlideInterval(3000);
-    ui->actionSlide_100ms->setChecked(true);
+    ui->actionSlide_3000ms->setChecked(true);
 }
 
 void PictureBrowser::on_actionSlide_Return_First_triggered()
@@ -759,4 +763,55 @@ void PictureBrowser::on_actionSlide_33ms_triggered()
 {
     setSlideInterval(33);
     ui->actionSlide_33ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionMark_Red_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    foreach (auto item, items)
+    {
+        item->setBackground(redMark);
+    }
+}
+
+void PictureBrowser::on_actionMark_Green_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    foreach (auto item, items)
+    {
+        item->setBackground(greenMark);
+    }
+}
+
+void PictureBrowser::on_actionMark_None_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    foreach (auto item, items)
+    {
+        item->setBackground(Qt::transparent);
+    }
+}
+
+void PictureBrowser::on_actionSelect_Green_Marked_triggered()
+{
+    for (int i = 0; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (item->background() == greenMark)
+        {
+            ui->listWidget->setCurrentItem(item, QItemSelectionModel::Select);
+        }
+    }
+}
+
+void PictureBrowser::on_actionSelect_Red_Marked_triggered()
+{
+    for (int i = 0; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (item->background() == redMark)
+        {
+            ui->listWidget->setCurrentItem(item, QItemSelectionModel::Select);
+        }
+    }
 }

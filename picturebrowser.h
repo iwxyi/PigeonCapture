@@ -139,6 +139,16 @@ private slots:
 
     void on_actionSlide_33ms_triggered();
 
+    void on_actionMark_Red_triggered();
+
+    void on_actionMark_Green_triggered();
+
+    void on_actionMark_None_triggered();
+
+    void on_actionSelect_Green_Marked_triggered();
+
+    void on_actionSelect_Red_Marked_triggered();
+
 private:
 
 private:
@@ -151,6 +161,9 @@ private:
 
     QHash<QString, ListProgress> viewPoss; // 缓存每个文件夹的浏览位置
     QTimer* slideTimer;
+
+    QColor redMark = QColor(240, 128, 128);
+    QColor greenMark = QColor(115, 230, 140);
 };
 
 #endif // PICTUREBROWSER_H
