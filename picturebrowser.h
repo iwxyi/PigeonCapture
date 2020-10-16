@@ -15,6 +15,8 @@
 #include <QScrollBar>
 #include <QClipboard>
 #include <QMimeData>
+#include <QTimer>
+#include <QDateTime>
 
 #define BACK_PREV_DIRECTORY ".."
 #define FilePathRole (Qt::UserRole)
@@ -52,6 +54,7 @@ protected:
     void setListWidgetIconSize(int x);
     void saveCurrentViewPos();
     void restoreCurrentViewPos();
+    void setSlideInterval(int ms);
 
 private slots:
     void on_actionRefresh_triggered();
@@ -116,6 +119,26 @@ private slots:
 
     void on_actionSort_DESC_triggered();
 
+    void on_listWidget_itemPressed(QListWidgetItem *item);
+
+    void on_actionStart_Play_GIF_triggered();
+
+    void on_actionSlide_100ms_triggered();
+
+    void on_actionSlide_200ms_triggered();
+
+    void on_actionSlide_500ms_triggered();
+
+    void on_actionSlide_1000ms_triggered();
+
+    void on_actionSlide_3000ms_triggered();
+
+    void on_actionSlide_Return_First_triggered();
+
+    void on_actionSlide_16ms_triggered();
+
+    void on_actionSlide_33ms_triggered();
+
 private:
 
 private:
@@ -127,6 +150,7 @@ private:
     QDir::SortFlags sortFlags;
 
     QHash<QString, ListProgress> viewPoss; // 缓存每个文件夹的浏览位置
+    QTimer* slideTimer;
 };
 
 #endif // PICTUREBROWSER_H

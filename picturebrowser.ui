@@ -92,8 +92,25 @@
      <addaction name="actionIcon_Lager"/>
      <addaction name="actionIcon_Smaller"/>
     </widget>
+    <widget class="QMenu" name="menuSlide_Interval">
+     <property name="title">
+      <string>播放参数</string>
+     </property>
+     <addaction name="actionSlide_16ms"/>
+     <addaction name="actionSlide_33ms"/>
+     <addaction name="actionSlide_100ms"/>
+     <addaction name="actionSlide_200ms"/>
+     <addaction name="actionSlide_500ms"/>
+     <addaction name="actionSlide_1000ms"/>
+     <addaction name="actionSlide_3000ms"/>
+     <addaction name="separator"/>
+     <addaction name="actionSlide_Return_First"/>
+    </widget>
     <addaction name="menuIcon_Size"/>
     <addaction name="menuSort_Type"/>
+    <addaction name="separator"/>
+    <addaction name="actionStart_Play_GIF"/>
+    <addaction name="menuSlide_Interval"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -334,7 +351,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>从小到大</string>
+    <string>正序</string>
    </property>
   </action>
   <action name="actionSort_DESC">
@@ -342,7 +359,76 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>从大到小</string>
+    <string>反序</string>
+   </property>
+  </action>
+  <action name="actionStart_Play_GIF">
+   <property name="text">
+    <string>自动播放</string>
+   </property>
+  </action>
+  <action name="actionSlide_100ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 0.1s</string>
+   </property>
+  </action>
+  <action name="actionSlide_200ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 0.2s</string>
+   </property>
+  </action>
+  <action name="actionSlide_500ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 0.5s</string>
+   </property>
+  </action>
+  <action name="actionSlide_1000ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 1s</string>
+   </property>
+  </action>
+  <action name="actionSlide_3000ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 3s</string>
+   </property>
+  </action>
+  <action name="actionSlide_Return_First">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>循环播放</string>
+   </property>
+  </action>
+  <action name="actionSlide_16ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 16ms</string>
+   </property>
+  </action>
+  <action name="actionSlide_33ms">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>每隔 33ms</string>
    </property>
   </action>
  </widget>

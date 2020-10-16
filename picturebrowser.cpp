@@ -39,6 +39,44 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         ui->actionSort_DESC->setChecked(true);
     else // 默认从小到大（新的在后面）
         ui->actionSort_AESC->setChecked(true);
+
+    // 播放动图
+    slideTimer = new QTimer(this);
+    int interval = settings.value("picturebrowser/slideInterval", 100).toInt();
+    slideTimer->setInterval(interval);
+    connect(slideTimer, &QTimer::timeout, this, [=]{
+        int row = ui->listWidget->currentRow();
+        if (row == -1)
+            return ;
+        int count = ui->listWidget->count();
+        if (row < count-1)
+        {
+            ui->listWidget->setCurrentRow(row+1); // 播放下一帧
+        }
+        else if (count > 1 && row == count-1
+                 && settings.value("picturebrowser/slideReturnFirst", false).toBool())
+        {
+            if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
+                // 子目录第一项是返回上一级
+                ui->listWidget->setCurrentRow(1); // 从头(第一张图)开始播放
+            else
+                ui->listWidget->setCurrentRow(0); // 从头开始播放
+        }
+    });
+    if (interval == 16)
+        ui->actionSlide_16ms->setChecked(true);
+    else if (interval == 33)
+        ui->actionSlide_33ms->setChecked(true);
+    else if (interval == 100)
+        ui->actionSlide_100ms->setChecked(true);
+    else if (interval == 200)
+        ui->actionSlide_200ms->setChecked(true);
+    else if (interval == 500)
+        ui->actionSlide_500ms->setChecked(true);
+    else if (interval == 1000)
+        ui->actionSlide_1000ms->setChecked(true);
+    else if (interval == 3000)
+        ui->actionSlide_3000ms->setChecked(true);
 }
 
 PictureBrowser::~PictureBrowser()
@@ -107,7 +145,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
         else
             continue;
         item->setData(FilePathRole, info.absoluteFilePath());
-        item->setToolTip(info.fileName());
+        item->setToolTip(info.fileName() + "\n" + info.lastModified().toString("yyyy-MM-dd hh-mm-ss.zzz"));
     }
 
     restoreCurrentViewPos();
@@ -191,6 +229,20 @@ void PictureBrowser::restoreCurrentViewPos()
             }
         }
     }
+}
+
+void PictureBrowser::setSlideInterval(int ms)
+{
+    settings.setValue("picturebrowser/slideInterval", ms);
+    slideTimer->setInterval(ms);
+
+    ui->actionSlide_16ms->setChecked(false);
+    ui->actionSlide_33ms->setChecked(false);
+    ui->actionSlide_100ms->setChecked(false);
+    ui->actionSlide_200ms->setChecked(false);
+    ui->actionSlide_500ms->setChecked(false);
+    ui->actionSlide_1000ms->setChecked(false);
+    ui->actionSlide_3000ms->setChecked(false);
 }
 
 void PictureBrowser::on_actionRefresh_triggered()
@@ -319,6 +371,8 @@ void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
     menu->addSeparator();
     menu->addAction(ui->actionDelete_Up_Files);
     menu->addAction(ui->actionDelete_Down_Files);
+    menu->addSeparator();
+    menu->addAction(ui->actionStart_Play_GIF);
     menu->exec(QCursor::pos());
 }
 
@@ -640,4 +694,69 @@ void PictureBrowser::on_actionSort_DESC_triggered()
     readSortFlags();
     on_actionRefresh_triggered();
     ui->actionSort_AESC->setChecked(false);
+}
+
+void PictureBrowser::on_listWidget_itemPressed(QListWidgetItem *item)
+{
+    // 停止播放
+    if (slideTimer->isActive())
+        slideTimer->stop();
+}
+
+void PictureBrowser::on_actionStart_Play_GIF_triggered()
+{
+    if (!slideTimer->isActive())
+        slideTimer->start();
+    else
+        slideTimer->stop();
+}
+
+void PictureBrowser::on_actionSlide_100ms_triggered()
+{
+    setSlideInterval(100);
+    ui->actionSlide_100ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_200ms_triggered()
+{
+    setSlideInterval(200);
+    ui->actionSlide_100ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_500ms_triggered()
+{
+    setSlideInterval(500);
+    ui->actionSlide_100ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_1000ms_triggered()
+{
+    setSlideInterval(1000);
+    ui->actionSlide_100ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_3000ms_triggered()
+{
+    setSlideInterval(3000);
+    ui->actionSlide_100ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_Return_First_triggered()
+{
+    bool first = !settings.value("picturebrowser/slideReturnFirst", false).toBool();
+    settings.setValue("picturebrowser/slideReturnFirst", first);
+
+    ui->actionSlide_Return_First->setChecked(first);
+}
+
+void PictureBrowser::on_actionSlide_16ms_triggered()
+{
+    setSlideInterval(16);
+    ui->actionSlide_16ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_33ms_triggered()
+{
+    setSlideInterval(33);
+    ui->actionSlide_33ms->setChecked(true);
 }

@@ -574,6 +574,7 @@ void MainWindow::on_prevCaptureCheckBox_stateChanged(int)
     {
         // 关闭预先截图
         clearPrevCapture();
+        ui->prevCaptureCheckBox->setText("未开启");
     }
 
     settings.setValue("capture/prev", check);
