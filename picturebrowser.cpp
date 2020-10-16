@@ -853,3 +853,20 @@ void PictureBrowser::on_actionOpen_Directory_triggered()
     if (!path.isEmpty())
         readDirectory(path);
 }
+
+void PictureBrowser::on_actionSelect_Reverse_triggered()
+{
+    auto selectedItems = ui->listWidget->selectedItems();
+    if (selectedItems.size() == 0)
+        return ;
+    int start = 0;
+    if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
+        start++;
+    ui->listWidget->setCurrentRow(0, QItemSelectionModel::Clear);
+    for (int i = start; i < ui->listWidget->count(); i++)
+    {
+        auto item = ui->listWidget->item(i);
+        if (!selectedItems.contains(item))
+            ui->listWidget->setCurrentRow(i, QItemSelectionModel::Select);
+    }
+}

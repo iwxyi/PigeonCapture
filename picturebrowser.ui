@@ -132,6 +132,7 @@
     <addaction name="actionExtra_Selected"/>
     <addaction name="actionExtra_And_Delete"/>
     <addaction name="separator"/>
+    <addaction name="actionSelect_Reverse"/>
     <addaction name="actionDelete_Selected"/>
     <addaction name="actionDelete_Unselected"/>
     <addaction name="actionDelete_Up_Files"/>
@@ -461,25 +462,40 @@
    <property name="text">
     <string>红标记</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
+   </property>
   </action>
   <action name="actionMark_Green">
    <property name="text">
     <string>绿标记</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+G</string>
    </property>
   </action>
   <action name="actionMark_None">
    <property name="text">
     <string>取消标记</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+N</string>
+   </property>
   </action>
   <action name="actionSelect_Green_Marked">
    <property name="text">
     <string>选中所有绿标记项</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="actionSelect_Red_Marked">
    <property name="text">
     <string>选中所有红标记项</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionPlace_Red_Top">
@@ -525,6 +541,14 @@
   <action name="actionOpen_Directory">
    <property name="text">
     <string>打开文件夹</string>
+   </property>
+  </action>
+  <action name="actionSelect_Reverse">
+   <property name="text">
+    <string>反向选择</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+I</string>
    </property>
   </action>
  </widget>

@@ -30,7 +30,7 @@ protected:
     void paintEvent(QPaintEvent *) override;
 
 signals:
-    void areaChanged(QRect rect);
+    void areaChanged();
     void toHide();
     void toSelectWindow();
 

@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     areaSelector = new AreaSelector(this);
     if (settings.contains("capture/area"))
         areaSelector->setGeometry(settings.value("capture/area").toRect());
-    connect(areaSelector, SIGNAL(areaChanged(QRect)), this, SLOT(areaSelectorMoved(QRect)));
+    connect(areaSelector, SIGNAL(areaChanged()), this, SLOT(areaSelectorMoved()));
     connect(areaSelector, SIGNAL(toHide()), this, SLOT(on_showAreaSelector_clicked()));
     connect(areaSelector, SIGNAL(toSelectWindow()), this, SLOT(on_selectScreenWindow_clicked()));
 
@@ -328,7 +328,7 @@ void MainWindow::clearPrevCapture()
     }
 }
 
-void MainWindow::areaSelectorMoved(QRect)
+void MainWindow::areaSelectorMoved()
 {
     showPreview(getScreenShot());
 }

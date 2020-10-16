@@ -66,7 +66,7 @@ private slots:
     void startPrevCapture();
     void savePrevCapture(qint64 delta);
     void clearPrevCapture();
-    void areaSelectorMoved(QRect rect);
+    void areaSelectorMoved();
 
     void on_showAreaSelector_clicked();
 

@@ -156,6 +156,8 @@ private slots:
 
     void on_actionOpen_Directory_triggered();
 
+    void on_actionSelect_Reverse_triggered();
+
 private:
 
 private:

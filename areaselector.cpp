@@ -35,6 +35,8 @@ void AreaSelector::setArea(QRect rect)
                 rect.y() - fontHeight - boundaryWidth,
                 rect.width() + boundaryWidth*2,
                 rect.height()+fontHeight+boundaryWidth*2);
+
+    emit areaChanged();
 }
 
 bool AreaSelector::nativeEvent(const QByteArray &eventType, void *message, long *result)
@@ -80,14 +82,14 @@ void AreaSelector::mouseMoveEvent(QMouseEvent *e)
     if(e->buttons()&Qt::LeftButton)
     {
         move(e->pos()+pos()-clickPos);
-        emit areaChanged(geometry());
+        emit areaChanged();
     }
 }
 
 void AreaSelector::resizeEvent(QResizeEvent *)
 {
     QTimer::singleShot(0, [=]{
-        emit areaChanged(geometry());
+        emit areaChanged();
     });
 }
 
