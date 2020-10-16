@@ -47,6 +47,7 @@ protected:
     void showEvent(QShowEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
 
+    void readSortFlags();
     void showCurrentItemPreview();
     void setListWidgetIconSize(int x);
     void saveCurrentViewPos();
@@ -107,6 +108,14 @@ private slots:
 
     void on_listWidget_itemSelectionChanged();
 
+    void on_actionSort_By_Time_triggered();
+
+    void on_actionSort_By_Name_triggered();
+
+    void on_actionSort_AESC_triggered();
+
+    void on_actionSort_DESC_triggered();
+
 private:
 
 private:
@@ -115,8 +124,9 @@ private:
     QSettings settings;
     QString rootDirPath;
     QString currentDirPath;
+    QDir::SortFlags sortFlags;
 
-    QHash<QString, ListProgress> viewPoss;
+    QHash<QString, ListProgress> viewPoss; // 缓存每个文件夹的浏览位置
 };
 
 #endif // PICTUREBROWSER_H

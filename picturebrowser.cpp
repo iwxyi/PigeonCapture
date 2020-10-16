@@ -11,6 +11,15 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     {
         int size = settings.value("picturebrowser/iconSize").toInt();
         ui->listWidget->setIconSize(QSize(size, size));
+
+        if (size == 64)
+            ui->actionIcon_Small->setChecked(true);
+        else if (size == 128)
+            ui->actionIcon_Middle->setChecked(true);
+        else if (size == 256)
+            ui->actionIcon_Large->setChecked(true);
+        else if (size == 512)
+            ui->actionIcon_Largest->setChecked(true);
     }
 
     connect(ui->splitter, &QSplitter::splitterMoved, this, [=](int, int){
@@ -18,6 +27,18 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         ui->listWidget->setIconSize(QSize(1, 1));
         ui->listWidget->setIconSize(size);
     });
+
+    readSortFlags();
+
+    // 恢复菜单
+    if (sortFlags & QDir::Name)
+        ui->actionSort_By_Name->setChecked(true);
+    else // 默认按时间
+        ui->actionSort_By_Time->setChecked(true);
+    if (sortFlags &QDir::Reversed)
+        ui->actionSort_DESC->setChecked(true);
+    else // 默认从小到大（新的在后面）
+        ui->actionSort_AESC->setChecked(true);
 }
 
 PictureBrowser::~PictureBrowser()
@@ -54,7 +75,8 @@ void PictureBrowser::enterDirectory(QString targetDir)
 
     // 读取目录的图片和文件夹
     QDir dir(targetDir);
-    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
+    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
+                                              sortFlags);
     QSize maxIconSize = ui->listWidget->iconSize();
     if (maxIconSize.width() <= 16 || maxIconSize.height() <= 16)
         maxIconSize = QSize(32, 32);
@@ -116,6 +138,14 @@ void PictureBrowser::closeEvent(QCloseEvent *event)
     settings.setValue("picturebrowser/state", this->saveState());
     settings.setValue("picturebrowser/splitterGeometry", ui->splitter->saveGeometry());
     settings.setValue("picturebrowser/splitterState", ui->splitter->saveState());
+}
+
+void PictureBrowser::readSortFlags()
+{
+    sortFlags = static_cast<QDir::SortFlags>(settings.value("picturebrowser/sortType", QDir::Time).toInt());
+
+    if (settings.value("picturebrowser/sortReversed", false).toBool())
+        sortFlags |= QDir::Reversed;
 }
 
 void PictureBrowser::showCurrentItemPreview()
@@ -239,21 +269,41 @@ void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
 void PictureBrowser::on_actionIcon_Small_triggered()
 {
     setListWidgetIconSize(64);
+
+    ui->actionIcon_Small->setChecked(true);
+    ui->actionIcon_Middle->setChecked(false);
+    ui->actionIcon_Large->setChecked(false);
+    ui->actionIcon_Largest->setChecked(false);
 }
 
 void PictureBrowser::on_actionIcon_Middle_triggered()
 {
     setListWidgetIconSize(128);
+
+    ui->actionIcon_Small->setChecked(false);
+    ui->actionIcon_Middle->setChecked(true);
+    ui->actionIcon_Large->setChecked(false);
+    ui->actionIcon_Largest->setChecked(false);
 }
 
 void PictureBrowser::on_actionIcon_Large_triggered()
 {
     setListWidgetIconSize(256);
+
+    ui->actionIcon_Small->setChecked(false);
+    ui->actionIcon_Middle->setChecked(false);
+    ui->actionIcon_Large->setChecked(true);
+    ui->actionIcon_Largest->setChecked(false);
 }
 
 void PictureBrowser::on_actionIcon_Largest_triggered()
 {
     setListWidgetIconSize(512);
+
+    ui->actionIcon_Small->setChecked(false);
+    ui->actionIcon_Middle->setChecked(false);
+    ui->actionIcon_Large->setChecked(false);
+    ui->actionIcon_Largest->setChecked(true);
 }
 
 void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
@@ -558,4 +608,36 @@ void PictureBrowser::on_listWidget_itemSelectionChanged()
     int count = ui->listWidget->selectedItems().size();
     ui->actionDelete_Up_Files->setEnabled(count == 1 && currentDirPath != rootDirPath);
     ui->actionDelete_Down_Files->setEnabled(count == 1 && currentDirPath != rootDirPath);
+}
+
+void PictureBrowser::on_actionSort_By_Time_triggered()
+{
+    settings.setValue("picturebrowser/sortType", QDir::Time);
+    readSortFlags();
+    on_actionRefresh_triggered();
+    ui->actionSort_By_Name->setChecked(false);
+}
+
+void PictureBrowser::on_actionSort_By_Name_triggered()
+{
+    settings.setValue("picturebrowser/sortType", QDir::Name);
+    readSortFlags();
+    on_actionRefresh_triggered();
+    ui->actionSort_By_Time->setChecked(false);
+}
+
+void PictureBrowser::on_actionSort_AESC_triggered()
+{
+    settings.setValue("picturebrowser/sortReversed", false);
+    readSortFlags();
+    on_actionRefresh_triggered();
+    ui->actionSort_DESC->setChecked(false);
+}
+
+void PictureBrowser::on_actionSort_DESC_triggered()
+{
+    settings.setValue("picturebrowser/sortReversed", true);
+    readSortFlags();
+    on_actionRefresh_triggered();
+    ui->actionSort_AESC->setChecked(false);
 }

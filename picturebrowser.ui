@@ -70,13 +70,30 @@
     <property name="title">
      <string>列表</string>
     </property>
-    <addaction name="actionIcon_Largest"/>
-    <addaction name="actionIcon_Large"/>
-    <addaction name="actionIcon_Middle"/>
-    <addaction name="actionIcon_Small"/>
-    <addaction name="separator"/>
-    <addaction name="actionIcon_Lager"/>
-    <addaction name="actionIcon_Smaller"/>
+    <widget class="QMenu" name="menuSort_Type">
+     <property name="title">
+      <string>排序方式</string>
+     </property>
+     <addaction name="actionSort_By_Time"/>
+     <addaction name="actionSort_By_Name"/>
+     <addaction name="separator"/>
+     <addaction name="actionSort_AESC"/>
+     <addaction name="actionSort_DESC"/>
+    </widget>
+    <widget class="QMenu" name="menuIcon_Size">
+     <property name="title">
+      <string>图标大小</string>
+     </property>
+     <addaction name="actionIcon_Largest"/>
+     <addaction name="actionIcon_Large"/>
+     <addaction name="actionIcon_Middle"/>
+     <addaction name="actionIcon_Small"/>
+     <addaction name="separator"/>
+     <addaction name="actionIcon_Lager"/>
+     <addaction name="actionIcon_Smaller"/>
+    </widget>
+    <addaction name="menuIcon_Size"/>
+    <addaction name="menuSort_Type"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -122,11 +139,17 @@
    </property>
   </action>
   <action name="actionIcon_Largest">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>超大图标</string>
    </property>
   </action>
   <action name="actionIcon_Large">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>大图标</string>
    </property>
@@ -135,6 +158,9 @@
    </property>
   </action>
   <action name="actionIcon_Middle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>中图标</string>
    </property>
@@ -143,6 +169,9 @@
    </property>
   </action>
   <action name="actionIcon_Small">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>小图标</string>
    </property>
@@ -282,6 +311,38 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+9</string>
+   </property>
+  </action>
+  <action name="actionSort_By_Time">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>按时间</string>
+   </property>
+  </action>
+  <action name="actionSort_By_Name">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>按名称</string>
+   </property>
+  </action>
+  <action name="actionSort_AESC">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>从小到大</string>
+   </property>
+  </action>
+  <action name="actionSort_DESC">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>从大到小</string>
    </property>
   </action>
  </widget>
