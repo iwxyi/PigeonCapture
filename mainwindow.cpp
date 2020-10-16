@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 设置截图模式
     int mode = settings.value("capture/mode", 0).toInt();
     ui->modeTab->setCurrentIndex(mode);
-    if (mode != FullScreen && settings.value("capture/showAreaSelector").toBool())
+    if (mode == ScreenArea && settings.value("capture/showAreaSelector").toBool())
     {
         areaSelector->show();
         ui->showAreaSelector->setText("隐藏截图区域");
@@ -142,7 +142,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
     ui->screensCombo->setCurrentIndex(currentMonitor);
 
-//    ui->modeTab->hide();
+    if (mode == OneWindow)
+    {
+        on_modeTab_currentChanged(mode);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -608,9 +611,8 @@ void MainWindow::on_capturePrev60sButton_clicked()
 void MainWindow::on_actionAbout_triggered()
 {
     QString text;
-    text.append("本程序用来看直播时抓截主播各种沙雕表情包\n\n");
     text.append("支持穿越时空，通过快速截图、连续截图、预先截图等功能，\n获取 过去、当下、未来 的任意截图\n");
-    text.append("自带极其方便的图片管理工具，尤其是连续截图提取功能。\n\n");
+    text.append("自带极其方便的图片管理工具，针对连续截图进行优化，一键提取最佳图片。\n\n");
     text.append("开发者：MRXY001\n");
     text.append("GitHub：https://github.com/MRXY001");
     QMessageBox::information(this, "关于", text);
