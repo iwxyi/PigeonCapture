@@ -154,6 +154,10 @@ void PictureBrowser::enterDirectory(QString targetDir)
 void PictureBrowser::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
+
+    QSize size(ui->listWidget->iconSize());
+    ui->listWidget->setIconSize(QSize(1, 1));
+    ui->listWidget->setIconSize(size);
 }
 
 void PictureBrowser::showEvent(QShowEvent *event)
@@ -213,7 +217,17 @@ void PictureBrowser::saveCurrentViewPos()
 void PictureBrowser::restoreCurrentViewPos()
 {
     if (currentDirPath.isEmpty() || !viewPoss.contains(currentDirPath))
+    {
+        if (ui->listWidget->count() > 0)
+        {
+            if (ui->listWidget->count() > 1
+                    && ui->listWidget->item(0)->data(FilePathRole) == BACK_PREV_DIRECTORY)
+                ui->listWidget->setCurrentRow(1);
+            else
+                ui->listWidget->setCurrentRow(0);
+        }
         return ;
+    }
     ListProgress progress = viewPoss.value(currentDirPath);
     ui->listWidget->setCurrentRow(progress.index);
     ui->listWidget->verticalScrollBar()->setSliderPosition(progress.scroll);
@@ -369,6 +383,7 @@ void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
     menu->addAction(ui->actionMark_None);
     menu->addSeparator();
     menu->addAction(ui->actionExtra_Selected);
+    menu->addAction(ui->actionExtra_And_Delete);
     menu->addAction(ui->actionDelete_Selected);
     menu->addAction(ui->actionDelete_Up_Files);
     menu->addAction(ui->actionDelete_Down_Files);
@@ -630,6 +645,7 @@ void PictureBrowser::on_actionDelete_Up_Files_triggered()
 
         ui->listWidget->takeItem(start);
     }
+    ui->listWidget->scrollToTop();
 }
 
 void PictureBrowser::on_actionDelete_Down_Files_triggered()
@@ -656,6 +672,7 @@ void PictureBrowser::on_actionDelete_Down_Files_triggered()
 
         ui->listWidget->takeItem(row);
     }
+    ui->listWidget->scrollToBottom();
 }
 
 void PictureBrowser::on_listWidget_itemSelectionChanged()
