@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent)
         bool failed = false;
         try {
             prevCapturedList->append(CaptureInfo{timestamp,
-                                                 timeToFile()+".jpg",
+                                                 timeToFile(),
                                                  new QPixmap(getScreenShot())});
         } catch (...) {
             failed = true;
