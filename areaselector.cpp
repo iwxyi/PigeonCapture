@@ -81,7 +81,7 @@ void AreaSelector::mouseMoveEvent(QMouseEvent *e)
 {
     if(e->buttons()&Qt::LeftButton)
     {
-        move(e->pos()+pos()-clickPos);
+        move(QCursor::pos()-clickPos);
         emit areaChanged();
     }
 }
