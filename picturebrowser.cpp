@@ -1244,8 +1244,45 @@ void PictureBrowser::on_actionGIF_Compress_x8_triggered()
 
 void PictureBrowser::on_actionUnpack_GIF_File_triggered()
 {
+    // 选择gif
     QString path = QFileDialog::getOpenFileName(this, "请选择GIF路径，拆分成为一帧一帧的图片", rootDirPath, "Images (*.gif)");
     if (path.isEmpty())
         return ;
 
+    // 设置提取路径
+    QFileInfo info(path);
+    QString name = info.baseName();
+    QString dir = QDir(currentDirPath).absoluteFilePath(name);
+    if (QFileInfo(dir).exists())
+    {
+        int index = 0;
+        while (QFileInfo(dir+"("+QString::number(++index)+")").exists());
+        dir += "("+QString::number(++index)+")";
+    }
+
+    // 开始提取
+    QDir saveDir(dir);
+    saveDir.mkpath(saveDir.absolutePath());
+    QMovie movie(path);
+    movie.setCacheMode(QMovie::CacheAll);
+    for (int i = 0; i < movie.frameCount(); ++i)
+    {
+        movie.jumpToFrame(i);
+        QImage image = movie.currentImage();
+        QFile file(saveDir.absoluteFilePath(QString("%1.jpg").arg(i)));
+        file.open(QFile::WriteOnly);
+        image.save(&file, "JPG");
+        file.close();
+    }
+
+    // 打开文件夹
+    auto result = QMessageBox::information(this, "拆分GIF完毕", "路径：" + saveDir.absolutePath(), "进入文件夹", "显示在资源管理器", "取消", 0, 2);
+    if (result == 0) // 进入文件夹
+    {
+        enterDirectory(saveDir.absolutePath());
+    }
+    else if (result == 1) // 显示在资源管理器
+    {
+        QDesktopServices::openUrl(QUrl("file:///" + saveDir.absolutePath(), QUrl::TolerantMode));
+    }
 }
