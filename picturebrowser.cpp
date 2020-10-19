@@ -7,6 +7,12 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // 图标大小
+    QActionGroup* iconSizeGroup = new QActionGroup(this);
+    iconSizeGroup->addAction(ui->actionIcon_Largest);
+    iconSizeGroup->addAction(ui->actionIcon_Large);
+    iconSizeGroup->addAction(ui->actionIcon_Middle);
+    iconSizeGroup->addAction(ui->actionIcon_Small);
     if (settings.contains("picturebrowser/iconSize"))
     {
         int size = settings.value("picturebrowser/iconSize").toInt();
@@ -30,11 +36,18 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
 
     readSortFlags();
 
-    // 恢复菜单
+    // 排序
+    QActionGroup* sortTypeGroup = new QActionGroup(this);
+    sortTypeGroup->addAction(ui->actionSort_By_Time);
+    sortTypeGroup->addAction(ui->actionSort_By_Name);
     if (sortFlags & QDir::Name)
         ui->actionSort_By_Name->setChecked(true);
     else // 默认按时间
         ui->actionSort_By_Time->setChecked(true);
+
+    QActionGroup* sortReverseGroup = new QActionGroup(this);
+    sortReverseGroup->addAction(ui->actionSort_DESC);
+    sortReverseGroup->addAction(ui->actionSort_AESC);
     if (sortFlags &QDir::Reversed)
         ui->actionSort_DESC->setChecked(true);
     else // 默认从小到大（新的在后面）
@@ -80,6 +93,14 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         }
         ui->listWidget->setCurrentRow(targetRow, QItemSelectionModel::Current);
     });
+    QActionGroup* intervalGroup = new QActionGroup(this);
+    intervalGroup->addAction(ui->actionSlide_16ms);
+    intervalGroup->addAction(ui->actionSlide_33ms);
+    intervalGroup->addAction(ui->actionSlide_100ms);
+    intervalGroup->addAction(ui->actionSlide_200ms);
+    intervalGroup->addAction(ui->actionSlide_500ms);
+    intervalGroup->addAction(ui->actionSlide_1000ms);
+    intervalGroup->addAction(ui->actionSlide_3000ms);
     if (interval == 16)
         ui->actionSlide_16ms->setChecked(true);
     else if (interval == 33)
@@ -98,6 +119,9 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         ui->actionSlide_3000ms->setChecked(true);
 
     // GIF录制参数
+    QActionGroup* gifRecordGroup = new QActionGroup(this);
+    gifRecordGroup->addAction(ui->actionGIF_Use_Record_Interval);
+    gifRecordGroup->addAction(ui->actionGIF_Use_Display_Interval);
     bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
     ui->actionGIF_Use_Record_Interval->setChecked(gifUseRecordInterval);
     ui->actionGIF_Use_Display_Interval->setChecked(!gifUseRecordInterval);
@@ -326,15 +350,6 @@ void PictureBrowser::setSlideInterval(int ms)
 {
     settings.setValue("picturebrowser/slideInterval", ms);
     slideTimer->setInterval(ms);
-
-    ui->actionSlide_16ms->setChecked(false);
-    ui->actionSlide_33ms->setChecked(false);
-    ui->actionSlide_50ms->setChecked(false);
-    ui->actionSlide_100ms->setChecked(false);
-    ui->actionSlide_200ms->setChecked(false);
-    ui->actionSlide_500ms->setChecked(false);
-    ui->actionSlide_1000ms->setChecked(false);
-    ui->actionSlide_3000ms->setChecked(false);
 }
 
 void PictureBrowser::on_actionRefresh_triggered()
@@ -414,40 +429,24 @@ void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
 void PictureBrowser::on_actionIcon_Small_triggered()
 {
     setListWidgetIconSize(64);
-
     ui->actionIcon_Small->setChecked(true);
-    ui->actionIcon_Middle->setChecked(false);
-    ui->actionIcon_Large->setChecked(false);
-    ui->actionIcon_Largest->setChecked(false);
 }
 
 void PictureBrowser::on_actionIcon_Middle_triggered()
 {
     setListWidgetIconSize(128);
-
-    ui->actionIcon_Small->setChecked(false);
     ui->actionIcon_Middle->setChecked(true);
-    ui->actionIcon_Large->setChecked(false);
-    ui->actionIcon_Largest->setChecked(false);
 }
 
 void PictureBrowser::on_actionIcon_Large_triggered()
 {
     setListWidgetIconSize(256);
-
-    ui->actionIcon_Small->setChecked(false);
-    ui->actionIcon_Middle->setChecked(false);
     ui->actionIcon_Large->setChecked(true);
-    ui->actionIcon_Largest->setChecked(false);
 }
 
 void PictureBrowser::on_actionIcon_Largest_triggered()
 {
     setListWidgetIconSize(512);
-
-    ui->actionIcon_Small->setChecked(false);
-    ui->actionIcon_Middle->setChecked(false);
-    ui->actionIcon_Large->setChecked(false);
     ui->actionIcon_Largest->setChecked(true);
 }
 
@@ -741,7 +740,6 @@ void PictureBrowser::on_actionSort_By_Time_triggered()
     settings.setValue("picturebrowser/sortType", QDir::Time);
     readSortFlags();
     on_actionRefresh_triggered();
-    ui->actionSort_By_Name->setChecked(false);
 }
 
 void PictureBrowser::on_actionSort_By_Name_triggered()
@@ -749,7 +747,6 @@ void PictureBrowser::on_actionSort_By_Name_triggered()
     settings.setValue("picturebrowser/sortType", QDir::Name);
     readSortFlags();
     on_actionRefresh_triggered();
-    ui->actionSort_By_Time->setChecked(false);
 }
 
 void PictureBrowser::on_actionSort_AESC_triggered()
@@ -757,7 +754,6 @@ void PictureBrowser::on_actionSort_AESC_triggered()
     settings.setValue("picturebrowser/sortReversed", false);
     readSortFlags();
     on_actionRefresh_triggered();
-    ui->actionSort_DESC->setChecked(false);
 }
 
 void PictureBrowser::on_actionSort_DESC_triggered()
@@ -765,7 +761,6 @@ void PictureBrowser::on_actionSort_DESC_triggered()
     settings.setValue("picturebrowser/sortReversed", true);
     readSortFlags();
     on_actionRefresh_triggered();
-    ui->actionSort_AESC->setChecked(false);
 }
 
 void PictureBrowser::on_listWidget_itemPressed(QListWidgetItem *item)
@@ -1170,13 +1165,11 @@ void PictureBrowser::on_actionGIF_Use_Record_Interval_triggered()
 {
     settings.setValue("gif/recordInterval", true);
     ui->actionGIF_Use_Record_Interval->setChecked(true);
-    ui->actionGIF_Use_Display_Interval->setChecked(false);
 }
 
 void PictureBrowser::on_actionGIF_Use_Display_Interval_triggered()
 {
     settings.setValue("gif/recordInterval", false);
-    ui->actionGIF_Use_Record_Interval->setChecked(false);
     ui->actionGIF_Use_Display_Interval->setChecked(true);
 }
 
