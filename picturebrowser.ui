@@ -100,6 +100,7 @@
      </property>
      <addaction name="actionSlide_16ms"/>
      <addaction name="actionSlide_33ms"/>
+     <addaction name="actionSlide_50ms"/>
      <addaction name="actionSlide_100ms"/>
      <addaction name="actionSlide_200ms"/>
      <addaction name="actionSlide_500ms"/>
@@ -108,11 +109,21 @@
      <addaction name="separator"/>
      <addaction name="actionSlide_Return_First"/>
     </widget>
+    <widget class="QMenu" name="menuGIF_Params">
+     <property name="title">
+      <string>GIF 参数</string>
+     </property>
+     <addaction name="actionGIF_Use_Record_Interval"/>
+     <addaction name="actionGIF_Use_Display_Interval"/>
+    </widget>
     <addaction name="menuIcon_Size"/>
     <addaction name="menuSort_Type"/>
     <addaction name="separator"/>
     <addaction name="actionStart_Play_GIF"/>
     <addaction name="menuSlide_Interval"/>
+    <addaction name="separator"/>
+    <addaction name="actionGeneral_GIF"/>
+    <addaction name="menuGIF_Params"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -558,6 +569,35 @@
    </property>
    <property name="text">
     <string>撤销删除</string>
+   </property>
+  </action>
+  <action name="actionGeneral_GIF">
+   <property name="text">
+    <string>生成 GIF</string>
+   </property>
+  </action>
+  <action name="actionGIF_Use_Record_Interval">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>使用录制时间隔</string>
+   </property>
+  </action>
+  <action name="actionGIF_Use_Display_Interval">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>使用播放时间隔</string>
+   </property>
+  </action>
+  <action name="actionSlide_50ms">
+   <property name="text">
+    <string>每隔 50ms</string>
    </property>
   </action>
  </widget>

@@ -23,6 +23,7 @@
 #define BACK_PREV_DIRECTORY ".."
 #define TEMP_DIRECTORY "temp"
 #define RECYCLE_DIRECTORY "recycle"
+#define SEQUENCE_PARAM_FILE "params.ini"
 #define FilePathRole (Qt::UserRole)
 #define FileMarkRole (Qt::UserRole+1)
 
@@ -143,6 +144,8 @@ private slots:
 
     void on_actionSlide_33ms_triggered();
 
+    void on_actionSlide_50ms_triggered();
+
     void on_actionMark_Red_triggered();
 
     void on_actionMark_Green_triggered();
@@ -163,6 +166,12 @@ private slots:
 
     void on_actionUndo_Delete_Command_triggered();
 
+    void on_actionGeneral_GIF_triggered();
+
+    void on_actionGIF_Use_Record_Interval_triggered();
+
+    void on_actionGIF_Use_Display_Interval_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
@@ -179,6 +188,7 @@ private:
 
     QHash<QString, ListProgress> viewPoss; // 缓存每个文件夹的浏览位置
     QTimer* slideTimer;
+    bool slideInSelected = false;
 
     QColor redMark = QColor(240, 128, 128);
     QColor greenMark = QColor(115, 230, 140);

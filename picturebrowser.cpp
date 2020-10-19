@@ -48,25 +48,44 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         int row = ui->listWidget->currentRow();
         if (row == -1)
             return ;
-        int count = ui->listWidget->count();
-        if (row < count-1)
+
+        // 切换到下一帧
+        int targetRow = 0;
+        auto selectedItems = ui->listWidget->selectedItems();
+
+        if (slideInSelected && selectedItems.size() > 1 && selectedItems.contains(ui->listWidget->currentItem())) // 在多个选中项中
         {
-            ui->listWidget->setCurrentRow(row+1); // 播放下一帧
+            int index = selectedItems.indexOf(ui->listWidget->currentItem());
+            index++;
+            if (index == selectedItems.size())
+                index = 0;
+            targetRow = ui->listWidget->row(selectedItems.at(index));
         }
-        else if (count > 1 && row == count-1
-                 && settings.value("picturebrowser/slideReturnFirst", false).toBool())
+        else
         {
-            if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
-                // 子目录第一项是返回上一级
-                ui->listWidget->setCurrentRow(1); // 从头(第一张图)开始播放
-            else
-                ui->listWidget->setCurrentRow(0); // 从头开始播放
+            int count = ui->listWidget->count();
+            if (row < count-1)
+            {
+                targetRow = row + 1; // 播放下一帧
+            }
+            else if (count > 1 && row == count-1
+                     && settings.value("picturebrowser/slideReturnFirst", false).toBool())
+            {
+                if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
+                    // 子目录第一项是返回上一级
+                    targetRow = 1; // 从头(第一张图)开始播放
+                else
+                    targetRow = 0; // 从头开始播放
+            }
         }
+        ui->listWidget->setCurrentRow(targetRow, QItemSelectionModel::Current);
     });
     if (interval == 16)
         ui->actionSlide_16ms->setChecked(true);
     else if (interval == 33)
         ui->actionSlide_33ms->setChecked(true);
+    else if (interval == 50)
+        ui->actionSlide_50ms->setChecked(true);
     else if (interval == 100)
         ui->actionSlide_100ms->setChecked(true);
     else if (interval == 200)
@@ -77,11 +96,20 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         ui->actionSlide_1000ms->setChecked(true);
     else if (interval == 3000)
         ui->actionSlide_3000ms->setChecked(true);
+
+    // GIF录制参数
+    bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
+    ui->actionGIF_Use_Record_Interval->setChecked(gifUseRecordInterval);
+    ui->actionGIF_Use_Display_Interval->setChecked(!gifUseRecordInterval);
 }
 
 PictureBrowser::~PictureBrowser()
 {
     delete ui;
+
+    QDir tempDir(tempDirPath);
+    if (tempDir.exists())
+        tempDir.removeRecursively();
 }
 
 void PictureBrowser::readDirectory(QString targetDir)
@@ -186,9 +214,7 @@ void PictureBrowser::closeEvent(QCloseEvent *event)
     settings.setValue("picturebrowser/splitterGeometry", ui->splitter->saveGeometry());
     settings.setValue("picturebrowser/splitterState", ui->splitter->saveState());
 
-    QDir tempDir(tempDirPath);
-    if (tempDir.exists())
-        tempDir.removeRecursively();
+     slideTimer->stop();
 }
 
 void PictureBrowser::readSortFlags()
@@ -261,6 +287,7 @@ void PictureBrowser::setSlideInterval(int ms)
 
     ui->actionSlide_16ms->setChecked(false);
     ui->actionSlide_33ms->setChecked(false);
+    ui->actionSlide_50ms->setChecked(false);
     ui->actionSlide_100ms->setChecked(false);
     ui->actionSlide_200ms->setChecked(false);
     ui->actionSlide_500ms->setChecked(false);
@@ -709,7 +736,32 @@ void PictureBrowser::on_listWidget_itemPressed(QListWidgetItem *item)
 void PictureBrowser::on_actionStart_Play_GIF_triggered()
 {
     if (!slideTimer->isActive())
+    {
+        // 调整选中项
+        auto selectedItems = ui->listWidget->selectedItems();
+        if (selectedItems.size() > 1) // 仅在选择项里面滑动
+        {
+            slideInSelected = true;
+            auto backItem = ui->listWidget->item(0);
+            int  currentRow = ui->listWidget->currentRow();
+            if (backItem->data(FilePathRole) == BACK_PREV_DIRECTORY && selectedItems.contains(backItem))
+            {
+                ui->listWidget->setCurrentRow(0, QItemSelectionModel::Deselect);
+                selectedItems.removeOne(backItem);
+
+                if (currentRow != 0)
+                    ui->listWidget->setCurrentRow(currentRow, QItemSelectionModel::Current);
+                else
+                    ui->listWidget->setCurrentItem(selectedItems.first(), QItemSelectionModel::Current);
+            }
+        }
+        else // 全部滑动
+        {
+            slideInSelected = false;
+        }
+
         slideTimer->start();
+    }
     else
         slideTimer->stop();
 }
@@ -762,6 +814,12 @@ void PictureBrowser::on_actionSlide_33ms_triggered()
 {
     setSlideInterval(33);
     ui->actionSlide_33ms->setChecked(true);
+}
+
+void PictureBrowser::on_actionSlide_50ms_triggered()
+{
+    setSlideInterval(50);
+    ui->actionSlide_50ms->setChecked(true);
 }
 
 void PictureBrowser::on_actionMark_Red_triggered()
@@ -979,4 +1037,42 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
 
     on_actionRefresh_triggered();
     ui->actionUndo_Delete_Command->setEnabled(deleteUndoCommands.size());
+}
+
+void PictureBrowser::on_actionGeneral_GIF_triggered()
+{
+    bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
+    int interval = 0;
+    if (gifUseRecordInterval)
+    {
+        // 从当前文件夹的配置文件中读取时间
+        QFileInfo info(QDir(currentDirPath).absoluteFilePath(SEQUENCE_PARAM_FILE));
+        if (info.exists())
+        {
+            QSettings st(info.absoluteFilePath());
+            interval = st.value("interval", slideTimer->interval()).toInt();
+        }
+    }
+    if (interval <= 0)
+    {
+        // 使用默认的播放时间
+        interval = slideTimer->interval();
+    }
+
+    // 开始创建GIF
+
+}
+
+void PictureBrowser::on_actionGIF_Use_Record_Interval_triggered()
+{
+    settings.setValue("gif/recordInterval", true);
+    ui->actionGIF_Use_Record_Interval->setChecked(true);
+    ui->actionGIF_Use_Display_Interval->setChecked(false);
+}
+
+void PictureBrowser::on_actionGIF_Use_Display_Interval_triggered()
+{
+    settings.setValue("gif/recordInterval", false);
+    ui->actionGIF_Use_Record_Interval->setChecked(false);
+    ui->actionGIF_Use_Display_Interval->setChecked(true);
 }
