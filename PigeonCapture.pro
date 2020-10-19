@@ -17,8 +17,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include($$PWD/qxtglobalshortcut5/qxt.pri)
 
+INCLUDEPATH += gif/
+
 SOURCES += \
     areaselector.cpp \
+    gif/gif.cpp \
     main.cpp \
     mainwindow.cpp \
     picturebrowser.cpp \
@@ -26,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     areaselector.h \
+    gif/gif.h \
     mainwindow.h \
     picturebrowser.h \
     resizablepicture.h \

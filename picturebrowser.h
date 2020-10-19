@@ -19,6 +19,8 @@
 #include <QDateTime>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QtConcurrent/QtConcurrent>
+#include "gif.h"
 
 #define BACK_PREV_DIRECTORY ".."
 #define TEMP_DIRECTORY "temp"
@@ -175,6 +177,10 @@ private slots:
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
+    void removeUselessItemSelect();
+
+signals:
+    void signalGeneralGIFFinished(QString path);
 
 private:
     Ui::PictureBrowser *ui;

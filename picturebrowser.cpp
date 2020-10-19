@@ -163,8 +163,9 @@ void PictureBrowser::enterDirectory(QString targetDir)
         }
         else if (info.isFile())
         {
-            if (name.contains("."))
+            if (name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".jpeg"))
                 name = name.left(name.lastIndexOf("."));
+            // gif后缀显示出来
             QString suffix = info.suffix();
             if (suffix != "jpg" && suffix != "png"
                     && suffix != "jpeg" && suffix != "gif")
@@ -178,7 +179,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
         else
             continue;
         item->setData(FilePathRole, info.absoluteFilePath());
-        item->setToolTip(info.fileName() + "\n" + info.lastModified().toString("yyyy-MM-dd hh-mm-ss.zzz"));
+        item->setToolTip(info.fileName());
     }
 
     restoreCurrentViewPos();
@@ -738,27 +739,12 @@ void PictureBrowser::on_actionStart_Play_GIF_triggered()
     if (!slideTimer->isActive())
     {
         // 调整选中项
+        removeUselessItemSelect();
         auto selectedItems = ui->listWidget->selectedItems();
-        if (selectedItems.size() > 1) // 仅在选择项里面滑动
-        {
+        if (selectedItems.size() > 1 && selectedItems.contains(ui->listWidget->currentItem()))
             slideInSelected = true;
-            auto backItem = ui->listWidget->item(0);
-            int  currentRow = ui->listWidget->currentRow();
-            if (backItem->data(FilePathRole) == BACK_PREV_DIRECTORY && selectedItems.contains(backItem))
-            {
-                ui->listWidget->setCurrentRow(0, QItemSelectionModel::Deselect);
-                selectedItems.removeOne(backItem);
-
-                if (currentRow != 0)
-                    ui->listWidget->setCurrentRow(currentRow, QItemSelectionModel::Current);
-                else
-                    ui->listWidget->setCurrentItem(selectedItems.first(), QItemSelectionModel::Current);
-            }
-        }
-        else // 全部滑动
-        {
+        else
             slideInSelected = false;
-        }
 
         slideTimer->start();
     }
@@ -962,6 +948,27 @@ void PictureBrowser::commitDeleteCommand()
     ui->actionUndo_Delete_Command->setEnabled(true);
 }
 
+void PictureBrowser::removeUselessItemSelect()
+{
+    auto selectedItems = ui->listWidget->selectedItems();
+    if (selectedItems.size() >= 1)
+    {
+        auto backItem = ui->listWidget->item(0);
+        int  currentRow = ui->listWidget->currentRow();
+        if (backItem->data(FilePathRole) == BACK_PREV_DIRECTORY && selectedItems.contains(backItem))
+        {
+            ui->listWidget->setCurrentRow(0, QItemSelectionModel::Deselect);
+            selectedItems.removeOne(backItem);
+
+            if (currentRow != 0)
+                ui->listWidget->setCurrentRow(currentRow, QItemSelectionModel::Current);
+            else
+                ui->listWidget->setCurrentItem(selectedItems.first(), QItemSelectionModel::Current);
+            qDebug() << "自动移除【返回上一级】项";
+        }
+    }
+}
+
 void PictureBrowser::on_actionUndo_Delete_Command_triggered()
 {
     if (deleteUndoCommands.size() == 0)
@@ -1041,6 +1048,15 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
 
 void PictureBrowser::on_actionGeneral_GIF_triggered()
 {
+    removeUselessItemSelect();
+    auto selectedItems = ui->listWidget->selectedItems();
+    if (selectedItems.size() < 2)
+    {
+        QMessageBox::warning(this, "生成GIF", "请选中至少2张图片\n根据【选中顺序】生成GIF，允许非连续");
+        return ;
+    }
+
+    // 获取间隔
     bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
     int interval = 0;
     if (gifUseRecordInterval)
@@ -1059,8 +1075,47 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         interval = slideTimer->interval();
     }
 
-    // 开始创建GIF
+    // 所有图片路径
+    QStringList pixmapPaths;
+    for (int i = 0; i < selectedItems.size(); i++)
+        pixmapPaths.append(selectedItems.at(i)->data(FilePathRole).toString());
 
+    // 获取图片大小
+    auto item = selectedItems.first();
+    QPixmap firstPixmap(item->data(FilePathRole).toString());
+    QSize size = firstPixmap.size(); // 图片大小
+    QString gifPath = QDir(currentDirPath).absoluteFilePath(QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz.gif"));
+
+    // 创建GIF
+    QtConcurrent::run([=]{
+        size_t wt = static_cast<uint32_t>(size.width());
+        size_t ht = static_cast<uint32_t>(size.height());
+        size_t iv = static_cast<uint32_t>(interval);
+
+        Gif_H m_Gif;
+        auto m_GifWriter = new Gif_H::GifWriter;
+        if (!m_Gif.GifBegin(m_GifWriter, gifPath.toLocal8Bit().data(), wt, ht, iv))
+        {
+            qDebug() << "开启gif失败";
+            delete m_GifWriter;
+            return;
+        }
+
+        for (int i = 0; i < pixmapPaths.size(); i++)
+        {
+            QPixmap pixmap(pixmapPaths.at(i));
+            if (!pixmap.isNull())
+            {
+                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().bits(), wt, ht, iv);
+            }
+        }
+
+        m_Gif.GifEnd(m_GifWriter);
+        delete m_GifWriter;
+
+        emit signalGeneralGIFFinished(gifPath);
+        qDebug() << "GIF生成完毕：" << size << pixmapPaths.size() << interval;
+    });
 }
 
 void PictureBrowser::on_actionGIF_Use_Record_Interval_triggered()
