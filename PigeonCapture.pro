@@ -28,6 +28,7 @@ SOURCES += \
     resizablepicture.cpp
 
 HEADERS += \
+    ASCII_Art.h \
     areaselector.h \
     gif/gif.h \
     mainwindow.h \

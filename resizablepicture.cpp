@@ -11,9 +11,9 @@ bool ResizablePicture::setGif(QString path)
 {
     if (!movie)
     {
-        movie = new QMovie(this);
-        movie->setFileName(path);
+        movie->deleteLater();
     }
+    movie = new QMovie(this);
 
     // 保存原先的位置
     if (!originPixmap.isNull())
@@ -22,8 +22,11 @@ bool ResizablePicture::setGif(QString path)
     }
 
     // 加载图片
+    movie->setFileName(path); // 会绑定gif，导致无法删除或者提取
     label->setMovie(movie);
     movie->start();
+
+    originPixmap = movie->currentPixmap();
 
     // 恢复相同的位置
     if (scaleCacheEnabled)
@@ -34,7 +37,8 @@ bool ResizablePicture::setGif(QString path)
             QRect rect = scaleCache.value(sizeToLL(size));
             currentPixmap = originPixmap.scaled(rect.size());
             label->setGeometry(rect);
-            label->setPixmap(currentPixmap);
+            if (!movie)
+                label->setPixmap(currentPixmap);
             return true;
         }
     }
@@ -72,7 +76,8 @@ bool ResizablePicture::setPixmap(const QPixmap &pixmap)
             QRect rect = scaleCache.value(sizeToLL(size));
             currentPixmap = originPixmap.scaled(rect.size());
             label->setGeometry(rect);
-            label->setPixmap(currentPixmap);
+            if (!movie)
+                label->setPixmap(currentPixmap);
             return true;
         }
     }
@@ -80,6 +85,17 @@ bool ResizablePicture::setPixmap(const QPixmap &pixmap)
     resetScale();
 
     return true;
+}
+
+void ResizablePicture::unbindFiles()
+{
+    if (movie)
+    {
+        movie->setFileName("");
+        label->setMovie(nullptr);
+        delete movie;
+        movie = nullptr;
+    }
 }
 
 void ResizablePicture::resetScale()
@@ -99,7 +115,8 @@ void ResizablePicture::resetScale()
     // label缩小到pixmap的大小
     label->resize(currentPixmap.size());
     label->move((width()-label->width())/2, (height()-label->height())/2);
-    label->setPixmap(currentPixmap);
+    if (!movie)
+        label->setPixmap(currentPixmap);
 }
 
 void ResizablePicture::setScaleCache(bool enable)
@@ -117,7 +134,8 @@ void ResizablePicture::scaleTo(double scale, QPoint pos)
     currentPixmap = originPixmap.scaled(static_cast<int>(label->width() * scale),
                                         static_cast<int>(label->height() * scale));
     label->resize(currentPixmap.size());
-    label->setPixmap(currentPixmap);
+    if (!movie)
+        label->setPixmap(currentPixmap);
 
     scaleCache[sizeToLL(originPixmap.size())] = label->geometry();
 }
@@ -133,8 +151,9 @@ void ResizablePicture::scaleToFill()
     currentPixmap = originPixmap.scaled(size(), Qt::AspectRatioMode::KeepAspectRatio);
 
     label->resize(currentPixmap.size());
-    label->setPixmap(currentPixmap);
     label->move((width()-label->width())/2, (height()-label->height())/2);
+    if (!movie)
+        label->setPixmap(currentPixmap);
 }
 
 /**
@@ -147,8 +166,9 @@ void ResizablePicture::scaleToOrigin()
 
     currentPixmap = originPixmap;
     label->resize(currentPixmap.size());
-    label->setPixmap(currentPixmap);
     label->move((width()-label->width())/2, (height()-label->height())/2);
+    if (!movie)
+        label->setPixmap(currentPixmap);
 }
 
 void ResizablePicture::wheelEvent(QWheelEvent *event)

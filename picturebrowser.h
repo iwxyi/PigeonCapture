@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QtConcurrent/QtConcurrent>
 #include "gif.h"
+#include "ASCII_Art.h"
 
 #define BACK_PREV_DIRECTORY ".."
 #define TEMP_DIRECTORY "temp"
@@ -183,6 +184,8 @@ private slots:
     void on_actionGIF_Compress_x8_triggered();
 
     void on_actionUnpack_GIF_File_triggered();
+
+    void on_actionGIF_ASCII_Art_triggered();
 
 private:
     void deleteFileOrDir(QString path);

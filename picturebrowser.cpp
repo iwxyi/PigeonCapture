@@ -157,7 +157,7 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         }
 
         // 操作对话框
-        auto result = QMessageBox::information(this, "生成GIF完毕", "路径：" + path, "打开文件", "打开文件夹", "取消", 0, 2);
+        auto result = QMessageBox::information(this, "处理完毕", "路径：" + path, "打开文件", "打开文件夹", "取消", 0, 2);
         if(result == 0) // 打开文件
         {
         #ifdef Q_OS_WIN32
@@ -543,6 +543,7 @@ void PictureBrowser::on_actionDelete_Selected_triggered()
     auto items = ui->listWidget->selectedItems();
     if (!items.size())
         return ;
+    ui->previewPicture->unbindFiles();
     int firstRow = ui->listWidget->row(items.first());
     foreach (auto item, items)
     {
@@ -564,6 +565,7 @@ void PictureBrowser::on_actionExtra_Selected_triggered()
     auto items = ui->listWidget->selectedItems();
     if (!items.size())
         return ;
+    ui->previewPicture->unbindFiles();
     int firstRow = ui->listWidget->row(items.first());
     foreach(auto item, items)
     {
@@ -1004,7 +1006,8 @@ void PictureBrowser::deleteFileOrDir(QString path)
             QFile(newPath).remove();
 
         // QFile::remove(path);
-        QFile(path).rename(newPath);
+        if (!QFile(path).rename(newPath))
+            qDebug() << "删除文件失败：" << path;
     }
     else if (info.isDir())
     {
@@ -1013,7 +1016,8 @@ void PictureBrowser::deleteFileOrDir(QString path)
 
         QDir dir(path);
         // dir.removeRecursively();
-        dir.rename(path, newPath);
+        if (!dir.rename(path, newPath))
+            qDebug() << "删除文件夹失败：" << path;
     }
 }
 
@@ -1148,6 +1152,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         {
             QSettings st(info.absoluteFilePath(), QSettings::IniFormat);
             interval = st.value("gif/interval", slideTimer->interval()).toInt();
+            qDebug() << "读取录制时间：" << interval;
         }
     }
     if (interval <= 0)
@@ -1179,7 +1184,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
     // 创建GIF
     QtConcurrent::run([=]{
         Gif_H m_Gif;
-        auto m_GifWriter = new Gif_H::GifWriter;
+        Gif_H::GifWriter* m_GifWriter = new Gif_H::GifWriter;
         if (!m_Gif.GifBegin(m_GifWriter, gifPath.toLocal8Bit().data(), wt, ht, iv))
         {
             qDebug() << "开启gif失败";
@@ -1285,4 +1290,78 @@ void PictureBrowser::on_actionUnpack_GIF_File_triggered()
     {
         QDesktopServices::openUrl(QUrl("file:///" + saveDir.absolutePath(), QUrl::TolerantMode));
     }
+}
+
+void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
+{
+    // 选择gif
+    QString path = QFileDialog::getOpenFileName(this, "请选择GIF路径，拆分成为一帧一帧的图片", rootDirPath, "Images (*.gif *.jpg *.png *.jpeg)");
+    if (path.isEmpty())
+        return ;
+
+    // 保存路径
+    QFileInfo info(path);
+    QString suffix = info.suffix();
+    QString savePath = QDir(info.absoluteDir()).absoluteFilePath(info.baseName() + "_ART");
+    if (QFileInfo(savePath + "." + suffix).exists())
+    {
+        int index = 0;
+        while (QFileInfo(savePath+"("+QString::number(++index)+")." + suffix).exists());
+        savePath += "(" + QString::number(index) + ")";
+    }
+    savePath += "." + suffix;
+
+    // 普通图片，马上弄
+    if (!path.endsWith(".gif"))
+    {
+        ASCIIArt art;
+        QPixmap cache(art.setImage(QPixmap(path).toImage(),
+                                   path.endsWith(".png") ? Qt::transparent : Qt::white));
+        cache.save(savePath);
+        emit signalGeneralGIFFinished(savePath);
+        return ;
+    }
+
+    QtConcurrent::run([=]{
+        // 初始化
+        QMovie movie(path);
+        ASCIIArt art;
+        movie.jumpToFrame(0);
+
+        // 生成cache
+        QList<QPixmap> cachePixmaps;
+        QList<QPixmap> srcPixmaps;
+        int count = movie.frameCount();
+        for (int i = 0; i < count; i++)
+        {
+            srcPixmaps.insert(i, movie.currentPixmap());
+            cachePixmaps.insert(i, art.setImage(movie.currentImage(), Qt::white));
+            movie.jumpToNextFrame();
+        }
+
+        QSize size = cachePixmaps.first().size();
+        size_t wt = static_cast<uint32_t>(size.width());
+        size_t ht = static_cast<uint32_t>(size.height());
+        size_t iv = static_cast<uint32_t>(movie.speed()) / 8;
+
+        Gif_H m_Gif;
+        Gif_H::GifWriter* m_GifWriter = new Gif_H::GifWriter;
+        if (!m_Gif.GifBegin(m_GifWriter, savePath.toLocal8Bit().data(), wt, ht, iv))
+        {
+            qDebug() << "开启gif失败";
+            delete m_GifWriter;
+            return;
+        }
+
+        for (int i = 0; i < cachePixmaps.size(); i++)
+        {
+            m_Gif.GifWriteFrame(m_GifWriter, cachePixmaps.at(i).toImage().bits(), wt, ht, iv);
+        }
+
+        m_Gif.GifEnd(m_GifWriter);
+        delete m_GifWriter;
+
+        emit signalGeneralGIFFinished(savePath);
+        qDebug() << "GIF生成完毕：" << size << cachePixmaps.first().size() << iv;
+    });
 }

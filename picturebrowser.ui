@@ -135,6 +135,7 @@
      <string>工具</string>
     </property>
     <addaction name="actionUnpack_GIF_File"/>
+    <addaction name="actionGIF_ASCII_Art"/>
     <addaction name="actionFind_Similar"/>
     <addaction name="actionEmoji_Factory"/>
     <addaction name="actionImage_Theme_Colors"/>
@@ -192,6 +193,9 @@
   <action name="actionRefresh">
    <property name="text">
     <string>刷新</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
    </property>
   </action>
   <action name="actionIcon_Largest">
@@ -307,6 +311,9 @@
    </property>
    <property name="toolTip">
     <string>提取选中并删除其他</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+E</string>
    </property>
   </action>
   <action name="actionOrigin_Size">
@@ -459,6 +466,9 @@
    <property name="text">
     <string>循环播放</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+Shift+R</string>
+   </property>
   </action>
   <action name="actionSlide_16ms">
    <property name="checkable">
@@ -520,6 +530,9 @@
    <property name="text">
     <string>置顶所有红标记项</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
   </action>
   <action name="actionPlace_Green_Top">
    <property name="text">
@@ -527,6 +540,9 @@
    </property>
    <property name="toolTip">
     <string>置顶所有绿标记项</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+G</string>
    </property>
   </action>
   <action name="actionEmoji_Factory">
@@ -575,6 +591,9 @@
    </property>
    <property name="text">
     <string>撤销删除</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
    </property>
   </action>
   <action name="actionGeneral_GIF">
@@ -643,7 +662,12 @@
   </action>
   <action name="actionUnpack_GIF_File">
    <property name="text">
-    <string>拆分GIF文件</string>
+    <string>GIF 拆分</string>
+   </property>
+  </action>
+  <action name="actionGIF_ASCII_Art">
+   <property name="text">
+    <string>GIF 字符画</string>
    </property>
   </action>
  </widget>
