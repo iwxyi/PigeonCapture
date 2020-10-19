@@ -296,38 +296,43 @@ void MainWindow::savePrevCapture(qint64 delta)
     if (!list)
         return ;
     qint64 currentTime = getTimestamp();
-    QtConcurrent::run([=]{
-        QString dirName = timeToFile();
-        // 获取保存的路径
-        QDir rootDir(saveDir);
-        QDir saveDir(rootDir.absoluteFilePath("预"+dirName));
-        saveDir.mkdir(saveDir.absolutePath());
 
-        // 保存录制参数
-        QSettings params(saveDir.absoluteFilePath(SEQUENCE_PARAM_FILE), QSettings::IniFormat);
-        params.setValue("gif/interval", prevTimer->interval());
-        params.sync();
+    try {
+        QtConcurrent::run([=]{
+            QString dirName = timeToFile();
+            // 获取保存的路径
+            QDir rootDir(saveDir);
+            QDir saveDir(rootDir.absoluteFilePath("预"+dirName));
+            saveDir.mkdir(saveDir.absolutePath());
 
-        // 计算要保存的起始位置
-        int maxSize = list->size();
-        int start = maxSize;
-        while (start > 0 && list->at(start-1).time + delta >= currentTime)
-            start--;
+            // 保存录制参数
+            QSettings params(saveDir.absoluteFilePath(SEQUENCE_PARAM_FILE), QSettings::IniFormat);
+            params.setValue("gif/interval", prevTimer->interval());
+            params.sync();
 
-        // 清理无用的
-        for (int i = 0; i < start; i++)
-            delete list->at(i).pixmap;
+            // 计算要保存的起始位置
+            int maxSize = list->size();
+            int start = maxSize;
+            while (start > 0 && list->at(start-1).time + delta >= currentTime)
+                start--;
 
-        // 开始保存
-        for (int i = start; i < maxSize; i++)
-        {
-            auto cap = list->at(i);
-            cap.pixmap->save(saveDir.absoluteFilePath(cap.name + "." + saveMode), saveMode.toLocal8Bit());
-            delete cap.pixmap;
-        }
-        qDebug() << "已保存" << (maxSize-start) << "张预先截图";
-        delete list;
-    });
+            // 清理无用的
+            for (int i = 0; i < start; i++)
+                delete list->at(i).pixmap;
+
+            // 开始保存
+            for (int i = start; i < maxSize; i++)
+            {
+                auto cap = list->at(i);
+                cap.pixmap->save(saveDir.absoluteFilePath(cap.name + "." + saveMode), saveMode.toLocal8Bit());
+                delete cap.pixmap;
+            }
+            qDebug() << "已保存" << (maxSize-start) << "张预先截图";
+            delete list;
+        });
+    } catch (...) {
+        qDebug() << "创建保存线程失败，请增加间隔（降低帧率）";
+    }
 }
 
 void MainWindow::clearPrevCapture()

@@ -130,7 +130,7 @@ private:
 
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
-    qint64 prevCaptureMaxTime = 61000; // 最大提前截取60s，超过的舍弃掉
+    qint64 prevCaptureMaxTime = 60500; // 最大提前截取60s，超过的舍弃掉
 
     HWND currentHwnd = nullptr;
 };

@@ -105,13 +105,13 @@
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;连续截图/预先截图 每两帧之间的间隔，单位：毫秒&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="minimum">
-         <number>10</number>
+         <number>7</number>
         </property>
         <property name="maximum">
          <number>3600000</number>
         </property>
         <property name="singleStep">
-         <number>50</number>
+         <number>20</number>
         </property>
         <property name="value">
          <number>100</number>
