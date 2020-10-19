@@ -13,10 +13,22 @@
 - [当下] 快速截图：瞬间截图，无需重复选择区域，无需选择保存路径
 - [未来] 连续截图：类似相机连拍，通过自带管理器一键提取最佳图片
 
-![预览](/images/picture.png)
+![预览](images/picture.png)
 
 
 
 
 
 > 开发初衷：为了截到可爱女主播的憨憨表情包！
+
+
+
+
+
+参考资料：
+
+- Qt窗口截图：https://blog.csdn.net/liukang325/article/details/53559714
+
+- GIF生成：https://github.com/douzhongqiang/EasyGifTool
+
+- 字符画生成：https://zhuanlan.zhihu.com/p/65232824

@@ -33,6 +33,8 @@ bool ResizablePicture::setGif(QString path)
         {
             QRect rect = scaleCache.value(sizeToLL(size));
             currentPixmap = originPixmap.scaled(rect.size());
+            if (movie)
+                movie->setScaledSize(rect.size());
             label->setGeometry(rect);
             if (!movie)
                 label->setPixmap(currentPixmap);
@@ -67,6 +69,8 @@ bool ResizablePicture::setPixmap(const QPixmap &pixmap)
         {
             QRect rect = scaleCache.value(sizeToLL(size));
             currentPixmap = originPixmap.scaled(rect.size());
+            if (movie)
+                movie->setScaledSize(rect.size());
             label->setGeometry(rect);
             if (!movie)
                 label->setPixmap(currentPixmap);
@@ -103,6 +107,8 @@ void ResizablePicture::resetScale()
         currentPixmap = originPixmap.scaled(size(), Qt::AspectRatioMode::KeepAspectRatio);
     else
         currentPixmap = originPixmap;
+    if (movie)
+        movie->setScaledSize(currentPixmap.size());
 
     // label缩小到pixmap的大小
     label->resize(currentPixmap.size());
@@ -125,6 +131,8 @@ void ResizablePicture::scaleTo(double scale, QPoint pos)
                 static_cast<int>(label->y() - label->height()*yProp*(scale-1)));
     currentPixmap = originPixmap.scaled(static_cast<int>(label->width() * scale),
                                         static_cast<int>(label->height() * scale));
+    if (movie)
+        movie->setScaledSize(currentPixmap.size());
     label->resize(currentPixmap.size());
     if (!movie)
         label->setPixmap(currentPixmap);
@@ -141,6 +149,8 @@ void ResizablePicture::scaleToFill()
         return ;
 
     currentPixmap = originPixmap.scaled(size(), Qt::AspectRatioMode::KeepAspectRatio);
+    if (movie)
+        movie->setScaledSize(currentPixmap.size());
 
     label->resize(currentPixmap.size());
     label->move((width()-label->width())/2, (height()-label->height())/2);

@@ -1126,6 +1126,9 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
     ui->actionUndo_Delete_Command->setEnabled(deleteUndoCommands.size());
 }
 
+/**
+ * 源代码参考自：https://github.com/douzhongqiang/EasyGifTool
+ */
 void PictureBrowser::on_actionGeneral_GIF_triggered()
 {
     removeUselessItemSelect();
@@ -1179,7 +1182,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         prop *= 2;
     size_t wt = static_cast<uint32_t>(size.width() / prop);
     size_t ht = static_cast<uint32_t>(size.height() / prop);
-    size_t iv = static_cast<uint32_t>(interval / 8);
+    size_t iv = static_cast<uint32_t>(interval / 8); // GIF合成的工具有问题，只能自己微调时间了
 
     // 创建GIF
     QtConcurrent::run([=]{
@@ -1199,7 +1202,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
             {
                 if (prop > 1)
                     pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
-                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().bits(), wt, ht, iv);
+                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().constBits(), wt, ht, iv);
             }
         }
 
@@ -1292,6 +1295,9 @@ void PictureBrowser::on_actionUnpack_GIF_File_triggered()
     }
 }
 
+/**
+ * 字符画链接：https://zhuanlan.zhihu.com/p/65232824
+ */
 void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
 {
     // 选择gif
