@@ -20,6 +20,8 @@
 #include <QFileDialog>
 
 #define BACK_PREV_DIRECTORY ".."
+#define TEMP_DIRECTORY "temp"
+#define RECYCLE_DIRECTORY "recycle"
 #define FilePathRole (Qt::UserRole)
 #define FileMarkRole (Qt::UserRole+1)
 
@@ -159,12 +161,15 @@ private slots:
     void on_actionSelect_Reverse_triggered();
 
 private:
+    void deleteFileOrDir(QString path);
 
 private:
     Ui::PictureBrowser *ui;
 
     QSettings settings;
     QString rootDirPath;
+    QString tempDirPath;
+    QDir recycleDir;
     QString currentDirPath;
     QDir::SortFlags sortFlags;
 

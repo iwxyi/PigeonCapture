@@ -87,6 +87,9 @@ PictureBrowser::~PictureBrowser()
 void PictureBrowser::readDirectory(QString targetDir)
 {
     rootDirPath = targetDir;
+    tempDirPath = QDir(targetDir).absoluteFilePath(TEMP_DIRECTORY);
+    recycleDir = QDir(QDir(tempDirPath).absoluteFilePath(RECYCLE_DIRECTORY));
+    recycleDir.mkpath(recycleDir.absolutePath());
     enterDirectory(targetDir);
 }
 
@@ -121,6 +124,8 @@ void PictureBrowser::enterDirectory(QString targetDir)
     foreach (QFileInfo info, infos)
     {
         QString name = info.baseName();
+        if (name == TEMP_DIRECTORY)
+            continue;
         if (name.contains(" "))
             name = name.right(name.length() - name.indexOf(" ") - 1);
         QListWidgetItem* item;
@@ -180,6 +185,10 @@ void PictureBrowser::closeEvent(QCloseEvent *event)
     settings.setValue("picturebrowser/state", this->saveState());
     settings.setValue("picturebrowser/splitterGeometry", ui->splitter->saveGeometry());
     settings.setValue("picturebrowser/splitterState", ui->splitter->saveState());
+
+    QDir tempDir(tempDirPath);
+    if (tempDir.exists())
+        tempDir.removeRecursively();
 }
 
 void PictureBrowser::readSortFlags()
@@ -446,16 +455,7 @@ void PictureBrowser::on_actionDelete_Selected_triggered()
         if (path == BACK_PREV_DIRECTORY)
             continue;
 
-        QFileInfo info(path);
-        if (info.isFile())
-        {
-            QFile::remove(path);
-        }
-        else if (info.isDir())
-        {
-            QDir dir(path);
-            dir.removeRecursively();
-        }
+        deleteFileOrDir(path);
 
         int row = ui->listWidget->row(item);
         ui->listWidget->takeItem(row);
@@ -505,12 +505,8 @@ void PictureBrowser::on_actionDelete_Unselected_triggered()
         QString path = item->data(FilePathRole).toString();
         if (path == BACK_PREV_DIRECTORY)
             continue;
-        QFileInfo info(path);
-        if (path.isEmpty() || !info.exists())
-            continue;
 
-        QFile file(path);
-        file.remove();
+        deleteFileOrDir(path);
 
         ui->listWidget->takeItem(i--);
     }
@@ -551,7 +547,7 @@ void PictureBrowser::on_actionExtra_And_Delete_triggered()
     QDir dir(currentDirPath);
     QDir up(currentDirPath);
     up.cdUp();
-    dir.removeRecursively();
+    deleteFileOrDir(up.absoluteFilePath(dir.dirName()));
     enterDirectory(up.absolutePath());
 
     // 选中刚提取的
@@ -632,16 +628,7 @@ void PictureBrowser::on_actionDelete_Up_Files_triggered()
             continue;
         }
 
-        QFileInfo info(path);
-        if (info.isFile())
-        {
-            QFile::remove(path);
-        }
-        else if (info.isDir())
-        {
-            QDir dir(path);
-            dir.removeRecursively();
-        }
+        deleteFileOrDir(path);
 
         ui->listWidget->takeItem(start);
     }
@@ -659,16 +646,7 @@ void PictureBrowser::on_actionDelete_Down_Files_triggered()
         if (path == BACK_PREV_DIRECTORY)
             continue;
 
-        QFileInfo info(path);
-        if (info.isFile())
-        {
-            QFile::remove(path);
-        }
-        else if (info.isDir())
-        {
-            QDir dir(path);
-            dir.removeRecursively();
-        }
+        deleteFileOrDir(path);
 
         ui->listWidget->takeItem(row);
     }
@@ -885,5 +863,28 @@ void PictureBrowser::on_actionSelect_Reverse_triggered()
         auto item = ui->listWidget->item(i);
         if (!selectedItems.contains(item))
             ui->listWidget->setCurrentRow(i, QItemSelectionModel::Select);
+    }
+}
+
+void PictureBrowser::deleteFileOrDir(QString path)
+{
+    QFileInfo info(path);
+    QString newPath = recycleDir.absoluteFilePath(info.fileName());
+    if (info.isFile())
+    {
+        if (QFileInfo(newPath).exists())
+            QFile(newPath).remove();
+
+        // QFile::remove(path);
+        QFile(path).rename(newPath);
+    }
+    else if (info.isDir())
+    {
+        if (QFileInfo(newPath).exists())
+            QDir(newPath).removeRecursively();
+
+        QDir dir(path);
+        // dir.removeRecursively();
+        dir.rename(path, newPath);
     }
 }
