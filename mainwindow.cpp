@@ -246,6 +246,12 @@ void MainWindow::triggerSerialCapture()
     {
         serialCaptureDir = "连"+timeToFile();
         QDir(saveDir).mkdir(serialCaptureDir);
+        QDir currentDir = QDir(saveDir).absoluteFilePath(serialCaptureDir);
+
+        // 保存录制参数
+        QSettings params(currentDir.absoluteFilePath(SEQUENCE_PARAM_FILE), QSettings::IniFormat);
+        params.setValue("gif/interval", prevTimer->interval());
+        params.sync();
 
         serialCaptureCount = 0;
         // 开始连续截图
@@ -292,13 +298,16 @@ void MainWindow::savePrevCapture(qint64 delta)
         QDir saveDir(rootDir.absoluteFilePath("预"+dirName));
         saveDir.mkdir(saveDir.absolutePath());
 
+        // 保存录制参数
+        QSettings params(saveDir.absoluteFilePath(SEQUENCE_PARAM_FILE), QSettings::IniFormat);
+        params.setValue("gif/interval", prevTimer->interval());
+        params.sync();
+
         // 计算要保存的起始位置
         int maxSize = list->size();
         int start = maxSize;
         while (start > 0 && list->at(start-1).time + delta >= currentTime)
-        {
             start--;
-        }
 
         // 清理无用的
         for (int i = 0; i < start; i++)

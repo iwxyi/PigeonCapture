@@ -1102,7 +1102,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         if (info.exists())
         {
             QSettings st(info.absoluteFilePath());
-            interval = st.value("interval", slideTimer->interval()).toInt();
+            interval = st.value("gif/interval", slideTimer->interval()).toInt();
         }
     }
     if (interval <= 0)
