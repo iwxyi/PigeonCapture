@@ -182,6 +182,8 @@ private slots:
 
     void on_actionGIF_Compress_x8_triggered();
 
+    void on_actionUnpack_GIF_File_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();

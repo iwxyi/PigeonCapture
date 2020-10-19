@@ -142,6 +142,21 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         ui->actionGIF_Compress_x8->setChecked(true);
 
     connect(this, &PictureBrowser::signalGeneralGIFFinished, this, [=](QString path){
+        // 显示在当前列表中
+        QFileInfo info(path);
+        if (info.absoluteDir() == currentDirPath)
+        {
+            // 还是这个目录，直接加到这个地方
+            QString name = info.baseName();
+            if (name.contains(" "))
+                name = name.right(name.length() - name.indexOf(" ") - 1);
+
+            QListWidgetItem* item = new QListWidgetItem(QIcon(path), info.fileName(), ui->listWidget);
+            item->setData(FilePathRole, info.absoluteFilePath());
+            item->setToolTip(info.fileName());
+        }
+
+        // 操作对话框
         auto result = QMessageBox::information(this, "生成GIF完毕", "路径：" + path, "打开文件", "打开文件夹", "取消", 0, 2);
         if(result == 0) // 打开文件
         {
@@ -368,11 +383,22 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
 
     QString path = current->data(FilePathRole).toString();
     QFileInfo info(path);
-    if (info.isFile() && path.endsWith(".jpg"))
+    if (info.isFile())
     {
         // 显示图片预览
-        if (!ui->previewPicture->setPixmap(QPixmap(info.absoluteFilePath())))
-            qDebug() << "打开图片失败：" << info.absoluteFilePath() << QPixmap(info.absoluteFilePath()).isNull();
+        if ((path.endsWith(".jpg") || path.endsWith(".png") || path.endsWith(".jpeg")))
+        {
+            if (!ui->previewPicture->setPixmap(QPixmap(info.absoluteFilePath())))
+                qDebug() << "打开图片失败：" << info.absoluteFilePath() << QPixmap(info.absoluteFilePath()).isNull();
+        }
+        else if (path.endsWith(".gif"))
+        {
+            ui->previewPicture->setGif(path);
+        }
+        else
+        {
+            qDebug() << "无法识别文件：" << info.absoluteFilePath();
+        }
     }
     else if (info.isDir())
     {
@@ -1214,4 +1240,12 @@ void PictureBrowser::on_actionGIF_Compress_x8_triggered()
 {
     settings.setValue("gif/compress", 3);
     ui->actionGIF_Compress_x8->setChecked(true);
+}
+
+void PictureBrowser::on_actionUnpack_GIF_File_triggered()
+{
+    QString path = QFileDialog::getOpenFileName(this, "请选择GIF路径，拆分成为一帧一帧的图片", rootDirPath, "Images (*.gif)");
+    if (path.isEmpty())
+        return ;
+
 }

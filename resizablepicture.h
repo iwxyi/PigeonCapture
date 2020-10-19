@@ -7,6 +7,7 @@
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QMovie>
 
 class ResizablePicture : public QWidget
 {
@@ -14,6 +15,7 @@ class ResizablePicture : public QWidget
 public:
     ResizablePicture(QWidget *parent = nullptr);
 
+    bool setGif(QString path);
     bool setPixmap(const QPixmap& pixmap);
     void resetScale();
 
@@ -37,6 +39,7 @@ public slots:
 
 private:
     QLabel* label;
+    QMovie* movie = nullptr;
 
     QPoint pressPos;
     QPixmap originPixmap;

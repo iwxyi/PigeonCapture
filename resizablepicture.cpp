@@ -7,8 +7,51 @@ ResizablePicture::ResizablePicture(QWidget *parent) : QWidget(parent)
     resetScale();
 }
 
+bool ResizablePicture::setGif(QString path)
+{
+    if (!movie)
+    {
+        movie = new QMovie(this);
+        movie->setFileName(path);
+    }
+
+    // 保存原先的位置
+    if (!originPixmap.isNull())
+    {
+       scaleCache[sizeToLL(originPixmap.size())] = label->geometry();
+    }
+
+    // 加载图片
+    label->setMovie(movie);
+    movie->start();
+
+    // 恢复相同的位置
+    if (scaleCacheEnabled)
+    {
+        QSize size = originPixmap.size();
+        if (scaleCache.contains(sizeToLL(size)))
+        {
+            QRect rect = scaleCache.value(sizeToLL(size));
+            currentPixmap = originPixmap.scaled(rect.size());
+            label->setGeometry(rect);
+            label->setPixmap(currentPixmap);
+            return true;
+        }
+    }
+
+    resetScale();
+    return true;
+}
+
 bool ResizablePicture::setPixmap(const QPixmap &pixmap)
 {
+    if (movie)
+    {
+        label->setMovie(nullptr);
+        movie->deleteLater();
+        movie = nullptr;
+    }
+
     // 保存原先的位置
     if (!originPixmap.isNull())
     {

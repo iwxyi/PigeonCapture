@@ -134,6 +134,7 @@
     <property name="title">
      <string>工具</string>
     </property>
+    <addaction name="actionUnpack_GIF_File"/>
     <addaction name="actionFind_Similar"/>
     <addaction name="actionEmoji_Factory"/>
     <addaction name="actionImage_Theme_Colors"/>
@@ -638,6 +639,11 @@
    </property>
    <property name="text">
     <string>不压缩</string>
+   </property>
+  </action>
+  <action name="actionUnpack_GIF_File">
+   <property name="text">
+    <string>拆分GIF文件</string>
    </property>
   </action>
  </widget>
