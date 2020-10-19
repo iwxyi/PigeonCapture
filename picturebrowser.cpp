@@ -1202,7 +1202,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
             {
                 if (prop > 1)
                     pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
-                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().constBits(), wt, ht, iv);
+                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().convertToFormat(QImage::Format_RGBA8888).constBits(), wt, ht, iv);
             }
         }
 
@@ -1284,7 +1284,7 @@ void PictureBrowser::on_actionUnpack_GIF_File_triggered()
     }
 
     // 打开文件夹
-    auto result = QMessageBox::information(this, "拆分GIF完毕", "路径：" + saveDir.absolutePath(), "进入文件夹", "显示在资源管理器", "取消", 0, 2);
+    auto result = QMessageBox::information(this, "分解GIF完毕", "路径：" + saveDir.absolutePath(), "进入文件夹", "显示在资源管理器", "取消", 0, 2);
     if (result == 0) // 进入文件夹
     {
         enterDirectory(saveDir.absolutePath());
@@ -1301,7 +1301,7 @@ void PictureBrowser::on_actionUnpack_GIF_File_triggered()
 void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
 {
     // 选择gif
-    QString path = QFileDialog::getOpenFileName(this, "请选择GIF路径，拆分成为一帧一帧的图片", rootDirPath, "Images (*.gif *.jpg *.png *.jpeg)");
+    QString path = QFileDialog::getOpenFileName(this, "请选择图片路径，制作字符画", rootDirPath, "Images (*.gif *.jpg *.png *.jpeg)");
     if (path.isEmpty())
         return ;
 
@@ -1321,8 +1321,9 @@ void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
     if (!path.endsWith(".gif"))
     {
         ASCIIArt art;
-        QPixmap cache(art.setImage(QPixmap(path).toImage(),
-                                   path.endsWith(".png") ? Qt::transparent : Qt::white));
+        QPixmap pixmap(path);
+        QPixmap cache(art.setImage(pixmap.toImage(),
+                                   pixmap.hasAlpha() ? Qt::transparent : Qt::white));
         cache.save(savePath);
         emit signalGeneralGIFFinished(savePath);
         return ;
@@ -1361,7 +1362,10 @@ void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
 
         for (int i = 0; i < cachePixmaps.size(); i++)
         {
-            m_Gif.GifWriteFrame(m_GifWriter, cachePixmaps.at(i).toImage().bits(), wt, ht, iv);
+            m_Gif.GifWriteFrame(m_GifWriter,
+                                cachePixmaps.at(i).toImage()
+                                    .convertToFormat(QImage::Format_RGBA8888).bits(),
+                                wt, ht, iv);
         }
 
         m_Gif.GifEnd(m_GifWriter);

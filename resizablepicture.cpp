@@ -171,6 +171,8 @@ void ResizablePicture::scaleToOrigin()
     label->move((width()-label->width())/2, (height()-label->height())/2);
     if (!movie)
         label->setPixmap(currentPixmap);
+    else
+        movie->setScaledSize(currentPixmap.size());
 }
 
 void ResizablePicture::wheelEvent(QWheelEvent *event)

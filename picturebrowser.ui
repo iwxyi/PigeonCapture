@@ -662,7 +662,7 @@
   </action>
   <action name="actionUnpack_GIF_File">
    <property name="text">
-    <string>GIF 拆分</string>
+    <string>GIF 分解</string>
    </property>
   </action>
   <action name="actionGIF_ASCII_Art">
