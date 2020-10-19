@@ -900,6 +900,8 @@ void PictureBrowser::deleteFileOrDir(QString path)
 void PictureBrowser::commitDeleteCommand()
 {
     deleteUndoCommands.append(deleteCommandsQueue);
+    deleteCommandsQueue.clear(); // 等待下一次的commit
+    ui->actionUndo_Delete_Command->setEnabled(true);
 }
 
 void PictureBrowser::on_actionUndo_Delete_Command_triggered()
@@ -914,6 +916,10 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
     {
         QString oldPath = deleteCommand.at(i).first;
         QString newPath = deleteCommand.at(i).second;
+
+        // 回收站文件不存在（手动删除）
+        if (!QFileInfo(newPath).exists())
+            continue;
 
         // 文件已存在
         if (QFileInfo(oldPath).exists())
@@ -939,7 +945,8 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
 
     if (existOriginPaths.size())
     {
-        if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + existOriginPaths.join("\n"), 0, 1) == QMessageBox::Yes)
+        if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + existOriginPaths.join("\n"),
+                                  QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Yes)
         {
             for (int i = existOriginPaths.size() - 1; i >= 0; i--)
             {
@@ -971,4 +978,5 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
     }
 
     on_actionRefresh_triggered();
+    ui->actionUndo_Delete_Command->setEnabled(deleteUndoCommands.size());
 }

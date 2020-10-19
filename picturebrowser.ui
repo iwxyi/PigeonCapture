@@ -65,6 +65,7 @@
     <addaction name="actionBack_Prev_Directory"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Directory"/>
+    <addaction name="actionUndo_Delete_Command"/>
     <addaction name="actionRefresh"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -137,8 +138,6 @@
     <addaction name="actionDelete_Unselected"/>
     <addaction name="actionDelete_Up_Files"/>
     <addaction name="actionDelete_Down_Files"/>
-    <addaction name="separator"/>
-    <addaction name="actionUndo_Delete_Command"/>
    </widget>
    <widget class="QMenu" name="menu_5">
     <property name="title">
@@ -554,6 +553,9 @@
    </property>
   </action>
   <action name="actionUndo_Delete_Command">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>撤销删除</string>
    </property>
