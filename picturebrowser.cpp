@@ -777,8 +777,22 @@ void PictureBrowser::on_actionStart_Play_GIF_triggered()
         // 调整选中项
         removeUselessItemSelect();
         auto selectedItems = ui->listWidget->selectedItems();
+
         if (selectedItems.size() > 1 && selectedItems.contains(ui->listWidget->currentItem()))
+        {
             slideInSelected = true;
+
+            // 排序
+            std::sort(selectedItems.begin(), selectedItems.end(), [=](QListWidgetItem*a, QListWidgetItem* b){
+                return ui->listWidget->row(a) < ui->listWidget->row(b);
+            });
+            ui->listWidget->clearSelection();
+            for (int i = 0; i < selectedItems.size(); i++)
+            {
+                ui->listWidget->setCurrentItem(selectedItems.at(i), QItemSelectionModel::Select);
+            }
+            ui->listWidget->setCurrentItem(selectedItems.first(), QItemSelectionModel::Current);
+        }
         else
             slideInSelected = false;
 
@@ -1086,11 +1100,16 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
 {
     removeUselessItemSelect();
     auto selectedItems = ui->listWidget->selectedItems();
+
     if (selectedItems.size() < 2)
     {
-        QMessageBox::warning(this, "生成GIF", "请选中至少2张图片\n根据【选中顺序】生成GIF，允许非连续");
+        QMessageBox::warning(this, "生成GIF", "请选中至少2张图片");
         return ;
     }
+    // 进行排序啊
+    std::sort(selectedItems.begin(), selectedItems.end(), [=](QListWidgetItem*a, QListWidgetItem* b){
+        return ui->listWidget->row(a) < ui->listWidget->row(b);
+    });
 
     // 获取间隔
     bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
