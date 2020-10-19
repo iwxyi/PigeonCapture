@@ -270,6 +270,7 @@ void PictureBrowser::setSlideInterval(int ms)
 
 void PictureBrowser::on_actionRefresh_triggered()
 {
+    saveCurrentViewPos();
     enterDirectory(currentDirPath);
 }
 
@@ -460,6 +461,7 @@ void PictureBrowser::on_actionDelete_Selected_triggered()
         int row = ui->listWidget->row(item);
         ui->listWidget->takeItem(row);
     }
+    commitDeleteCommand();
     ui->listWidget->setCurrentRow(firstRow);
 }
 
@@ -510,6 +512,7 @@ void PictureBrowser::on_actionDelete_Unselected_triggered()
 
         ui->listWidget->takeItem(i--);
     }
+    commitDeleteCommand();
 }
 
 void PictureBrowser::on_actionExtra_And_Delete_triggered()
@@ -548,6 +551,7 @@ void PictureBrowser::on_actionExtra_And_Delete_triggered()
     QDir up(currentDirPath);
     up.cdUp();
     deleteFileOrDir(up.absoluteFilePath(dir.dirName()));
+    commitDeleteCommand();
     enterDirectory(up.absolutePath());
 
     // 选中刚提取的
@@ -592,6 +596,7 @@ void PictureBrowser::on_actionBack_Prev_Directory_triggered()
     QDir dir(currentDirPath);
     dir.cdUp();
     enterDirectory(dir.absolutePath());
+    commitDeleteCommand();
 }
 
 void PictureBrowser::on_actionCopy_File_triggered()
@@ -632,6 +637,7 @@ void PictureBrowser::on_actionDelete_Up_Files_triggered()
 
         ui->listWidget->takeItem(start);
     }
+    commitDeleteCommand();
     ui->listWidget->scrollToTop();
 }
 
@@ -650,6 +656,7 @@ void PictureBrowser::on_actionDelete_Down_Files_triggered()
 
         ui->listWidget->takeItem(row);
     }
+    commitDeleteCommand();
     ui->listWidget->scrollToBottom();
 }
 
@@ -870,6 +877,7 @@ void PictureBrowser::deleteFileOrDir(QString path)
 {
     QFileInfo info(path);
     QString newPath = recycleDir.absoluteFilePath(info.fileName());
+    deleteCommandsQueue.append(QPair<QString, QString>(path, newPath));
     if (info.isFile())
     {
         if (QFileInfo(newPath).exists())
@@ -887,4 +895,80 @@ void PictureBrowser::deleteFileOrDir(QString path)
         // dir.removeRecursively();
         dir.rename(path, newPath);
     }
+}
+
+void PictureBrowser::commitDeleteCommand()
+{
+    deleteUndoCommands.append(deleteCommandsQueue);
+}
+
+void PictureBrowser::on_actionUndo_Delete_Command_triggered()
+{
+    if (deleteUndoCommands.size() == 0)
+        return ;
+
+    QList<QPair<QString, QString>> deleteCommand = deleteUndoCommands.last();
+    QStringList existOriginPaths;
+    QStringList existRecyclePaths;
+    for (int i = deleteCommand.size()-1; i >= 0; i--)
+    {
+        QString oldPath = deleteCommand.at(i).first;
+        QString newPath = deleteCommand.at(i).second;
+
+        // 文件已存在
+        if (QFileInfo(oldPath).exists())
+        {
+            existOriginPaths.append(oldPath);
+            existRecyclePaths.append(newPath);
+            continue;
+        }
+
+        // 重命名
+        QFileInfo info(newPath);
+        if (info.isDir())
+        {
+            QDir(newPath).rename(newPath, oldPath);
+        }
+        else if (info.isFile())
+        {
+            QFile(newPath).rename(newPath, oldPath);
+        }
+    }
+
+    deleteUndoCommands.removeLast();
+
+    if (existOriginPaths.size())
+    {
+        if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + existOriginPaths.join("\n"), 0, 1) == QMessageBox::Yes)
+        {
+            for (int i = existOriginPaths.size() - 1; i >= 0; i--)
+            {
+                QString oldPath = existOriginPaths.at(i);
+                QString newPath = existRecyclePaths.at(i);
+
+                // 文件已存在
+                QFileInfo oldInfo(oldPath);
+                if (oldInfo.exists())
+                {
+                    if (oldInfo.isDir())
+                        QDir(oldPath).removeRecursively();
+                    else if (oldInfo.isFile())
+                        QFile(oldPath).remove();
+                }
+
+                // 重命名
+                QFileInfo info(newPath);
+                if (info.isDir())
+                {
+                    QDir(newPath).rename(newPath, oldPath);
+                }
+                else if (info.isFile())
+                {
+                    QFile(newPath).rename(newPath, oldPath);
+                }
+            }
+        }
+    }
+
+    on_actionRefresh_triggered();
 }

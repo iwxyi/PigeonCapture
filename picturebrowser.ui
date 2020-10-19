@@ -137,6 +137,8 @@
     <addaction name="actionDelete_Unselected"/>
     <addaction name="actionDelete_Up_Files"/>
     <addaction name="actionDelete_Down_Files"/>
+    <addaction name="separator"/>
+    <addaction name="actionUndo_Delete_Command"/>
    </widget>
    <widget class="QMenu" name="menu_5">
     <property name="title">
@@ -549,6 +551,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
+   </property>
+  </action>
+  <action name="actionUndo_Delete_Command">
+   <property name="text">
+    <string>撤销删除</string>
    </property>
   </action>
  </widget>

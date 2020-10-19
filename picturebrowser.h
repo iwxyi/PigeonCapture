@@ -18,6 +18,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #define BACK_PREV_DIRECTORY ".."
 #define TEMP_DIRECTORY "temp"
@@ -160,8 +161,11 @@ private slots:
 
     void on_actionSelect_Reverse_triggered();
 
+    void on_actionUndo_Delete_Command_triggered();
+
 private:
     void deleteFileOrDir(QString path);
+    void commitDeleteCommand();
 
 private:
     Ui::PictureBrowser *ui;
@@ -178,6 +182,9 @@ private:
 
     QColor redMark = QColor(240, 128, 128);
     QColor greenMark = QColor(115, 230, 140);
+
+    QList<QList<QPair<QString, QString>>> deleteUndoCommands;
+    QList<QPair<QString, QString>> deleteCommandsQueue;
 };
 
 #endif // PICTUREBROWSER_H
