@@ -9,10 +9,7 @@ ResizablePicture::ResizablePicture(QWidget *parent) : QWidget(parent)
 
 bool ResizablePicture::setGif(QString path)
 {
-    if (!movie)
-    {
-        movie->deleteLater();
-    }
+    unbindMovie();
     movie = new QMovie(this);
 
     // 保存原先的位置
@@ -49,12 +46,7 @@ bool ResizablePicture::setGif(QString path)
 
 bool ResizablePicture::setPixmap(const QPixmap &pixmap)
 {
-    if (movie)
-    {
-        label->setMovie(nullptr);
-        movie->deleteLater();
-        movie = nullptr;
-    }
+    unbindMovie();
 
     // 保存原先的位置
     if (!originPixmap.isNull())
@@ -87,7 +79,7 @@ bool ResizablePicture::setPixmap(const QPixmap &pixmap)
     return true;
 }
 
-void ResizablePicture::unbindFiles()
+void ResizablePicture::unbindMovie()
 {
     if (movie)
     {

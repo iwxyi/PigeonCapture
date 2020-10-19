@@ -543,7 +543,7 @@ void PictureBrowser::on_actionDelete_Selected_triggered()
     auto items = ui->listWidget->selectedItems();
     if (!items.size())
         return ;
-    ui->previewPicture->unbindFiles();
+    ui->previewPicture->unbindMovie();
     int firstRow = ui->listWidget->row(items.first());
     foreach (auto item, items)
     {
@@ -565,7 +565,7 @@ void PictureBrowser::on_actionExtra_Selected_triggered()
     auto items = ui->listWidget->selectedItems();
     if (!items.size())
         return ;
-    ui->previewPicture->unbindFiles();
+    ui->previewPicture->unbindMovie();
     int firstRow = ui->listWidget->row(items.first());
     foreach(auto item, items)
     {
@@ -1179,7 +1179,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         prop *= 2;
     size_t wt = static_cast<uint32_t>(size.width() / prop);
     size_t ht = static_cast<uint32_t>(size.height() / prop);
-    size_t iv = static_cast<uint32_t>(interval);
+    size_t iv = static_cast<uint32_t>(interval / 8);
 
     // 创建GIF
     QtConcurrent::run([=]{

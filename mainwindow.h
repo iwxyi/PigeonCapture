@@ -61,6 +61,7 @@ private slots:
     void on_modeTab_currentChanged(int index);
 
     void runCapture();
+    void serialCapture();
     void triggerFastCapture();
     void triggerSerialCapture();
     void startPrevCapture();

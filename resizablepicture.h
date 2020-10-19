@@ -17,7 +17,7 @@ public:
 
     bool setGif(QString path);
     bool setPixmap(const QPixmap& pixmap);
-    void unbindFiles();
+    void unbindMovie();
     void resetScale();
 
     void setScaleCache(bool enable);

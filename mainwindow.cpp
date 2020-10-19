@@ -61,20 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
     int interval = settings.value("serial/interval", 100).toInt();
     serialTimer->setInterval(interval);
     connect(serialTimer, &QTimer::timeout, this, [=]{
-        QString fileName = timeToFile() + "." + saveMode;
-        QDir dir(saveDir);
-        dir = QDir(dir.filePath(serialCaptureDir));
-        QString savePath = dir.filePath(fileName);
-
-        try {
-            QPixmap pixmap = getScreenShot();
-            pixmap.save(savePath, saveMode.toLocal8Bit());
-        } catch (...) {
-            qDebug() << "截图失败，可能是内存不足";
-        }
-
-        serialCaptureCount++;
-        ui->serialCaptureShortcut->setText("已截" + QString::number(serialCaptureCount) + "张");
+        serialCapture();
     });
 
     // 预先截图
@@ -223,6 +210,24 @@ void MainWindow::runCapture()
 
 }
 
+void MainWindow::serialCapture()
+{
+    QString fileName = timeToFile() + "." + saveMode;
+    QDir dir(saveDir);
+    dir = QDir(dir.filePath(serialCaptureDir));
+    QString savePath = dir.filePath(fileName);
+
+    try {
+        QPixmap pixmap = getScreenShot();
+        pixmap.save(savePath, saveMode.toLocal8Bit());
+    } catch (...) {
+        qDebug() << "截图失败，可能是内存不足";
+    }
+
+    serialCaptureCount++;
+    ui->serialCaptureShortcut->setText("已截" + QString::number(serialCaptureCount) + "张");
+}
+
 void MainWindow::triggerFastCapture()
 {
     runCapture();
@@ -257,7 +262,7 @@ void MainWindow::triggerSerialCapture()
         // 开始连续截图
         serialTimer->start();
         // 先截一张
-        runCapture();
+        serialCapture();
         qDebug() << "开启连续截图";
 
         ui->selectDirButton->setEnabled(false);
