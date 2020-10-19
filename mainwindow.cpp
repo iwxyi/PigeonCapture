@@ -61,14 +61,14 @@ MainWindow::MainWindow(QWidget *parent)
     int interval = settings.value("serial/interval", 100).toInt();
     serialTimer->setInterval(interval);
     connect(serialTimer, &QTimer::timeout, this, [=]{
-        QString fileName = timeToFile() + ".jpg";
+        QString fileName = timeToFile() + "." + saveMode;
         QDir dir(saveDir);
         dir = QDir(dir.filePath(serialCaptureDir));
         QString savePath = dir.filePath(fileName);
 
         try {
             QPixmap pixmap = getScreenShot();
-            pixmap.save(savePath, "jpg");
+            pixmap.save(savePath, saveMode.toLocal8Bit());
         } catch (...) {
             qDebug() << "截图失败，可能是内存不足";
         }
@@ -204,12 +204,12 @@ QPixmap MainWindow::getScreenShot()
  */
 void MainWindow::runCapture()
 {
-    QString fileName = timeToFile() + ".jpg";
+    QString fileName = timeToFile() + "." + saveMode;
     QString savePath = QDir(saveDir).filePath(fileName);
 
     try {
         QPixmap pixmap = getScreenShot();
-        if (pixmap.save(savePath, "jpg"))
+        if (pixmap.save(savePath, saveMode.toLocal8Bit()))
         {
             qDebug() << "截图成功：" << savePath;
         }
@@ -317,7 +317,7 @@ void MainWindow::savePrevCapture(qint64 delta)
         for (int i = start; i < maxSize; i++)
         {
             auto cap = list->at(i);
-            cap.pixmap->save(saveDir.absoluteFilePath(cap.name+".jpg"), "jpg");
+            cap.pixmap->save(saveDir.absoluteFilePath(cap.name + "." + saveMode), saveMode.toLocal8Bit());
             delete cap.pixmap;
         }
         qDebug() << "已保存" << (maxSize-start) << "张预先截图";

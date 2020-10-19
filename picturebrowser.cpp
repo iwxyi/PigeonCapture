@@ -1120,7 +1120,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         QFileInfo info(QDir(currentDirPath).absoluteFilePath(SEQUENCE_PARAM_FILE));
         if (info.exists())
         {
-            QSettings st(info.absoluteFilePath());
+            QSettings st(info.absoluteFilePath(), QSettings::IniFormat);
             interval = st.value("gif/interval", slideTimer->interval()).toInt();
         }
     }

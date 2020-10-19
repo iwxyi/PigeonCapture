@@ -116,6 +116,7 @@ protected:
 private:
     Ui::MainWindow *ui;
     QSettings settings;
+    QString saveMode = "jpg";
     QString saveDir;
     QxtGlobalShortcut *fastCaptureShortcut = nullptr;
     QxtGlobalShortcut *serialCaptureShortcut = nullptr;
