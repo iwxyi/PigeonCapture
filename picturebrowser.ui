@@ -115,6 +115,11 @@
      </property>
      <addaction name="actionGIF_Use_Record_Interval"/>
      <addaction name="actionGIF_Use_Display_Interval"/>
+     <addaction name="separator"/>
+     <addaction name="actionGIF_Compress_None"/>
+     <addaction name="actionGIF_Compress_x2"/>
+     <addaction name="actionGIF_Compress_x4"/>
+     <addaction name="actionGIF_Compress_x8"/>
     </widget>
     <addaction name="menuIcon_Size"/>
     <addaction name="menuSort_Type"/>
@@ -598,6 +603,41 @@
   <action name="actionSlide_50ms">
    <property name="text">
     <string>每隔 50ms</string>
+   </property>
+  </action>
+  <action name="actionGIF_Compress_x2">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>压缩至1/2大小</string>
+   </property>
+  </action>
+  <action name="actionGIF_Compress_x4">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>压缩至1/4大小</string>
+   </property>
+  </action>
+  <action name="actionGIF_Compress_x8">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>压缩至1/8大小</string>
+   </property>
+  </action>
+  <action name="actionGIF_Compress_None">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>不压缩</string>
    </property>
   </action>
  </widget>

@@ -174,6 +174,14 @@ private slots:
 
     void on_actionGIF_Use_Display_Interval_triggered();
 
+    void on_actionGIF_Compress_None_triggered();
+
+    void on_actionGIF_Compress_x2_triggered();
+
+    void on_actionGIF_Compress_x4_triggered();
+
+    void on_actionGIF_Compress_x8_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();

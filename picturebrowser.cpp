@@ -101,6 +101,47 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
     ui->actionGIF_Use_Record_Interval->setChecked(gifUseRecordInterval);
     ui->actionGIF_Use_Display_Interval->setChecked(!gifUseRecordInterval);
+
+    QActionGroup* gifCompressGroup = new QActionGroup(this);
+    gifCompressGroup->addAction(ui->actionGIF_Compress_None);
+    gifCompressGroup->addAction(ui->actionGIF_Compress_x2);
+    gifCompressGroup->addAction(ui->actionGIF_Compress_x4);
+    gifCompressGroup->addAction(ui->actionGIF_Compress_x8);
+    int gifCompress = settings.value("gif/compress", 0).toInt();
+    if (gifCompress == 0)
+        ui->actionGIF_Compress_None->setChecked(true);
+    else if (gifCompress == 1)
+        ui->actionGIF_Compress_x2->setChecked(true);
+    else if (gifCompress == 2)
+        ui->actionGIF_Compress_x4->setChecked(true);
+    else if (gifCompress == 3)
+        ui->actionGIF_Compress_x8->setChecked(true);
+
+    connect(this, &PictureBrowser::signalGeneralGIFFinished, this, [=](QString path){
+        auto result = QMessageBox::information(this, "生成GIF完毕", "路径：" + path, "打开文件", "打开文件夹", "取消", 0, 2);
+        if(result == 0) // 打开文件
+        {
+        #ifdef Q_OS_WIN32
+            QString m_szHelpDoc = QString("file:///") + path;
+            bool is_open = QDesktopServices::openUrl(QUrl(m_szHelpDoc, QUrl::TolerantMode));
+            if(!is_open)
+                qDebug() << "打开图片失败：" << path;
+        #else
+            QString  cmd = QString("xdg-open ")+ m_szHelpDoc;　　　　　　　　//在linux下，可以通过system来xdg-open命令调用默认程序打开文件；
+            system(cmd.toStdString().c_str());
+        #endif
+        }
+        else if (result == 1) // 打开文件夹
+        {
+            if (path.isEmpty() || !QFileInfo(path).exists())
+                return ;
+
+            QProcess process;
+            path.replace("/", "\\");
+            QString cmd = QString("explorer.exe /select, \"%1\"").arg(path);
+            process.startDetached(cmd);
+        }
+    });
 }
 
 PictureBrowser::~PictureBrowser()
@@ -1086,12 +1127,17 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
     QSize size = firstPixmap.size(); // 图片大小
     QString gifPath = QDir(currentDirPath).absoluteFilePath(QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz.gif"));
 
+    // 压缩程度
+    int compress = settings.value("gif/compress", 0).toInt();
+    int prop = 1;
+    for (int i = 0; i < compress; i++)
+        prop *= 2;
+    size_t wt = static_cast<uint32_t>(size.width() / prop);
+    size_t ht = static_cast<uint32_t>(size.height() / prop);
+    size_t iv = static_cast<uint32_t>(interval);
+
     // 创建GIF
     QtConcurrent::run([=]{
-        size_t wt = static_cast<uint32_t>(size.width());
-        size_t ht = static_cast<uint32_t>(size.height());
-        size_t iv = static_cast<uint32_t>(interval);
-
         Gif_H m_Gif;
         auto m_GifWriter = new Gif_H::GifWriter;
         if (!m_Gif.GifBegin(m_GifWriter, gifPath.toLocal8Bit().data(), wt, ht, iv))
@@ -1106,6 +1152,8 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
             QPixmap pixmap(pixmapPaths.at(i));
             if (!pixmap.isNull())
             {
+                if (prop > 1)
+                    pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
                 m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().bits(), wt, ht, iv);
             }
         }
@@ -1130,4 +1178,28 @@ void PictureBrowser::on_actionGIF_Use_Display_Interval_triggered()
     settings.setValue("gif/recordInterval", false);
     ui->actionGIF_Use_Record_Interval->setChecked(false);
     ui->actionGIF_Use_Display_Interval->setChecked(true);
+}
+
+void PictureBrowser::on_actionGIF_Compress_None_triggered()
+{
+    settings.setValue("gif/compress", 0);
+    ui->actionGIF_Compress_None->setChecked(true);
+}
+
+void PictureBrowser::on_actionGIF_Compress_x2_triggered()
+{
+    settings.setValue("gif/compress", 1);
+    ui->actionGIF_Compress_x2->setChecked(true);
+}
+
+void PictureBrowser::on_actionGIF_Compress_x4_triggered()
+{
+    settings.setValue("gif/compress", 2);
+    ui->actionGIF_Compress_x4->setChecked(true);
+}
+
+void PictureBrowser::on_actionGIF_Compress_x8_triggered()
+{
+    settings.setValue("gif/compress", 3);
+    ui->actionGIF_Compress_x8->setChecked(true);
 }
