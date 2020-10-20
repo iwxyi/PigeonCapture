@@ -17,29 +17,31 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include($$PWD/qxtglobalshortcut5/qxt.pri)
 
-INCLUDEPATH += gif/
+INCLUDEPATH += gif/ \
+    capture/ \
+    picture_browser/
 
 SOURCES += \
-    areaselector.cpp \
+    capture/areaselector.cpp \
     gif/gif.cpp \
     main.cpp \
-    mainwindow.cpp \
-    picturebrowser.cpp \
-    resizablepicture.cpp
+    capture/mainwindow.cpp \
+    picture_browser/picturebrowser.cpp \
+    picture_browser/resizablepicture.cpp
 
 HEADERS += \
     ASCII_Art.h \
-    areaselector.h \
+    capture/areaselector.h \
     gif/gif.h \
-    mainwindow.h \
-    picturebrowser.h \
-    resizablepicture.h \
-    windowselector.h \
-    windowshwnd.h
+    capture/mainwindow.h \
+    picture_browser/picturebrowser.h \
+    picture_browser/resizablepicture.h \
+    capture/windowselector.h \
+    capture/windowshwnd.h
 
 FORMS += \
-    mainwindow.ui \
-    picturebrowser.ui
+    capture/mainwindow.ui \
+    picture_browser/picturebrowser.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
