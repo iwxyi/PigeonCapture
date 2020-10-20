@@ -4,6 +4,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
+RC_FILE += pigeoncapture.rc
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -37,7 +39,8 @@ HEADERS += \
     picture_browser/picturebrowser.h \
     picture_browser/resizablepicture.h \
     capture/windowselector.h \
-    capture/windowshwnd.h
+    capture/windowshwnd.h \
+    pigeoncapture.rc
 
 FORMS += \
     capture/mainwindow.ui \
