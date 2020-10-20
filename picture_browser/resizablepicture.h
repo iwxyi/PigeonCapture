@@ -25,6 +25,8 @@ public:
     void scaleToFill();
     void scaleToOrigin();
 
+    const QPixmap &getOriginPixmap();
+
 protected:
     void wheelEvent(QWheelEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;

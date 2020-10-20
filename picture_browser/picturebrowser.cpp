@@ -141,7 +141,14 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     else if (gifCompress == 3)
         ui->actionGIF_Compress_x8->setChecked(true);
 
+    connect(this, &PictureBrowser::signalGeneralGIFProgress, this, [=](int index){
+        progressBar->setValue(index);
+    });
+
     connect(this, &PictureBrowser::signalGeneralGIFFinished, this, [=](QString path){
+        progressBar->setMaximum(0);
+        progressBar->hide();
+
         // 显示在当前列表中
         QFileInfo info(path);
         if (info.absoluteDir() == currentDirPath)
@@ -164,7 +171,7 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
             QString m_szHelpDoc = QString("file:///") + path;
             bool is_open = QDesktopServices::openUrl(QUrl(m_szHelpDoc, QUrl::TolerantMode));
             if(!is_open)
-                qDebug() << "打开图片失败：" << path;
+                PBDEB << "打开图片失败：" << path;
         #else
             QString  cmd = QString("xdg-open ")+ m_szHelpDoc;　　　　　　　　//在linux下，可以通过system来xdg-open命令调用默认程序打开文件；
             system(cmd.toStdString().c_str());
@@ -181,6 +188,30 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
             process.startDetached(cmd);
         }
     });
+
+    // 状态栏
+    selectLabel = new QLabel;
+    ui->statusbar->addWidget(selectLabel);
+
+    sizeLabel = new QLabel(this);
+    ui->statusbar->addWidget(sizeLabel);
+
+    progressBar = new QProgressBar(this);
+    progressBar->hide();
+    ui->statusbar->addPermanentWidget(progressBar);
+
+    // 样式表
+    QString progressBarQss= "QProgressBar{\
+                                    border: none;\
+                                    color: white;\
+                                    text-align: center;\
+                                    background: rgb(68, 69, 73);\
+                            }\
+                            QProgressBar::chunk {\
+                                    border: none;\
+                                    background: rgb(0, 160, 230);\
+                            }";
+    progressBar->setStyleSheet(progressBarQss);
 }
 
 PictureBrowser::~PictureBrowser()
@@ -242,11 +273,13 @@ void PictureBrowser::enterDirectory(QString targetDir)
 
     // 读取目录的图片和文件夹
     QDir dir(targetDir);
-    QList<QFileInfo> infos = dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+    QList<QFileInfo> infos = dir.entryInfoList(
+                QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                                               sortFlags);
     foreach (QFileInfo info, infos)
     {
-        QString name = info.baseName();
+        QString name = info.fileName();
+        QString suffix = info.suffix();
         if (name == TEMP_DIRECTORY)
             continue;
         if (name.contains(" "))
@@ -266,6 +299,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
             QPixmap myDirIcon = dirIcon;
             QPainter dirPainter(&myDirIcon);
             dirPainter.setFont(dirCountFont);
+            dirPainter.setPen(QColor::fromHsl(rand() % 360, rand() % 256, rand() % 200)); // 随机颜色
             dirPainter.drawText(QRect(0, myDirIcon.height()/8,myDirIcon.width(),myDirIcon.height()*7/8), Qt::AlignCenter, QString::number(infos.size()));
 
             // 如果有图，则同时合并pixmap和icon
@@ -292,7 +326,10 @@ void PictureBrowser::enterDirectory(QString targetDir)
         {
             // gif后缀显示出来
             QString suffix = info.suffix();
-            QString name = info.baseName();
+            if (!getImageFilters().contains("*." + suffix))
+                continue;
+            if (name.contains("."))
+                name = name.left(name.lastIndexOf("."));
             QPixmap pixmap(info.absoluteFilePath());
             if (pixmap.width() > maxIconSize.width() || pixmap.height() > maxIconSize.height())
                 pixmap = pixmap.scaled(maxIconSize, Qt::AspectRatioMode::KeepAspectRatio);
@@ -311,11 +348,11 @@ void PictureBrowser::enterDirectory(QString targetDir)
                 QPainterPath path;
                 path.addRoundedRect(rect, 3, 3);
                 painter.fillPath(path, QColor(255, 255, 255, 128));
-                painter.setPen(QColor(32, 32, 32, 192));
+                // painter.setPen(QColor(32, 32, 32, 192));
+                painter.setPen(QColor::fromHsl(rand() % 360, rand() % 256, rand() % 200)); // 随机颜色
                 painter.drawText(rect, Qt::AlignCenter, tr("GIF"));
             }
-            QIcon icon(pixmap);
-            item = new QListWidgetItem(icon, name, ui->listWidget);
+            item = new QListWidgetItem(QIcon(pixmap), name, ui->listWidget);
         }
         else
             continue;
@@ -356,7 +393,24 @@ void PictureBrowser::closeEvent(QCloseEvent *event)
     settings.setValue("picturebrowser/splitterGeometry", ui->splitter->saveGeometry());
     settings.setValue("picturebrowser/splitterState", ui->splitter->saveState());
 
-     slideTimer->stop();
+    slideTimer->stop();
+}
+
+void PictureBrowser::keyPressEvent(QKeyEvent *event)
+{
+    auto key = event->key();
+
+    switch (key)
+    {
+    case Qt::Key_Escape:
+        if (slideTimer->isActive())
+        {
+            slideTimer->stop();
+            return ;
+        }
+    }
+
+    QWidget::keyPressEvent(event);
 }
 
 void PictureBrowser::readSortFlags()
@@ -439,6 +493,7 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
     if (!current)
     {
         ui->previewPicture->setPixmap(QPixmap());
+        sizeLabel->setText("");
         return ;
     }
 
@@ -446,19 +501,21 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
     QFileInfo info(path);
     if (info.isFile())
     {
+        QString suffix = info.suffix();
         // 显示图片预览
-        if ((path.endsWith(".jpg") || path.endsWith(".png") || path.endsWith(".jpeg")))
-        {
-            if (!ui->previewPicture->setPixmap(QPixmap(info.absoluteFilePath())))
-                qDebug() << "打开图片失败：" << info.absoluteFilePath() << QPixmap(info.absoluteFilePath()).isNull();
-        }
-        else if (path.endsWith(".gif"))
+        if (info.suffix() == "gif")
         {
             ui->previewPicture->setGif(path);
         }
+        else if (getImageFilters().contains("*." + suffix))
+        {
+            QPixmap pixmap(info.absoluteFilePath());
+            if (!ui->previewPicture->setPixmap(pixmap))
+                PBDEB << "打开图片失败：" << info.absoluteFilePath() << QPixmap(info.absoluteFilePath()).isNull();
+        }
         else
         {
-            qDebug() << "无法识别文件：" << info.absoluteFilePath();
+            PBDEB << "无法识别文件：" << info.absoluteFilePath();
         }
     }
     else if (info.isDir())
@@ -472,6 +529,9 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
             ui->previewPicture->setPixmap(QPixmap(infos.first().absoluteFilePath()));
         }
     }
+
+    QSize size = ui->previewPicture->getOriginPixmap().size();
+    sizeLabel->setText(QString("%1×%2").arg(size.width()).arg(size.height()));
 }
 
 void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
@@ -499,7 +559,7 @@ void PictureBrowser::on_listWidget_itemActivated(QListWidgetItem *item)
     bool is_open = QDesktopServices::openUrl(QUrl(m_szHelpDoc, QUrl::TolerantMode));
     if(!is_open)
     {
-        qDebug() << "打开图片失败：" << path;
+        PBDEB << "打开图片失败：" << path;
     }
 #else
     QString  cmd = QString("xdg-open ")+ m_szHelpDoc;　　　　　　　　//在linux下，可以通过system来xdg-open命令调用默认程序打开文件；
@@ -678,8 +738,7 @@ void PictureBrowser::on_actionDelete_Unselected_triggered()
 void PictureBrowser::on_actionExtra_And_Delete_triggered()
 {
     auto items = ui->listWidget->selectedItems();
-    if (!items.size())
-        return ;
+    // 如果没有选中就是全部删除
     QStringList paths;
 
     // 提取文件
@@ -823,8 +882,24 @@ void PictureBrowser::on_actionDelete_Down_Files_triggered()
 void PictureBrowser::on_listWidget_itemSelectionChanged()
 {
     int count = ui->listWidget->selectedItems().size();
+
+    ui->actionOpen_Select_In_Explore->setEnabled(count);
     ui->actionDelete_Up_Files->setEnabled(count == 1 && currentDirPath != rootDirPath);
     ui->actionDelete_Down_Files->setEnabled(count == 1 && currentDirPath != rootDirPath);
+
+    ui->actionCopy_File->setEnabled(count);
+    ui->actionCut_File->setEnabled(count);
+    ui->actionExtra_Selected->setEnabled(count);
+    ui->actionDelete_Selected->setEnabled(count);
+    ui->actionDelete_Unselected->setEnabled(count);
+
+    ui->actionMark_Red->setEnabled(count);
+    ui->actionMark_Green->setEnabled(count);
+    ui->actionMark_None->setEnabled(count);
+
+    ui->actionGeneral_GIF->setEnabled(count >= 2);
+
+    selectLabel->setText(count >= 2 ? QString("选中%1项").arg(count) : "");
 }
 
 void PictureBrowser::on_actionSort_By_Time_triggered()
@@ -1044,9 +1119,9 @@ void PictureBrowser::on_actionOpen_Directory_triggered()
 
 void PictureBrowser::on_actionSelect_Reverse_triggered()
 {
-    auto selectedItems = ui->listWidget->selectedItems();
-    if (selectedItems.size() == 0)
+    if (ui->listWidget->count() == 0)
         return ;
+    auto selectedItems = ui->listWidget->selectedItems();
     int start = 0;
     if (ui->listWidget->item(0)->data(FilePathRole).toString() == BACK_PREV_DIRECTORY)
         start++;
@@ -1071,7 +1146,7 @@ void PictureBrowser::deleteFileOrDir(QString path)
 
         // QFile::remove(path);
         if (!QFile(path).rename(newPath))
-            qDebug() << "删除文件失败：" << path;
+            PBDEB << "删除文件失败：" << path;
     }
     else if (info.isDir())
     {
@@ -1081,7 +1156,7 @@ void PictureBrowser::deleteFileOrDir(QString path)
         QDir dir(path);
         // dir.removeRecursively();
         if (!dir.rename(path, newPath))
-            qDebug() << "删除文件夹失败：" << path;
+            PBDEB << "删除文件夹失败：" << path;
     }
 }
 
@@ -1108,7 +1183,7 @@ void PictureBrowser::removeUselessItemSelect()
                 ui->listWidget->setCurrentRow(currentRow, QItemSelectionModel::Current);
             else
                 ui->listWidget->setCurrentItem(selectedItems.first(), QItemSelectionModel::Current);
-            qDebug() << "自动移除【返回上一级】项";
+            PBDEB << "自动移除【返回上一级】项";
         }
     }
 }
@@ -1208,6 +1283,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         QMessageBox::warning(this, "生成GIF", "请选中至少2张图片");
         return ;
     }
+
     // 进行排序啊
     std::sort(selectedItems.begin(), selectedItems.end(), [=](QListWidgetItem*a, QListWidgetItem* b){
         return ui->listWidget->row(a) < ui->listWidget->row(b);
@@ -1224,7 +1300,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         {
             QSettings st(info.absoluteFilePath(), QSettings::IniFormat);
             interval = st.value("gif/interval", slideTimer->interval()).toInt();
-            qDebug() << "读取录制时间：" << interval;
+            PBDEB << "读取录制时间：" << interval;
         }
     }
     if (interval <= 0)
@@ -1254,12 +1330,14 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
     size_t iv = static_cast<uint32_t>(interval / 8); // GIF合成的工具有问题，只能自己微调时间了
 
     // 创建GIF
+    progressBar->setMaximum(pixmapPaths.size());
+    progressBar->show();
     QtConcurrent::run([=]{
         Gif_H m_Gif;
         Gif_H::GifWriter* m_GifWriter = new Gif_H::GifWriter;
         if (!m_Gif.GifBegin(m_GifWriter, gifPath.toLocal8Bit().data(), wt, ht, iv))
         {
-            qDebug() << "开启gif失败";
+            PBDEB << "开启gif失败";
             delete m_GifWriter;
             return;
         }
@@ -1273,13 +1351,14 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
                     pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
                 m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().convertToFormat(QImage::Format_RGBA8888).constBits(), wt, ht, iv);
             }
+            emit signalGeneralGIFProgress(i+1);
         }
 
         m_Gif.GifEnd(m_GifWriter);
         delete m_GifWriter;
 
         emit signalGeneralGIFFinished(gifPath);
-        qDebug() << "GIF生成完毕：" << size << pixmapPaths.size() << interval;
+        PBDEB << "GIF生成完毕：" << size << pixmapPaths.size() << interval;
     });
 }
 
@@ -1424,7 +1503,7 @@ void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
         Gif_H::GifWriter* m_GifWriter = new Gif_H::GifWriter;
         if (!m_Gif.GifBegin(m_GifWriter, savePath.toLocal8Bit().data(), wt, ht, iv))
         {
-            qDebug() << "开启gif失败";
+            PBDEB << "开启gif失败";
             delete m_GifWriter;
             return;
         }
@@ -1441,6 +1520,6 @@ void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
         delete m_GifWriter;
 
         emit signalGeneralGIFFinished(savePath);
-        qDebug() << "GIF生成完毕：" << size << cachePixmaps.first().size() << iv;
+        PBDEB << "GIF生成完毕：" << size << cachePixmaps.first().size() << iv;
     });
 }

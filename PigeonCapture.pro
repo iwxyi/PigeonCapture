@@ -30,7 +30,7 @@ SOURCES += \
     picture_browser/resizablepicture.cpp
 
 HEADERS += \
-    ASCII_Art.h \
+    picture_browser/ASCII_Art.h \
     capture/areaselector.h \
     gif/gif.h \
     capture/mainwindow.h \

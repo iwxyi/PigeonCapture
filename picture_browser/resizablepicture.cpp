@@ -175,6 +175,11 @@ void ResizablePicture::scaleToOrigin()
         movie->setScaledSize(currentPixmap.size());
 }
 
+const QPixmap& ResizablePicture::getOriginPixmap()
+{
+    return originPixmap;
+}
+
 void ResizablePicture::wheelEvent(QWheelEvent *event)
 {
     QPoint pos = event->pos();

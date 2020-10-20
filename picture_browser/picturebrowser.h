@@ -20,9 +20,11 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QtConcurrent/QtConcurrent>
+#include <QProgressBar>
 #include "gif.h"
 #include "ASCII_Art.h"
 
+#define PBDEB qDebug()
 #define BACK_PREV_DIRECTORY ".."
 #define TEMP_DIRECTORY "temp"
 #define RECYCLE_DIRECTORY "recycle"
@@ -56,6 +58,7 @@ protected:
     void resizeEvent(QResizeEvent*) override;
     void showEvent(QShowEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
     void readSortFlags();
     void showCurrentItemPreview();
@@ -191,13 +194,17 @@ private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
     void removeUselessItemSelect();
-    QStringList getImageFilters();
+    static QStringList getImageFilters();
 
 signals:
+    void signalGeneralGIFProgress(int index);
     void signalGeneralGIFFinished(QString path);
 
 private:
     Ui::PictureBrowser *ui;
+    QLabel* selectLabel;
+    QLabel* sizeLabel;
+    QProgressBar* progressBar;
 
     QSettings settings;
     QString rootDirPath;
