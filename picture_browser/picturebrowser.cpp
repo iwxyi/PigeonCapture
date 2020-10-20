@@ -222,13 +222,21 @@ void PictureBrowser::enterDirectory(QString targetDir)
         item->setData(FilePathRole, BACK_PREV_DIRECTORY);
     }
 
-    // 读取目录的图片和文件夹
-    QDir dir(targetDir);
-    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot,
-                                              sortFlags);
+    // 尺寸大小
     QSize maxIconSize = ui->listWidget->iconSize();
     if (maxIconSize.width() <= 16 || maxIconSize.height() <= 16)
         maxIconSize = QSize(32, 32);
+
+    // 目录图标
+    QPixmap dirIcon(":/images/directory");
+    if (dirIcon.width() > maxIconSize.width() / 2 || dirIcon.height() > maxIconSize.height() / 2)
+        dirIcon = dirIcon.scaled(QSize(maxIconSize.width()/2, maxIconSize.height()/2),
+                                 Qt::AspectRatioMode::KeepAspectRatio);
+
+    // 读取目录的图片和文件夹
+    QDir dir(targetDir);
+    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+                                              sortFlags);
     foreach (QFileInfo info, infos)
     {
         QString name = info.baseName();
@@ -239,7 +247,33 @@ void PictureBrowser::enterDirectory(QString targetDir)
         QListWidgetItem* item;
         if (info.isDir())
         {
-            item = new QListWidgetItem(QIcon(":/images/directory"), name, ui->listWidget);
+            // 获取文件夹下第一张图
+            QString path;
+            auto infos = QDir(info.absoluteFilePath()).entryInfoList(getImageFilters(),
+                                                  QDir::Files | QDir::NoSymLinks,
+                                                  sortFlags);
+            if (infos.size())
+                path = infos.first().absoluteFilePath();
+            // 如果有图，则同时合并pixmap和icon
+            QPixmap pixmap(path);
+            if (!path.isEmpty())
+            {
+                pixmap = pixmap.scaled(maxIconSize, Qt::AspectRatioMode::KeepAspectRatio);
+
+
+                // 画目录Icon到Pixmap上
+                QPainter painter(&pixmap);
+                painter.drawPixmap(QRect(pixmap.width() - dirIcon.width(),
+                                         pixmap.height() - dirIcon.height(),
+                                         dirIcon.width(),
+                                         dirIcon.height()),
+                                   dirIcon);
+            }
+            else // 如果没有path，则只显示一个文件夹图标
+            {
+                pixmap = QPixmap(":/images/directory");
+            }
+            item = new QListWidgetItem(QIcon(pixmap), name, ui->listWidget);
         }
         else if (info.isFile())
         {
@@ -402,7 +436,10 @@ void PictureBrowser::on_listWidget_currentItemChanged(QListWidgetItem *current, 
     }
     else if (info.isDir())
     {
-        QList<QFileInfo> infos = QDir(info.absoluteFilePath()).entryInfoList(QDir::Files, QDir::SortFlag::Time | QDir::SortFlag::Reversed);
+        QList<QFileInfo> infos = QDir(info.absoluteFilePath()).
+                entryInfoList(getImageFilters(),
+                              QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+                              sortFlags);
         if (infos.size())
         {
             ui->previewPicture->setPixmap(QPixmap(infos.first().absoluteFilePath()));
@@ -1047,6 +1084,11 @@ void PictureBrowser::removeUselessItemSelect()
             qDebug() << "自动移除【返回上一级】项";
         }
     }
+}
+
+QStringList PictureBrowser::getImageFilters()
+{
+    return QStringList{"*.jpg", "*.png", "*.jpeg", "*.gif"};
 }
 
 void PictureBrowser::on_actionUndo_Delete_Command_triggered()

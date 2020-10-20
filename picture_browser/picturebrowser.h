@@ -191,6 +191,7 @@ private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
     void removeUselessItemSelect();
+    QStringList getImageFilters();
 
 signals:
     void signalGeneralGIFFinished(QString path);
