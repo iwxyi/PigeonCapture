@@ -233,9 +233,16 @@ void PictureBrowser::enterDirectory(QString targetDir)
         dirIcon = dirIcon.scaled(QSize(maxIconSize.width()/2, maxIconSize.height()/2),
                                  Qt::AspectRatioMode::KeepAspectRatio);
 
+    // 绘制工具
+    QFont dirCountFont = this->font();
+    dirCountFont.setPointSize(dirIcon.height()/4);
+    dirCountFont.setBold(true);
+    QFont gifMarkFont = this->font();
+    gifMarkFont.setBold(true);
+
     // 读取目录的图片和文件夹
     QDir dir(targetDir);
-    QList<QFileInfo> infos =dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+    QList<QFileInfo> infos = dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                                               sortFlags);
     foreach (QFileInfo info, infos)
     {
@@ -254,39 +261,59 @@ void PictureBrowser::enterDirectory(QString targetDir)
                                                   sortFlags);
             if (infos.size())
                 path = infos.first().absoluteFilePath();
+
+            // 目录显示数量
+            QPixmap myDirIcon = dirIcon;
+            QPainter dirPainter(&myDirIcon);
+            dirPainter.setFont(dirCountFont);
+            dirPainter.drawText(QRect(0, myDirIcon.height()/8,myDirIcon.width(),myDirIcon.height()*7/8), Qt::AlignCenter, QString::number(infos.size()));
+
             // 如果有图，则同时合并pixmap和icon
             QPixmap pixmap(path);
             if (!path.isEmpty())
             {
                 pixmap = pixmap.scaled(maxIconSize, Qt::AspectRatioMode::KeepAspectRatio);
 
-
                 // 画目录Icon到Pixmap上
                 QPainter painter(&pixmap);
-                painter.drawPixmap(QRect(pixmap.width() - dirIcon.width(),
-                                         pixmap.height() - dirIcon.height(),
-                                         dirIcon.width(),
-                                         dirIcon.height()),
-                                   dirIcon);
+                painter.drawPixmap(QRect(pixmap.width() - myDirIcon.width(),
+                                         pixmap.height() - myDirIcon.height(),
+                                         myDirIcon.width(),
+                                         myDirIcon.height()),
+                                   myDirIcon);
             }
             else // 如果没有path，则只显示一个文件夹图标
             {
-                pixmap = QPixmap(":/images/directory");
+                pixmap = myDirIcon;
             }
             item = new QListWidgetItem(QIcon(pixmap), name, ui->listWidget);
         }
         else if (info.isFile())
         {
-            if (name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".jpeg"))
-                name = name.left(name.lastIndexOf("."));
             // gif后缀显示出来
             QString suffix = info.suffix();
-            if (suffix != "jpg" && suffix != "png"
-                    && suffix != "jpeg" && suffix != "gif")
-                continue;
+            QString name = info.baseName();
             QPixmap pixmap(info.absoluteFilePath());
             if (pixmap.width() > maxIconSize.width() || pixmap.height() > maxIconSize.height())
                 pixmap = pixmap.scaled(maxIconSize, Qt::AspectRatioMode::KeepAspectRatio);
+            // 绘制标记
+            if (suffix == "gif")
+            {
+                QPainter painter(&pixmap);
+                painter.setFont(gifMarkFont);
+                QFontMetrics fm(gifMarkFont);
+                QSize size(fm.horizontalAdvance("GIF "), fm.lineSpacing());
+                int padding = qMin(size.width(), size.height()) / 5;
+                QRect rect(pixmap.width() - size.width() + padding,
+                           padding,
+                           size.width() - padding*2,
+                           size.height() - padding*2);
+                QPainterPath path;
+                path.addRoundedRect(rect, 3, 3);
+                painter.fillPath(path, QColor(255, 255, 255, 128));
+                painter.setPen(QColor(32, 32, 32, 192));
+                painter.drawText(rect, Qt::AlignCenter, tr("GIF"));
+            }
             QIcon icon(pixmap);
             item = new QListWidgetItem(icon, name, ui->listWidget);
         }
