@@ -258,10 +258,9 @@ void PictureBrowser::enterDirectory(QString targetDir)
     if (maxIconSize.width() <= 16 || maxIconSize.height() <= 16)
         maxIconSize = QSize(32, 32);
 
-    // 目录图标
+    // 目录角标
     QPixmap dirIcon(":/images/directory");
-    if (dirIcon.width() > maxIconSize.width() / 2 || dirIcon.height() > maxIconSize.height() / 2)
-        dirIcon = dirIcon.scaled(QSize(maxIconSize.width()/2, maxIconSize.height()/2),
+    dirIcon = dirIcon.scaled(QSize(maxIconSize.width()/3, maxIconSize.height()/3),
                                  Qt::AspectRatioMode::KeepAspectRatio);
 
     // 绘制工具
@@ -301,6 +300,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
             dirPainter.setFont(dirCountFont);
             dirPainter.setPen(QColor::fromHsl(rand() % 360, rand() % 256, rand() % 200)); // 随机颜色
             dirPainter.drawText(QRect(0, myDirIcon.height()/8,myDirIcon.width(),myDirIcon.height()*7/8), Qt::AlignCenter, QString::number(infos.size()));
+            dirPainter.end();
 
             // 如果有图，则同时合并pixmap和icon
             QPixmap pixmap(path);
@@ -316,7 +316,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
                                          myDirIcon.height()),
                                    myDirIcon);
             }
-            else // 如果没有path，则只显示一个文件夹图标
+            else // 如果没有path，则只显示一个空文件夹图标
             {
                 pixmap = myDirIcon;
             }
@@ -1179,7 +1179,7 @@ void PictureBrowser::removeUselessItemSelect()
             ui->listWidget->setCurrentRow(0, QItemSelectionModel::Deselect);
             selectedItems.removeOne(backItem);
 
-            if (currentRow != 0)
+            if (currentRow != 0 || !selectedItems.size())
                 ui->listWidget->setCurrentRow(currentRow, QItemSelectionModel::Current);
             else
                 ui->listWidget->setCurrentItem(selectedItems.first(), QItemSelectionModel::Current);
@@ -1349,7 +1349,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
             {
                 if (prop > 1)
                     pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
-                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().convertToFormat(QImage::Format_RGBA8888).constBits(), wt, ht, iv);
+                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().convertToFormat(QImage::Format_RGBA8888).bits(), wt, ht, iv);
             }
             emit signalGeneralGIFProgress(i+1);
         }
