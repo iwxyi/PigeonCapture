@@ -151,6 +151,7 @@
     <addaction name="actionCopy_File"/>
     <addaction name="actionOpen_Select_In_Explore"/>
     <addaction name="separator"/>
+    <addaction name="actionExtra_And_Copy"/>
     <addaction name="actionExtra_Selected"/>
     <addaction name="actionExtra_And_Delete"/>
     <addaction name="separator"/>
@@ -297,10 +298,13 @@
   </action>
   <action name="actionExtra_Selected">
    <property name="text">
-    <string>提取选中</string>
+    <string>提取到外层</string>
+   </property>
+   <property name="toolTip">
+    <string>提取到外层</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+E</string>
+    <string>Ctrl+Shift+E</string>
    </property>
   </action>
   <action name="actionDelete_Unselected">
@@ -316,7 +320,7 @@
     <string>提取选中并删除其他</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+E</string>
+    <string>Ctrl+Alt+Shift+E</string>
    </property>
   </action>
   <action name="actionOrigin_Size">
@@ -690,6 +694,17 @@
    </property>
    <property name="text">
     <string>抖动：关</string>
+   </property>
+  </action>
+  <action name="actionExtra_And_Copy">
+   <property name="text">
+    <string>复制到外层</string>
+   </property>
+   <property name="toolTip">
+    <string>复制到外层</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>

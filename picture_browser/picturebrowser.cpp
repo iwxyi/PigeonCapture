@@ -617,6 +617,7 @@ void PictureBrowser::on_listWidget_customContextMenuRequested(const QPoint &pos)
     menu->addAction(ui->actionMark_Green);
     menu->addAction(ui->actionMark_None);
     menu->addSeparator();
+    menu->addAction(ui->actionExtra_And_Copy);
     menu->addAction(ui->actionExtra_Selected);
     menu->addAction(ui->actionExtra_And_Delete);
     menu->addAction(ui->actionDelete_Selected);
@@ -718,6 +719,37 @@ void PictureBrowser::on_actionExtra_Selected_triggered()
         ui->listWidget->takeItem(row);
     }
     ui->listWidget->setCurrentRow(firstRow);
+}
+
+void PictureBrowser::on_actionExtra_And_Copy_triggered()
+{
+    auto items = ui->listWidget->selectedItems();
+    if (!items.size())
+        return ;
+
+    foreach(auto item, items)
+    {
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            continue;
+        QFileInfo info(path);
+        if (!info.exists())
+            continue;
+        if (info.isFile())
+        {
+            QFile file(path);
+            QDir upDir(info.absoluteDir());
+            upDir.cdUp();
+            file.copy(upDir.absoluteFilePath(info.fileName()));
+        }
+        else if (info.isDir())
+        {
+            QDir dir(path);
+            QDir upDir(info.absoluteDir());
+            upDir.cdUp();
+            copyDirectoryFiles(info.absoluteFilePath(), upDir.absoluteFilePath(info.fileName()), true);
+        }
+    }
 }
 
 void PictureBrowser::on_actionDelete_Unselected_triggered()
@@ -1198,6 +1230,41 @@ void PictureBrowser::removeUselessItemSelect()
 QStringList PictureBrowser::getImageFilters()
 {
     return QStringList{"*.jpg", "*.png", "*.jpeg", "*.gif"};
+}
+
+bool PictureBrowser::copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool coverFileIfExist)
+{
+    QDir sourceDir(fromDir);
+    QDir targetDir(toDir);
+    if(!targetDir.exists()){    /**< 如果目标目录不存在，则进行创建 */
+        if(!targetDir.mkdir(targetDir.absolutePath()))
+            return false;
+    }
+
+    QFileInfoList fileInfoList = sourceDir.entryInfoList();
+    foreach(QFileInfo fileInfo, fileInfoList){
+        if(fileInfo.fileName() == "." || fileInfo.fileName() == "..")
+            continue;
+
+        if(fileInfo.isDir()){    /**< 当为目录时，递归的进行copy */
+            if(!copyDirectoryFiles(fileInfo.filePath(),
+                                   targetDir.filePath(fileInfo.fileName()),
+                                   coverFileIfExist))
+                return false;
+        }
+        else{            /**< 当允许覆盖操作时，将旧文件进行删除操作 */
+            if(coverFileIfExist && targetDir.exists(fileInfo.fileName())){
+                targetDir.remove(fileInfo.fileName());
+            }
+
+            /// 进行文件copy
+            if(!QFile::copy(fileInfo.filePath(),
+                            targetDir.filePath(fileInfo.fileName()))){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 void PictureBrowser::on_actionUndo_Delete_Command_triggered()

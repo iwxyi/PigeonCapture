@@ -102,6 +102,8 @@ private slots:
 
     void on_actionExtra_Selected_triggered();
 
+    void on_actionExtra_And_Copy_triggered();
+
     void on_actionDelete_Unselected_triggered();
 
     void on_actionExtra_And_Delete_triggered();
@@ -199,6 +201,7 @@ private:
     void commitDeleteCommand();
     void removeUselessItemSelect();
     static QStringList getImageFilters();
+    bool copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool coverFileIfExist);
 
 signals:
     void signalGeneralGIFProgress(int index);
