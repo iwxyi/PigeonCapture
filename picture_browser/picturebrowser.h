@@ -190,6 +190,10 @@ private slots:
 
     void on_actionGIF_ASCII_Art_triggered();
 
+    void on_actionDither_Enabled_triggered();
+
+    void on_actionDither_Disabled_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
@@ -222,6 +226,9 @@ private:
 
     QList<QList<QPair<QString, QString>>> deleteUndoCommands;
     QList<QPair<QString, QString>> deleteCommandsQueue;
+
+    int gifBitDepth = 32;
+    bool gifDither = true; // GIF抖动，更加平滑
 };
 
 #endif // PICTUREBROWSER_H

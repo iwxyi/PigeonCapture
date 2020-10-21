@@ -54,7 +54,7 @@
      <x>0</x>
      <y>0</y>
      <width>647</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -120,6 +120,9 @@
      <addaction name="actionGIF_Compress_x2"/>
      <addaction name="actionGIF_Compress_x4"/>
      <addaction name="actionGIF_Compress_x8"/>
+     <addaction name="separator"/>
+     <addaction name="actionDither_Enabled"/>
+     <addaction name="actionDither_Disabled"/>
     </widget>
     <addaction name="menuIcon_Size"/>
     <addaction name="menuSort_Type"/>
@@ -630,7 +633,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>压缩至1/2大小</string>
+    <string>压缩至1/2边长</string>
    </property>
   </action>
   <action name="actionGIF_Compress_x4">
@@ -638,7 +641,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>压缩至1/4大小</string>
+    <string>压缩至1/4边长</string>
    </property>
   </action>
   <action name="actionGIF_Compress_x8">
@@ -646,7 +649,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>压缩至1/8大小</string>
+    <string>压缩至1/8边长</string>
    </property>
   </action>
   <action name="actionGIF_Compress_None">
@@ -668,6 +671,25 @@
   <action name="actionGIF_ASCII_Art">
    <property name="text">
     <string>GIF 字符画</string>
+   </property>
+  </action>
+  <action name="actionDither_Enabled">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>抖动：开</string>
+   </property>
+  </action>
+  <action name="actionDither_Disabled">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>抖动：关</string>
    </property>
   </action>
  </widget>

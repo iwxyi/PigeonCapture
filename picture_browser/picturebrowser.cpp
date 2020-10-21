@@ -125,6 +125,13 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
     ui->actionGIF_Use_Record_Interval->setChecked(gifUseRecordInterval);
     ui->actionGIF_Use_Display_Interval->setChecked(!gifUseRecordInterval);
+    QActionGroup* gifDitherGroup = new QActionGroup(this);
+    gifDitherGroup->addAction(ui->actionDither_Enabled);
+    gifDitherGroup->addAction(ui->actionDither_Disabled);
+    if (settings.value("gif/dither", true).toBool())
+        ui->actionDither_Enabled->setChecked(true);
+    else
+        ui->actionDither_Disabled->setChecked(true);
 
     QActionGroup* gifCompressGroup = new QActionGroup(this);
     gifCompressGroup->addAction(ui->actionGIF_Compress_None);
@@ -1349,7 +1356,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
             {
                 if (prop > 1)
                     pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
-                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().convertToFormat(QImage::Format_RGBA8888).bits(), wt, ht, iv);
+                m_Gif.GifWriteFrame(m_GifWriter, pixmap.toImage().convertToFormat(QImage::Format_RGBA8888).bits(), wt, ht, iv, 8, gifDither);
             }
             emit signalGeneralGIFProgress(i+1);
         }
@@ -1358,7 +1365,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
         delete m_GifWriter;
 
         emit signalGeneralGIFFinished(gifPath);
-        PBDEB << "GIF生成完毕：" << size << pixmapPaths.size() << interval;
+        PBDEB << "GIF生成完毕：" << size << pixmapPaths.size() << interval << compress;
     });
 }
 
@@ -1522,4 +1529,14 @@ void PictureBrowser::on_actionGIF_ASCII_Art_triggered()
         emit signalGeneralGIFFinished(savePath);
         PBDEB << "GIF生成完毕：" << size << cachePixmaps.first().size() << iv;
     });
+}
+
+void PictureBrowser::on_actionDither_Enabled_triggered()
+{
+    settings.setValue("gif/dither", true);
+}
+
+void PictureBrowser::on_actionDither_Disabled_triggered()
+{
+    settings.setValue("gif/dither", false);
 }
