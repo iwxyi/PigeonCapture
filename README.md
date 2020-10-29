@@ -27,8 +27,10 @@
 
 参考资料：
 
-- Qt窗口截图：https://blog.csdn.net/liukang325/article/details/53559714
+- 窗口截图：https://blog.csdn.net/liukang325/article/details/53559714
 
 - GIF生成：https://github.com/douzhongqiang/EasyGifTool
 
 - 字符画生成：https://zhuanlan.zhihu.com/p/65232824
+
+- 视频生成：https://blog.csdn.net/jklinux/article/details/71773638

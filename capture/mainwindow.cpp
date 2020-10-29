@@ -64,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent)
         serialCapture();
     });
 
+    bool recordAudio = settings.value("serial/audio", false).toBool();
+    ui->recordAudioCheckBox->setChecked(recordAudio);
+
     // 预先截图
     prevTimer = new QTimer(this);
     prevTimer->setInterval(interval);
@@ -239,7 +242,7 @@ void MainWindow::triggerFastCapture()
 
 void MainWindow::triggerSerialCapture()
 {
-    if (serialTimer->isActive())
+    if (serialTimer->isActive()) // 关闭
     {
         // 停止连续截图
         serialTimer->stop();
@@ -247,8 +250,13 @@ void MainWindow::triggerSerialCapture()
         qDebug() << "停止连续截图";
 
         ui->selectDirButton->setEnabled(true);
+
+        if (!prevTimer)
+        {
+            endRecordAudio();
+        }
     }
-    else
+    else // 开启
     {
         serialCaptureDir = "连"+timeToFile();
         QDir(saveDir).mkdir(serialCaptureDir);
@@ -267,6 +275,7 @@ void MainWindow::triggerSerialCapture()
         // 先截一张
         serialCapture();
         qDebug() << "开启连续截图";
+        startRecordAudio();
 
         ui->selectDirButton->setEnabled(false);
     }
@@ -282,6 +291,7 @@ void MainWindow::startPrevCapture()
         clearPrevCapture();
     }
 
+    startRecordAudio();
     prevTimer->start();
     prevCapturedList = new QList<CaptureInfo>();
 }
@@ -364,6 +374,50 @@ void MainWindow::clearPrevCapture()
 void MainWindow::areaSelectorMoved()
 {
     showPreview(getScreenShot());
+}
+
+void MainWindow::startRecordAudio()
+{
+    if (!ui->recordAudioCheckBox->isChecked())
+        return ;
+
+    audioFile.setFileName("temp/test.raw");
+    audioFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QAudioFormat format;
+
+    format.setSampleRate(44100);
+    format.setChannelCount(2);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
+
+    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+    if (!info.isFormatSupported(format))
+    {
+       qWarning()<<"default format not supported try to use nearest";
+       format = info.nearestFormat(format);
+    }
+
+    audio = new QAudioInput(info, format, this);
+    audio->start(&audioFile);
+    audioStartTime = getTimestamp();
+
+    qDebug() << "开始录制音频";
+}
+
+void MainWindow::endRecordAudio()
+{
+    if (!audio)
+        return ;
+
+    audioEndTime = getTimestamp();
+    audio->stop();
+    audioFile.close();
+    delete audio;
+    audio = nullptr;
+
+    qDebug() << "结束录制音频";
 }
 
 /**
@@ -608,6 +662,11 @@ void MainWindow::on_prevCaptureCheckBox_stateChanged(int)
         // 关闭预先截图
         clearPrevCapture();
         ui->prevCaptureCheckBox->setText("未开启");
+
+        if (!serialTimer->isActive())
+        {
+            endRecordAudio();
+        }
     }
 
     settings.setValue("capture/prev", check);
@@ -695,4 +754,18 @@ void MainWindow::on_selectScreenWindow_clicked()
 
     // 设置area为结果
     areaSelector->setArea(rect);
+}
+
+void MainWindow::on_recordAudioCheckBox_clicked(bool checked)
+{
+    settings.setValue("serial/audio", checked);
+
+    if (checked && (prevTimer->isActive() || serialTimer->isActive()))
+    {
+        startRecordAudio();
+    }
+    else
+    {
+        endRecordAudio();
+    }
 }

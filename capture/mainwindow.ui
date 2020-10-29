@@ -176,6 +176,13 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QCheckBox" name="recordAudioCheckBox">
+          <property name="text">
+           <string>录制音频</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>

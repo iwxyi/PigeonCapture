@@ -14,6 +14,10 @@
 #include <QDesktopServices>
 #include <QtConcurrent/QtConcurrent>
 #include <QMessageBox>
+#include <QAudioFormat>
+#include <QAudioDeviceInfo>
+#include <QAudioInput>
+#include <QAudioOutput>
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
@@ -68,6 +72,8 @@ private slots:
     void savePrevCapture(qint64 delta);
     void clearPrevCapture();
     void areaSelectorMoved();
+    void startRecordAudio();
+    void endRecordAudio();
 
     void on_showAreaSelector_clicked();
 
@@ -103,6 +109,8 @@ private slots:
 
     void on_selectScreenWindow_clicked();
 
+    void on_recordAudioCheckBox_clicked(bool checked);
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
@@ -129,6 +137,11 @@ private:
     int serialCaptureCount = 0;
     qint64 serialStartTime = 0;
     qint64 serialEndTime = 0;
+
+    QFile audioFile;
+    QAudioInput* audio = nullptr;
+    qint64 audioStartTime = 0; // 音频录制与连续截图不一定一起，可能是后续想起来再开
+    qint64 audioEndTime = 0;
 
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
