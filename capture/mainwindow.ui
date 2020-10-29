@@ -412,6 +412,7 @@
     <addaction name="separator"/>
     <addaction name="actionAudio_Recorder_Settings"/>
     <addaction name="actionRestore_Geometry"/>
+    <addaction name="actionPlay_Test_Audio"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
@@ -447,6 +448,11 @@
   <action name="actionAudio_Recorder_Settings">
    <property name="text">
     <string>系统音频设置</string>
+   </property>
+  </action>
+  <action name="actionPlay_Test_Audio">
+   <property name="text">
+    <string>Play Test Audio</string>
    </property>
   </action>
  </widget>

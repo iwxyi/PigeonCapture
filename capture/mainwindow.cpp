@@ -393,7 +393,14 @@ void MainWindow::startRecordAudio()
     format.setSampleType(QAudioFormat::UnSignedInt);
 
     QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
-    /*qDebug() << "input devices:";
+    if (info.isNull())
+    {
+        ui->recordAudioCheckBox->setChecked(false);
+        QMessageBox::warning(this, "无法录制", "请先在声音设置中打开“立体声混音”");
+        on_actionAudio_Recorder_Settings_triggered();
+        return ;
+    }
+    qDebug() << "input devices:";
     auto inputs = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
     foreach (auto in, inputs)
         qDebug() << in.deviceName();
@@ -401,7 +408,7 @@ void MainWindow::startRecordAudio()
     auto outputs = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
     foreach (auto out, outputs)
         qDebug() << out.deviceName();
-    info = inputs.first();*/
+//    info = inputs.at(0);
     qDebug() << "录制设备：" << info.deviceName();
     if (!info.isFormatSupported(format))
     {
@@ -424,6 +431,8 @@ void MainWindow::endRecordAudio()
     audioFile.close();
     delete audio;
     audio = nullptr;
+
+//    translateRaw2Wav("test.raw", "test.wav");
 
     qDebug() << "结束录制音频";
 }
@@ -570,6 +579,66 @@ QString MainWindow::get_window_class(HWND hwnd)
         retStr = QString::fromWCharArray(temp);
     }
     return retStr;
+}
+
+/**
+ * 参考链接：https://blog.csdn.net/GoForwardToStep/article/details/52779913
+ */
+qint64 MainWindow::translateRaw2Wav(QString rawFileName, QString wavFileName)
+{
+    // 开始设置WAV的文件头
+    // 这里具体的数据代表什么含义请看上一篇文章（Qt之WAV文件解析）中对wav文件头的介绍
+    WAVFILEHEADER WavFileHeader;
+    qstrcpy(WavFileHeader.RiffName, "RIFF");
+    qstrcpy(WavFileHeader.WavName, "WAVE");
+    qstrcpy(WavFileHeader.FmtName, "fmt ");
+    qstrcpy(WavFileHeader.DATANAME, "data");
+
+    // 表示 FMT块 的长度
+    WavFileHeader.nFmtLength = 16;
+    // 表示 按照PCM 编码;
+    WavFileHeader.nAudioFormat = 1;
+    // 声道数目;
+    WavFileHeader.nChannleNumber = 1;
+    // 采样频率;
+    WavFileHeader.nSampleRate = 48000;
+
+    // nBytesPerSample 和 nBytesPerSecond这两个值通过设置的参数计算得到;
+    // 数据块对齐单位(每个采样需要的字节数 = 通道数 × 每次采样得到的样本数据位数 / 8 )
+    WavFileHeader.nBytesPerSample = 2;
+    // 波形数据传输速率
+    // (每秒平均字节数 = 采样频率 × 通道数 × 每次采样得到的样本数据位数 / 8  = 采样频率 × 每个采样需要的字节数 )
+    WavFileHeader.nBytesPerSecond = 96000;
+
+    // 每次采样得到的样本数据位数;
+    WavFileHeader.nBitsPerSample = 16;
+
+    QFile cacheFile(rawFileName);
+    QFile wavFile(wavFileName);
+
+    if (!cacheFile.open(QIODevice::ReadWrite))
+    {
+        return -1;
+    }
+    if (!wavFile.open(QIODevice::WriteOnly))
+    {
+        return -2;
+    }
+
+    int nSize = sizeof(WavFileHeader);
+    qint64 nFileLen = cacheFile.bytesAvailable();
+
+    WavFileHeader.nRiffLength = nFileLen - 8 + nSize;
+    WavFileHeader.nDataLength = nFileLen;
+
+    // 先将wav文件头信息写入，再将音频数据写入;
+    wavFile.write((char *)&WavFileHeader, nSize);
+    wavFile.write(cacheFile.readAll());
+
+    cacheFile.close();
+    wavFile.close();
+
+    return nFileLen;
 }
 
 void MainWindow::on_modeTab_currentChanged(int index)
@@ -782,4 +851,31 @@ void MainWindow::on_actionAudio_Recorder_Settings_triggered()
 {
     QProcess p;
     p.startDetached("control Mmsys.cpl ,1");
+}
+
+void MainWindow::on_actionPlay_Test_Audio_triggered()
+{
+    sourceFile.setFileName("test.raw");
+    sourceFile.open(QIODevice::ReadOnly);
+
+    QAudioFormat format;
+    // Set up the format, eg.
+    format.setSampleRate(48000);
+    format.setChannelCount(2);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
+
+    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Raw audio format not supported by backend, cannot play audio.";
+        return;
+    }
+
+    audioOutput = new QAudioOutput(format, this);
+    audioOutput->start(&sourceFile);
+    connect(audioOutput, &QAudioOutput::stateChanged, this, [=](QAudio::State){
+        qDebug() << "播放结束";
+    });
 }
