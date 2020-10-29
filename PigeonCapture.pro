@@ -26,6 +26,7 @@ INCLUDEPATH += gif/ \
 
 SOURCES += \
     capture/areaselector.cpp \
+    gif/avilib.cpp \
     gif/gif.cpp \
     main.cpp \
     capture/mainwindow.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     picture_browser/resizablepicture.cpp
 
 HEADERS += \
+    gif/avilib.h \
     picture_browser/ASCII_Art.h \
     capture/areaselector.h \
     gif/gif.h \

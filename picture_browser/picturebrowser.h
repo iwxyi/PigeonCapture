@@ -23,6 +23,7 @@
 #include <QProgressBar>
 #include "gif.h"
 #include "ASCII_Art.h"
+#include "avilib.h"
 
 #define PBDEB qDebug()
 #define BACK_PREV_DIRECTORY ".."
@@ -196,12 +197,19 @@ private slots:
 
     void on_actionDither_Disabled_triggered();
 
+    void on_actionGeneral_AVI_triggered();
+
+    void on_actionCreate_To_Origin_Folder_triggered();
+
+    void on_actionCreate_To_One_Folder_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
     void removeUselessItemSelect();
     static QStringList getImageFilters();
     bool copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool coverFileIfExist);
+    int getRecordInterval();
 
 signals:
     void signalGeneralGIFProgress(int index);

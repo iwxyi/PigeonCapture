@@ -118,6 +118,16 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     else if (interval == 3000)
         ui->actionSlide_3000ms->setChecked(true);
 
+    // 生成位置
+    QActionGroup* createFolderGroup = new QActionGroup(this);
+    createFolderGroup->addAction(ui->actionCreate_To_Origin_Folder);
+    createFolderGroup->addAction(ui->actionCreate_To_One_Folder);
+    bool toOne = settings.value("gif/createToOne", false).toBool();
+    if (toOne)
+        ui->actionCreate_To_One_Folder->setChecked(true);
+    else
+        ui->actionCreate_To_Origin_Folder->setChecked(true);
+
     // GIF录制参数
     QActionGroup* gifRecordGroup = new QActionGroup(this);
     gifRecordGroup->addAction(ui->actionGIF_Use_Record_Interval);
@@ -1267,6 +1277,33 @@ bool PictureBrowser::copyDirectoryFiles(const QString &fromDir, const QString &t
     return true;
 }
 
+/**
+ * 获取录制时间
+ * 如果无法读取，则使用播放时间（用户决定）
+ */
+int PictureBrowser::getRecordInterval()
+{
+    bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
+    int interval = 0;
+    if (gifUseRecordInterval)
+    {
+        // 从当前文件夹的配置文件中读取时间
+        QFileInfo info(QDir(currentDirPath).absoluteFilePath(SEQUENCE_PARAM_FILE));
+        if (info.exists())
+        {
+            QSettings st(info.absoluteFilePath(), QSettings::IniFormat);
+            interval = st.value("gif/interval", slideTimer->interval()).toInt();
+            PBDEB << "读取录制时间：" << interval;
+        }
+    }
+    if (interval <= 0)
+    {
+        // 使用默认的播放时间
+        interval = slideTimer->interval();
+    }
+    return interval;
+}
+
 void PictureBrowser::on_actionUndo_Delete_Command_triggered()
 {
     if (deleteUndoCommands.size() == 0)
@@ -1364,24 +1401,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
     });
 
     // 获取间隔
-    bool gifUseRecordInterval = settings.value("gif/recordInterval", true).toBool();
-    int interval = 0;
-    if (gifUseRecordInterval)
-    {
-        // 从当前文件夹的配置文件中读取时间
-        QFileInfo info(QDir(currentDirPath).absoluteFilePath(SEQUENCE_PARAM_FILE));
-        if (info.exists())
-        {
-            QSettings st(info.absoluteFilePath(), QSettings::IniFormat);
-            interval = st.value("gif/interval", slideTimer->interval()).toInt();
-            PBDEB << "读取录制时间：" << interval;
-        }
-    }
-    if (interval <= 0)
-    {
-        // 使用默认的播放时间
-        interval = slideTimer->interval();
-    }
+    int interval = getRecordInterval();
 
     // 所有图片路径
     QStringList pixmapPaths;
@@ -1392,7 +1412,11 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
     auto item = selectedItems.first();
     QPixmap firstPixmap(item->data(FilePathRole).toString());
     QSize size = firstPixmap.size(); // 图片大小
-    QString gifPath = QDir(currentDirPath).absoluteFilePath(QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz.gif"));
+    QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz")+".gif";
+    QString dirPath = ui->actionCreate_To_Origin_Folder->isChecked()
+            ? currentDirPath : QDir(rootDirPath).absoluteFilePath("general");
+    QString gifPath = QDir(dirPath)
+            .absoluteFilePath(fileName);
 
     // 压缩程度
     int compress = settings.value("gif/compress", 0).toInt();
@@ -1416,6 +1440,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
             return;
         }
 
+        QDir(dirPath).mkpath(dirPath);
         for (int i = 0; i < pixmapPaths.size(); i++)
         {
             QPixmap pixmap(pixmapPaths.at(i));
@@ -1606,4 +1631,91 @@ void PictureBrowser::on_actionDither_Enabled_triggered()
 void PictureBrowser::on_actionDither_Disabled_triggered()
 {
     settings.setValue("gif/dither", false);
+}
+
+void PictureBrowser::on_actionGeneral_AVI_triggered()
+{
+    removeUselessItemSelect();
+    auto selectedItems = ui->listWidget->selectedItems();
+
+    if (selectedItems.size() < 2)
+    {
+        QMessageBox::warning(this, "生成GIF", "请选中至少2张图片");
+        return ;
+    }
+
+    // 进行排序啊
+    std::sort(selectedItems.begin(), selectedItems.end(), [=](QListWidgetItem*a, QListWidgetItem* b){
+        return ui->listWidget->row(a) < ui->listWidget->row(b);
+    });
+
+    // 获取间隔
+    int interval = getRecordInterval();
+
+    // 所有图片路径
+    QStringList pixmapPaths;
+    for (int i = 0; i < selectedItems.size(); i++)
+        pixmapPaths.append(selectedItems.at(i)->data(FilePathRole).toString());
+
+    // 获取图片大小
+    auto item = selectedItems.first();
+    QPixmap firstPixmap(item->data(FilePathRole).toString());
+    QSize size = firstPixmap.size(); // 图片大小
+    QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz")+".avi";
+    QString dirPath = ui->actionCreate_To_Origin_Folder->isChecked()
+            ? currentDirPath : QDir(rootDirPath).absoluteFilePath("general");
+    QString gifPath = QDir(dirPath)
+            .absoluteFilePath(fileName);
+
+    // 压缩程度
+    int compress = settings.value("gif/compress", 0).toInt();
+    int prop = 1;
+    for (int i = 0; i < compress; i++)
+        prop *= 2;
+    size_t wt = static_cast<uint32_t>(size.width() / prop);
+    size_t ht = static_cast<uint32_t>(size.height() / prop);
+    size_t iv = static_cast<uint32_t>(interval);
+
+    // 创建GIF
+    progressBar->setMaximum(pixmapPaths.size());
+    progressBar->show();
+    QtConcurrent::run([=]{
+        QDir(dirPath).mkpath(dirPath);
+        avi_t* avi = AVI_open_output_file(gifPath.toLocal8Bit().data());
+        AVI_set_video(avi, wt, ht, 1000/interval, "mjpg");
+
+        for (int i = 0; i < pixmapPaths.size(); i++)
+        {
+            QPixmap pixmap(pixmapPaths.at(i));
+            if (!pixmap.isNull())
+            {
+                if (prop > 1)
+                    pixmap = pixmap.scaled(static_cast<int>(wt), static_cast<int>(ht));
+                QByteArray ba;
+                QBuffer    bf(&ba);
+                if (!pixmap.save(&bf, "jpg", -1))
+                {
+                    qDebug() << "保存图片Buffer失败" << pixmapPaths.at(i);
+                    continue;
+                }
+                AVI_write_frame(avi, ba.data(), ba.size(), 1);
+            }
+            emit signalGeneralGIFProgress(i+1);
+        }
+
+        AVI_close(avi);
+
+        emit signalGeneralGIFFinished(gifPath);
+        PBDEB << "AVI生成完毕：" << size << pixmapPaths.size() << interval << compress;
+    });
+}
+
+void PictureBrowser::on_actionCreate_To_Origin_Folder_triggered()
+{
+    settings.setValue("gif/createToOne", false);
+}
+
+void PictureBrowser::on_actionCreate_To_One_Folder_triggered()
+{
+    settings.setValue("gif/createToOne", true);
 }

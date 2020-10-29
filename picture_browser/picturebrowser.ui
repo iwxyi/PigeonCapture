@@ -54,7 +54,7 @@
      <x>0</x>
      <y>0</y>
      <width>647</width>
-     <height>26</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -111,8 +111,11 @@
     </widget>
     <widget class="QMenu" name="menuGIF_Params">
      <property name="title">
-      <string>GIF 参数</string>
+      <string>参数设置</string>
      </property>
+     <addaction name="actionCreate_To_Origin_Folder"/>
+     <addaction name="actionCreate_To_One_Folder"/>
+     <addaction name="separator"/>
      <addaction name="actionGIF_Use_Record_Interval"/>
      <addaction name="actionGIF_Use_Display_Interval"/>
      <addaction name="separator"/>
@@ -131,6 +134,7 @@
     <addaction name="menuSlide_Interval"/>
     <addaction name="separator"/>
     <addaction name="actionGeneral_GIF"/>
+    <addaction name="actionGeneral_AVI"/>
     <addaction name="menuGIF_Params"/>
    </widget>
    <widget class="QMenu" name="menu_3">
@@ -605,7 +609,7 @@
   </action>
   <action name="actionGeneral_GIF">
    <property name="text">
-    <string>生成 GIF</string>
+    <string>生成动图.gif</string>
    </property>
   </action>
   <action name="actionGIF_Use_Record_Interval">
@@ -637,7 +641,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>压缩至1/2边长</string>
+    <string>压缩至 1/2 边长</string>
    </property>
   </action>
   <action name="actionGIF_Compress_x4">
@@ -645,7 +649,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>压缩至1/4边长</string>
+    <string>压缩至 1/4 边长</string>
    </property>
   </action>
   <action name="actionGIF_Compress_x8">
@@ -653,7 +657,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>压缩至1/8边长</string>
+    <string>压缩至 1/8 边长</string>
    </property>
   </action>
   <action name="actionGIF_Compress_None">
@@ -685,7 +689,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>抖动：开</string>
+    <string>GIF 抖动：开</string>
    </property>
   </action>
   <action name="actionDither_Disabled">
@@ -693,7 +697,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>抖动：关</string>
+    <string>GIF 抖动：关</string>
    </property>
   </action>
   <action name="actionExtra_And_Copy">
@@ -705,6 +709,33 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionGeneral_AVI">
+   <property name="text">
+    <string>生成视频.avi</string>
+   </property>
+  </action>
+  <action name="actionCreate_To_Origin_Folder">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>保存到源文件夹</string>
+   </property>
+  </action>
+  <action name="actionCreate_To_One_Folder">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>保存到根文件夹</string>
+   </property>
+   <property name="toolTip">
+    <string>保存到外层文件夹</string>
    </property>
   </action>
  </widget>
