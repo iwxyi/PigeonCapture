@@ -28,6 +28,7 @@
 #define PBDEB qDebug()
 #define BACK_PREV_DIRECTORY ".."
 #define TEMP_DIRECTORY "temp"
+#define GENERAL_DIRECTORY "general"
 #define RECYCLE_DIRECTORY "recycle"
 #define SEQUENCE_PARAM_FILE "params.ini"
 #define FilePathRole (Qt::UserRole)

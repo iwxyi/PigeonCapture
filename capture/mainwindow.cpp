@@ -94,10 +94,11 @@ MainWindow::MainWindow(QWidget *parent)
             else
                 break;
         }
-        ui->prevCaptureCheckBox->setText(QString("已有%1张(%2s)%3")
+        ui->prevCaptureCheckBox->setText(QString("已有%1张(%2s)%3 \t%4")
                                          .arg(prevCapturedList->size())
                                          .arg((timestamp-prevCapturedList->first().time)/1000)
-                                         .arg(failed ? " 内存不足" : ""));
+                                         .arg(failed ? " 内存不足" : "")
+                                         .arg(QDateTime::currentDateTime().toString("hh:mm:ss")));
     });
     if (settings.value("capture/prev", false).toBool())
     {
@@ -256,6 +257,8 @@ void MainWindow::triggerSerialCapture()
         // 保存录制参数
         QSettings params(currentDir.absoluteFilePath(SEQUENCE_PARAM_FILE), QSettings::IniFormat);
         params.setValue("gif/interval", prevTimer->interval());
+        params.setValue("time/start", serialStartTime);
+        params.setValue("time/end", serialEndTime);
         params.sync();
 
         serialCaptureCount = 0;
@@ -303,12 +306,10 @@ void MainWindow::savePrevCapture(qint64 delta)
             // 获取保存的路径
             QDir rootDir(saveDir);
             QDir saveDir(rootDir.absoluteFilePath("预"+dirName));
-            saveDir.mkdir(saveDir.absolutePath());
 
             // 保存录制参数
             QSettings params(saveDir.absoluteFilePath(SEQUENCE_PARAM_FILE), QSettings::IniFormat);
             params.setValue("gif/interval", prevTimer->interval());
-            params.sync();
 
             // 计算要保存的起始位置
             int maxSize = list->size();
@@ -319,6 +320,16 @@ void MainWindow::savePrevCapture(qint64 delta)
             // 清理无用的
             for (int i = 0; i < start; i++)
                 delete list->at(i).pixmap;
+
+            // 确保有保存的项
+            if (start >= maxSize)
+                return ;
+            saveDir.mkdir(saveDir.absolutePath());
+
+            // 记录保存时间
+            params.setValue("time/start", list->at(start).time);
+            params.setValue("time/end", list->at(maxSize-1).time);
+            params.sync();
 
             // 开始保存
             for (int i = start; i < maxSize; i++)

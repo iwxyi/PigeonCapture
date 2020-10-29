@@ -303,7 +303,7 @@ void PictureBrowser::enterDirectory(QString targetDir)
     {
         QString name = info.fileName();
         QString suffix = info.suffix();
-        if (name == TEMP_DIRECTORY)
+        if (name == TEMP_DIRECTORY || name == GENERAL_DIRECTORY)
             continue;
         if (name.contains(" "))
             name = name.right(name.length() - name.indexOf(" ") - 1);
@@ -1435,7 +1435,7 @@ void PictureBrowser::on_actionGeneral_GIF_triggered()
     QSize size = firstPixmap.size(); // 图片大小
     QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz")+".gif";
     QString dirPath = ui->actionCreate_To_Origin_Folder->isChecked()
-            ? currentDirPath : QDir(rootDirPath).absoluteFilePath("general");
+            ? currentDirPath : QDir(rootDirPath).absoluteFilePath(GENERAL_DIRECTORY);
     QString gifPath = QDir(dirPath)
             .absoluteFilePath(fileName);
 
@@ -1684,7 +1684,7 @@ void PictureBrowser::on_actionGeneral_AVI_triggered()
     QSize size = firstPixmap.size(); // 图片大小
     QString fileName = QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss.zzz")+".avi";
     QString dirPath = ui->actionCreate_To_Origin_Folder->isChecked()
-            ? currentDirPath : QDir(rootDirPath).absoluteFilePath("general");
+            ? currentDirPath : QDir(rootDirPath).absoluteFilePath(GENERAL_DIRECTORY);
     QString gifPath = QDir(dirPath)
             .absoluteFilePath(fileName);
 

@@ -127,6 +127,8 @@ private:
     QTimer* serialTimer = nullptr;
     QString serialCaptureDir;
     int serialCaptureCount = 0;
+    qint64 serialStartTime = 0;
+    qint64 serialEndTime = 0;
 
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
