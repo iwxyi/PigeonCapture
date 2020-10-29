@@ -53,6 +53,7 @@ public:
         QString file;
     };
 
+
     void enterDirectory(QString targetDir);
     void readDirectory(QString targetDir);
 

@@ -381,28 +381,45 @@ void MainWindow::startRecordAudio()
     if (!ui->recordAudioCheckBox->isChecked())
         return ;
 
-    audioRecorder = new QAudioRecorder;
+    audioFile.setFileName("test.raw");
+    audioFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    QAudioFormat format;
 
-    QAudioEncoderSettings audioSettings;
-    audioSettings.setCodec("audio/amr");
-    audioSettings.setQuality(QMultimedia::HighQuality);
+    format.setSampleRate(48000);
+    format.setChannelCount(2);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
 
-    audioRecorder->setEncodingSettings(audioSettings);
-
-    // 选择要录制的声音
-    /*QStringList inputs = audioRecorder->audioInputs();
-    QString selectedInput = audioRecorder->defaultAudioInput();
-    foreach (QString input, inputs) {
-        QString description = audioRecorder->audioInputDescription(input);
-        qDebug() << input << description;
-        selectedInput = input;
+    QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
+    if (info.isNull())
+    {
+        ui->recordAudioCheckBox->setChecked(false);
+        QMessageBox::warning(this, "无法录制", "请先在声音设置中打开“立体声混音”");
+        on_actionAudio_Recorder_Settings_triggered();
+        return ;
+    }
+    qDebug() << "input devices:";
+    auto inputs = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    foreach (auto in, inputs)
+        qDebug() << in.deviceName();
+    qDebug() << "output devices:";
+    auto outputs = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+    foreach (auto out, outputs)
+        qDebug() << out.deviceName();
+//    info = inputs.at(0);
+    qDebug() << "录制设备：" << info.deviceName();
+    if (!info.isFormatSupported(format))
+    {
+       qWarning() << "default format not supported try to use nearest";
+       format = info.nearestFormat(format);
     }
     audioRecorder->setAudioInput(selectedInput);*/
 
-    audioRecorder->setOutputLocation(QUrl("B:/test.amr"));
-    audioRecorder->record();
-
-    qDebug() << "开始录制音频";
+    audio = new QAudioInput(info, format, this);
+    audio->start(&audioFile);
+    audioStartTime = getTimestamp();
 }
 
 void MainWindow::endRecordAudio()
@@ -411,63 +428,9 @@ void MainWindow::endRecordAudio()
         return ;
 
     audioEndTime = getTimestamp();
-    audioRecorder->stop();
-    delete audioRecorder;
-    audioRecorder = nullptr;
-    audioFile.close();
-
-    qDebug() << "结束录制音频";
-}
-
-/**
- * 设置截图快捷键
- */
-void MainWindow::setFastShortcut(QString s)
-{
-    if (s.isEmpty())
-        return ;
-
-    if(fastCaptureShortcut->setShortcut(QKeySequence(s)))
-    {
-        if (tipTimer)
-            ui->fastCaptureShortcut->setText("设置成功");
-    }
-    else
-    {
-        if (tipTimer)
-            ui->fastCaptureShortcut->setText("冲突");
-       qDebug() << "快速截图快捷键设置失败，或许是冲突了" << s;
-    }
-    if (tipTimer)
-        tipTimer->start();
-}
-
-void MainWindow::setSerialShortcut(QString s)
-{
-    if (s.isEmpty())
-        return ;
-
-    if(serialCaptureShortcut->setShortcut(QKeySequence(s)))
-    {
-        if (tipTimer)
-            ui->serialCaptureShortcut->setText("设置成功");
-    }
-    else
-    {
-        if (tipTimer)
-            ui->serialCaptureShortcut->setText("冲突");
-       qDebug() << "连续截图快捷键设置失败，或许是冲突了" << s;
-    }
-    if (tipTimer)
-        tipTimer->start();
-}
-
-/**
- * 显示预览图
  */
 void MainWindow::showPreview(QPixmap pixmap)
 {
-    if (pixmap.width() > ui->previewLabel->width() || pixmap.height() > ui->previewLabel->height())
         pixmap = pixmap.scaled(ui->previewLabel->size(), Qt::KeepAspectRatio);
     ui->previewLabel->setPixmap(pixmap);
     ui->previewLabel->setMinimumSize(1, 1);
@@ -561,6 +524,66 @@ QString MainWindow::get_window_class(HWND hwnd)
         retStr = QString::fromWCharArray(temp);
     }
     return retStr;
+}
+
+/**
+ * 参考链接：https://blog.csdn.net/GoForwardToStep/article/details/52779913
+ */
+qint64 MainWindow::translateRaw2Wav(QString rawFileName, QString wavFileName)
+{
+    // 开始设置WAV的文件头
+    // 这里具体的数据代表什么含义请看上一篇文章（Qt之WAV文件解析）中对wav文件头的介绍
+    WAVFILEHEADER WavFileHeader;
+    qstrcpy(WavFileHeader.RiffName, "RIFF");
+    qstrcpy(WavFileHeader.WavName, "WAVE");
+    qstrcpy(WavFileHeader.FmtName, "fmt ");
+    qstrcpy(WavFileHeader.DATANAME, "data");
+
+    // 表示 FMT块 的长度
+    WavFileHeader.nFmtLength = 16;
+    // 表示 按照PCM 编码;
+    WavFileHeader.nAudioFormat = 1;
+    // 声道数目;
+    WavFileHeader.nChannleNumber = 1;
+    // 采样频率;
+    WavFileHeader.nSampleRate = 48000;
+
+    // nBytesPerSample 和 nBytesPerSecond这两个值通过设置的参数计算得到;
+    // 数据块对齐单位(每个采样需要的字节数 = 通道数 × 每次采样得到的样本数据位数 / 8 )
+    WavFileHeader.nBytesPerSample = 2;
+    // 波形数据传输速率
+    // (每秒平均字节数 = 采样频率 × 通道数 × 每次采样得到的样本数据位数 / 8  = 采样频率 × 每个采样需要的字节数 )
+    WavFileHeader.nBytesPerSecond = 96000;
+
+    // 每次采样得到的样本数据位数;
+    WavFileHeader.nBitsPerSample = 16;
+
+    QFile cacheFile(rawFileName);
+    QFile wavFile(wavFileName);
+
+    if (!cacheFile.open(QIODevice::ReadWrite))
+    {
+        return -1;
+    }
+    if (!wavFile.open(QIODevice::WriteOnly))
+    {
+        return -2;
+    }
+
+    int nSize = sizeof(WavFileHeader);
+    qint64 nFileLen = cacheFile.bytesAvailable();
+
+    WavFileHeader.nRiffLength = nFileLen - 8 + nSize;
+    WavFileHeader.nDataLength = nFileLen;
+
+    // 先将wav文件头信息写入，再将音频数据写入;
+    wavFile.write((char *)&WavFileHeader, nSize);
+    wavFile.write(cacheFile.readAll());
+
+    cacheFile.close();
+    wavFile.close();
+
+    return nFileLen;
 }
 
 void MainWindow::on_modeTab_currentChanged(int index)
@@ -767,4 +790,37 @@ void MainWindow::on_recordAudioCheckBox_clicked(bool checked)
     {
         endRecordAudio();
     }
+}
+
+void MainWindow::on_actionAudio_Recorder_Settings_triggered()
+{
+    QProcess p;
+    p.startDetached("control Mmsys.cpl ,1");
+}
+
+void MainWindow::on_actionPlay_Test_Audio_triggered()
+{
+    sourceFile.setFileName("test.raw");
+    sourceFile.open(QIODevice::ReadOnly);
+
+    QAudioFormat format;
+    // Set up the format, eg.
+    format.setSampleRate(48000);
+    format.setChannelCount(2);
+    format.setSampleSize(16);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
+
+    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Raw audio format not supported by backend, cannot play audio.";
+        return;
+    }
+
+    audioOutput = new QAudioOutput(format, this);
+    audioOutput->start(&sourceFile);
+    connect(audioOutput, &QAudioOutput::stateChanged, this, [=](QAudio::State){
+        qDebug() << "播放结束";
+    });
 }

@@ -50,6 +50,31 @@ public:
         QString name;
         QPixmap* pixmap;
     };
+    struct WAVFILEHEADER
+    {
+        // RIFF 头
+        char RiffName[4];
+        unsigned long nRiffLength;
+
+        // 数据类型标识符
+        char WavName[4];
+
+        // 格式块中的块头
+        char FmtName[4];
+        unsigned long nFmtLength;
+
+        // 格式块中的块数据
+        unsigned short nAudioFormat;
+        unsigned short nChannleNumber;
+        unsigned long nSampleRate;
+        unsigned long nBytesPerSecond;
+        unsigned short nBytesPerSample;
+        unsigned short nBitsPerSample;
+
+        // 数据块中的块头
+        char    DATANAME[4];
+        unsigned long   nDataLength;
+    };
 
     void selectArea();
 
@@ -112,6 +137,10 @@ private slots:
 
     void on_recordAudioCheckBox_clicked(bool checked);
 
+    void on_actionAudio_Recorder_Settings_triggered();
+
+    void on_actionPlay_Test_Audio_triggered();
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
@@ -122,6 +151,7 @@ protected:
 
     QString get_window_title(HWND hwnd);
     QString get_window_class(HWND hwnd);
+    qint64 translateRaw2Wav(QString rawFileName, QString wavFileName);
 
 private:
     Ui::MainWindow *ui;
@@ -143,6 +173,9 @@ private:
     QAudioRecorder* audioRecorder;
     qint64 audioStartTime = 0; // 音频录制与连续截图不一定一起，可能是后续想起来再开
     qint64 audioEndTime = 0;
+
+    QFile sourceFile;
+    QAudioOutput* audioOutput;
 
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具

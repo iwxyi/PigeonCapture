@@ -178,6 +178,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="recordAudioCheckBox">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;控制面板-声音设置-录制-立体声混音-启用&lt;/p&gt;&lt;p&gt;否则无法录制声音&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
            <string>录制音频</string>
           </property>
@@ -407,7 +410,9 @@
     <addaction name="actionAbout"/>
     <addaction name="actionGitHub"/>
     <addaction name="separator"/>
+    <addaction name="actionAudio_Recorder_Settings"/>
     <addaction name="actionRestore_Geometry"/>
+    <addaction name="actionPlay_Test_Audio"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
@@ -438,6 +443,16 @@
   <action name="actionGitHub">
    <property name="text">
     <string>GitHub</string>
+   </property>
+  </action>
+  <action name="actionAudio_Recorder_Settings">
+   <property name="text">
+    <string>系统音频设置</string>
+   </property>
+  </action>
+  <action name="actionPlay_Test_Audio">
+   <property name="text">
+    <string>Play Test Audio</string>
    </property>
   </action>
  </widget>
