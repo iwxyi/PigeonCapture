@@ -405,6 +405,14 @@ void PictureBrowser::showEvent(QShowEvent *event)
     ui->splitter->restoreGeometry(settings.value("picturebrowser/splitterGeometry").toByteArray());
     ui->splitter->restoreState(settings.value("picturebrowser/splitterState").toByteArray());
 
+    // 初始化缩放
+    static bool inited = false;
+    if (!inited)
+    {
+        inited = true;
+        ui->previewPicture->resetScale();
+    }
+
     int is = settings.value("picturebrowser/iconSize", 64).toInt();
     ui->listWidget->setIconSize(QSize(1, 1));
     ui->listWidget->setIconSize(QSize(is, is));
@@ -1356,7 +1364,7 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
     if (existOriginPaths.size())
     {
         QString pathText = existOriginPaths.size() > 5
-                ? (existOriginPaths.join("\n") + "等" + QString::number(existOriginPaths.size()) + "个文件")
+                ? (existOriginPaths.first() + "  等" + QString::number(existOriginPaths.size()) + "个文件")
                 : existOriginPaths.join("\n");
         if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + pathText,
                                   QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Yes)
@@ -1757,21 +1765,22 @@ void PictureBrowser::on_actionClip_Selected_triggered()
     // 计算裁剪比例（全都是比例，适用于所有图片）
     double clipLeft = (showArea.left() - imageArea.left()) / (double)imageArea.width();
     double clipTop = (showArea.top() - imageArea.top()) / (double)imageArea.height();
-    double clipWidth = showArea.width() / (double)imageArea.width();
-    double clipHeight = showArea.height() / (double)imageArea.height();
-    qDebug() << "裁剪比例：" << clipLeft << clipTop << clipWidth << clipHeight;
-    if (clipWidth >= 1 && clipHeight >= 1) // 不需要裁剪
-        return ;
-    if (clipLeft >=1 || clipTop >= 1 || clipWidth <= 0 || clipHeight <= 0) // 没有显示出来的
+    double clipRight = (showArea.right() - imageArea.left()) / (double)imageArea.width();
+    double clipBottom = (showArea.bottom() - imageArea.top()) / (double)imageArea.height();
+    if (clipLeft >=1 || clipTop >= 1 || clipRight <= 0 || clipBottom <= 0) // 没有显示出来的
         return ;
     if (clipLeft < 0)
         clipLeft = 0;
     if (clipTop < 0)
         clipTop = 0;
-    if (clipWidth > 1)
-        clipWidth = 1;
-    if (clipHeight > 1)
-        clipHeight = 1;
+    if (clipRight > 1)
+        clipRight = 1;
+    if (clipBottom > 1)
+        clipBottom = 1;
+    double clipWidth = clipRight - clipLeft;
+    double clipHeight = clipBottom - clipTop;
+    if (clipWidth >= 1 && clipHeight >= 1) // 不需要裁剪
+        return ;
 
     // 获取选中项
     removeUselessItemSelect();

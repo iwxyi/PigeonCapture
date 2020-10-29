@@ -98,7 +98,7 @@ void ResizablePicture::resetScale()
 {
     if (originPixmap.isNull())
     {
-        label->setGeometry(0, 0, width(), height());
+        label->setGeometry(this->rect());
         return ;
     }
 
