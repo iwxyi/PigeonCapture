@@ -381,41 +381,40 @@ void MainWindow::startRecordAudio()
     if (!ui->recordAudioCheckBox->isChecked())
         return ;
 
-    audioFile.setFileName("temp/test.raw");
-    audioFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    QAudioFormat format;
+    audioRecorder = new QAudioRecorder;
 
-    format.setSampleRate(44100);
-    format.setChannelCount(2);
-    format.setSampleSize(16);
-    format.setCodec("audio/pcm");
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleType(QAudioFormat::UnSignedInt);
+    QAudioEncoderSettings audioSettings;
+    audioSettings.setCodec("audio/amr");
+    audioSettings.setQuality(QMultimedia::HighQuality);
 
-    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
-    if (!info.isFormatSupported(format))
-    {
-       qWarning()<<"default format not supported try to use nearest";
-       format = info.nearestFormat(format);
+    audioRecorder->setEncodingSettings(audioSettings);
+
+    // 选择要录制的声音
+    /*QStringList inputs = audioRecorder->audioInputs();
+    QString selectedInput = audioRecorder->defaultAudioInput();
+    foreach (QString input, inputs) {
+        QString description = audioRecorder->audioInputDescription(input);
+        qDebug() << input << description;
+        selectedInput = input;
     }
+    audioRecorder->setAudioInput(selectedInput);*/
 
-    audio = new QAudioInput(info, format, this);
-    audio->start(&audioFile);
-    audioStartTime = getTimestamp();
+    audioRecorder->setOutputLocation(QUrl("B:/test.amr"));
+    audioRecorder->record();
 
     qDebug() << "开始录制音频";
 }
 
 void MainWindow::endRecordAudio()
 {
-    if (!audio)
+    if (!audioRecorder)
         return ;
 
     audioEndTime = getTimestamp();
-    audio->stop();
+    audioRecorder->stop();
+    delete audioRecorder;
+    audioRecorder = nullptr;
     audioFile.close();
-    delete audio;
-    audio = nullptr;
 
     qDebug() << "结束录制音频";
 }
