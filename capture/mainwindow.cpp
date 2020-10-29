@@ -545,7 +545,7 @@ void MainWindow::on_actionOpen_Directory_triggered()
 
 void MainWindow::on_actionCapture_History_triggered()
 {
-    PictureBrowser* pb = new PictureBrowser(this);
+    static PictureBrowser* pb = new PictureBrowser;
     pb->readDirectory(saveDir);
     pb->show();
 }

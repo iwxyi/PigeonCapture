@@ -175,6 +175,8 @@
     <addaction name="separator"/>
     <addaction name="actionOrigin_Size"/>
     <addaction name="actionFill_Size"/>
+    <addaction name="separator"/>
+    <addaction name="actionResize_Auto_Init"/>
    </widget>
    <widget class="QMenu" name="menu_6">
     <property name="title">
@@ -736,6 +738,17 @@
    </property>
    <property name="toolTip">
     <string>保存到外层文件夹</string>
+   </property>
+  </action>
+  <action name="actionResize_Auto_Init">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>调整窗口恢复缩放</string>
    </property>
   </action>
  </widget>

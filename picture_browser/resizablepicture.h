@@ -25,6 +25,8 @@ public:
     void scaleToFill();
     void scaleToOrigin();
 
+    void setResizeAutoInit(bool i);
+
     const QPixmap &getOriginPixmap();
 
 protected:
@@ -43,6 +45,8 @@ public slots:
 private:
     QLabel* label;
     QMovie* movie = nullptr;
+
+    bool resizeAutoInit = true;
 
     QPoint pressPos;
     QPixmap originPixmap;

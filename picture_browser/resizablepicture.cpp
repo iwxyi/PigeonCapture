@@ -175,6 +175,11 @@ void ResizablePicture::scaleToOrigin()
         movie->setScaledSize(currentPixmap.size());
 }
 
+void ResizablePicture::setResizeAutoInit(bool i)
+{
+    this->resizeAutoInit = i;
+}
+
 const QPixmap& ResizablePicture::getOriginPixmap()
 {
     return originPixmap;
@@ -229,13 +234,16 @@ void ResizablePicture::mouseReleaseEvent(QMouseEvent *event)
 
 void ResizablePicture::resizeEvent(QResizeEvent *)
 {
-    // 清理全部缓存
-    scaleCache.clear();
+    if (resizeAutoInit)
+    {
+        // 清理全部缓存
+        scaleCache.clear();
 
-    if (originPixmap.isNull())
-        return ;
+        if (originPixmap.isNull())
+            return ;
 
-    resetScale();
+        resetScale();
+    }
 }
 
 qint64 ResizablePicture::sizeToLL(QSize size)

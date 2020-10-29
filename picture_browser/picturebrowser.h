@@ -203,6 +203,8 @@ private slots:
 
     void on_actionCreate_To_One_Folder_triggered();
 
+    void on_actionResize_Auto_Init_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();

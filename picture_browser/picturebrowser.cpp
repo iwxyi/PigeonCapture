@@ -206,6 +206,11 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
         }
     });
 
+    // 预览设置
+    bool resizeAutoInit = settings.value("picturebrowser/resizeAutoInit", true).toBool();
+    ui->actionResize_Auto_Init->setChecked(resizeAutoInit);
+    ui->previewPicture->setResizeAutoInit(resizeAutoInit);
+
     // 状态栏
     selectLabel = new QLabel;
     ui->statusbar->addWidget(selectLabel);
@@ -1718,4 +1723,11 @@ void PictureBrowser::on_actionCreate_To_Origin_Folder_triggered()
 void PictureBrowser::on_actionCreate_To_One_Folder_triggered()
 {
     settings.setValue("gif/createToOne", true);
+}
+
+void PictureBrowser::on_actionResize_Auto_Init_triggered()
+{
+    bool init = ui->actionResize_Auto_Init->isChecked();
+    settings.setValue("picturebrowser/resizeAutoInit", init);
+    ui->previewPicture->setResizeAutoInit(init);
 }
