@@ -381,29 +381,37 @@ void MainWindow::startRecordAudio()
     if (!ui->recordAudioCheckBox->isChecked())
         return ;
 
-    audioFile.setFileName("temp/test.raw");
+    audioFile.setFileName("test.raw");
     audioFile.open(QIODevice::WriteOnly | QIODevice::Truncate);
     QAudioFormat format;
 
-    format.setSampleRate(44100);
+    format.setSampleRate(48000);
     format.setChannelCount(2);
     format.setSampleSize(16);
     format.setCodec("audio/pcm");
     format.setByteOrder(QAudioFormat::LittleEndian);
     format.setSampleType(QAudioFormat::UnSignedInt);
 
-    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+    QAudioDeviceInfo info = QAudioDeviceInfo::defaultOutputDevice();
+    /*qDebug() << "input devices:";
+    auto inputs = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+    foreach (auto in, inputs)
+        qDebug() << in.deviceName();
+    qDebug() << "output devices:";
+    auto outputs = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+    foreach (auto out, outputs)
+        qDebug() << out.deviceName();
+    info = inputs.first();*/
+    qDebug() << "录制设备：" << info.deviceName();
     if (!info.isFormatSupported(format))
     {
-       qWarning()<<"default format not supported try to use nearest";
+       qWarning() << "default format not supported try to use nearest";
        format = info.nearestFormat(format);
     }
 
     audio = new QAudioInput(info, format, this);
     audio->start(&audioFile);
     audioStartTime = getTimestamp();
-
-    qDebug() << "开始录制音频";
 }
 
 void MainWindow::endRecordAudio()
@@ -768,4 +776,10 @@ void MainWindow::on_recordAudioCheckBox_clicked(bool checked)
     {
         endRecordAudio();
     }
+}
+
+void MainWindow::on_actionAudio_Recorder_Settings_triggered()
+{
+    QProcess p;
+    p.startDetached("control Mmsys.cpl ,1");
 }

@@ -111,6 +111,8 @@ private slots:
 
     void on_recordAudioCheckBox_clicked(bool checked);
 
+    void on_actionAudio_Recorder_Settings_triggered();
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
