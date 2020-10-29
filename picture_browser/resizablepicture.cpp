@@ -185,6 +185,21 @@ const QPixmap& ResizablePicture::getOriginPixmap()
     return originPixmap;
 }
 
+/**
+ * 获取当前显示的位置，用于裁剪
+ * @param size 原图片大小
+ * @param imageArea 当前图片的位置
+ * @param showArea 当前显示出来的部分
+ */
+void ResizablePicture::getClipArea(QSize &originSize, QRect &imageArea, QRect& showArea)
+{
+    if (originPixmap.isNull())
+        return ;
+    originSize = originPixmap.size();
+    imageArea = label->geometry();
+    showArea = this->rect();
+}
+
 void ResizablePicture::wheelEvent(QWheelEvent *event)
 {
     QPoint pos = event->pos();

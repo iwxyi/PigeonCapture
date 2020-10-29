@@ -639,7 +639,7 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionGitHub_triggered()
 {
-    QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/MRXY001/LiveEmojiCapture")));
+    QDesktopServices::openUrl(QUrl(QLatin1String("https://github.com/MRXY001/PigeonCapture")));
 }
 
 void MainWindow::on_windowsCombo_activated(int index)

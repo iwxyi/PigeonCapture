@@ -29,6 +29,8 @@ public:
 
     const QPixmap &getOriginPixmap();
 
+    void getClipArea(QSize& originSize, QRect& imageArea, QRect &showArea);
+
 protected:
     void wheelEvent(QWheelEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;

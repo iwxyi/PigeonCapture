@@ -605,7 +605,10 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>撤销删除</string>
+    <string>撤销操作</string>
+   </property>
+   <property name="toolTip">
+    <string>撤销删除/裁剪等文件修改操作</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
@@ -755,7 +758,7 @@
   </action>
   <action name="actionClip_Selected">
    <property name="text">
-    <string>按区域裁剪选中项</string>
+    <string>按显示区域裁剪选中项</string>
    </property>
    <property name="toolTip">
     <string>以显示部分来裁剪所有选中项</string>

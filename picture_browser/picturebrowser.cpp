@@ -1355,7 +1355,10 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
 
     if (existOriginPaths.size())
     {
-        if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + existOriginPaths.join("\n"),
+        QString pathText = existOriginPaths.size() > 5
+                ? (existOriginPaths.join("\n") + "等" + QString::number(existOriginPaths.size()) + "个文件")
+                : existOriginPaths.join("\n");
+        if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + pathText,
                                   QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Yes)
         {
             for (int i = existOriginPaths.size() - 1; i >= 0; i--)
@@ -1735,10 +1738,77 @@ void PictureBrowser::on_actionResize_Auto_Init_triggered()
     bool init = ui->actionResize_Auto_Init->isChecked();
     settings.setValue("picturebrowser/resizeAutoInit", init);
     ui->previewPicture->setResizeAutoInit(init);
-    ui->previewPicture->resetScale();
 }
 
+/**
+ * 根据显示的大小裁剪选中项
+ * 需要图片大小一致，不一致的跳过
+ */
 void PictureBrowser::on_actionClip_Selected_triggered()
 {
+    // 获取裁剪位置
+    QSize originSize;
+    QRect imageArea;
+    QRect showArea;
+    ui->previewPicture->getClipArea(originSize, imageArea, showArea);
+    if (!originSize.isValid())
+        return ;
 
+    // 计算裁剪比例（全都是比例，适用于所有图片）
+    double clipLeft = (showArea.left() - imageArea.left()) / (double)imageArea.width();
+    double clipTop = (showArea.top() - imageArea.top()) / (double)imageArea.height();
+    double clipWidth = showArea.width() / (double)imageArea.width();
+    double clipHeight = showArea.height() / (double)imageArea.height();
+    qDebug() << "裁剪比例：" << clipLeft << clipTop << clipWidth << clipHeight;
+    if (clipWidth >= 1 && clipHeight >= 1) // 不需要裁剪
+        return ;
+    if (clipLeft >=1 || clipTop >= 1 || clipWidth <= 0 || clipHeight <= 0) // 没有显示出来的
+        return ;
+    if (clipLeft < 0)
+        clipLeft = 0;
+    if (clipTop < 0)
+        clipTop = 0;
+    if (clipWidth > 1)
+        clipWidth = 1;
+    if (clipHeight > 1)
+        clipHeight = 1;
+
+    // 获取选中项
+    removeUselessItemSelect();
+    auto selectedItems = ui->listWidget->selectedItems();
+    if (selectedItems.size() == 0)
+        return ;
+
+    // 图标尺寸
+    QSize maxIconSize = ui->listWidget->iconSize();
+    if (maxIconSize.width() <= 16 || maxIconSize.height() <= 16)
+        maxIconSize = QSize(32, 32);
+
+    foreach (auto item, selectedItems)
+    {
+        QString path = item->data(FilePathRole).toString();
+        QFileInfo info(path);
+        if (!info.exists() || !info.isFile())
+            continue;
+        QString suffix = info.suffix();
+        if (suffix != "jpg" && suffix != "png" && suffix != "jpeg")
+            continue;
+
+        // 先拷贝文件
+        QString newPath = recycleDir.absoluteFilePath(info.fileName());
+        deleteCommandsQueue.append(QPair<QString, QString>(path, newPath));
+        QFile file(path);
+        file.copy(newPath);
+
+        // 裁剪图片
+        QPixmap pixmap(path);
+        pixmap = pixmap.copy(pixmap.width()*clipLeft, pixmap.height()*clipTop,
+                             pixmap.width()*clipWidth, pixmap.height()*clipHeight);
+        pixmap.save(path);
+        pixmap = pixmap.scaled(maxIconSize, Qt::AspectRatioMode::KeepAspectRatio);
+        item->setIcon(QIcon(pixmap));
+    }
+
+    commitDeleteCommand();
+    showCurrentItemPreview();
 }
