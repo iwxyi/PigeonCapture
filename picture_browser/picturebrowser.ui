@@ -177,6 +177,8 @@
     <addaction name="actionFill_Size"/>
     <addaction name="separator"/>
     <addaction name="actionResize_Auto_Init"/>
+    <addaction name="separator"/>
+    <addaction name="actionClip_Selected"/>
    </widget>
    <widget class="QMenu" name="menu_6">
     <property name="title">
@@ -749,6 +751,14 @@
    </property>
    <property name="text">
     <string>调整窗口恢复缩放</string>
+   </property>
+  </action>
+  <action name="actionClip_Selected">
+   <property name="text">
+    <string>按区域裁剪选中项</string>
+   </property>
+   <property name="toolTip">
+    <string>以显示部分来裁剪所有选中项</string>
    </property>
   </action>
  </widget>

@@ -234,13 +234,10 @@ void ResizablePicture::mouseReleaseEvent(QMouseEvent *event)
 
 void ResizablePicture::resizeEvent(QResizeEvent *)
 {
-    if (resizeAutoInit)
+    if (resizeAutoInit || originPixmap.isNull())
     {
         // 清理全部缓存
         scaleCache.clear();
-
-        if (originPixmap.isNull())
-            return ;
 
         resetScale();
     }

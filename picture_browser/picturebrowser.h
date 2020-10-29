@@ -205,6 +205,8 @@ private slots:
 
     void on_actionResize_Auto_Init_triggered();
 
+    void on_actionClip_Selected_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();

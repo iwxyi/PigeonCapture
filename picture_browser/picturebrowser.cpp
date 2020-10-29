@@ -268,6 +268,8 @@ void PictureBrowser::enterDirectory(QString targetDir)
     ui->listWidget->clear();
     if (targetDir.isEmpty())
         return ;
+    ui->previewPicture->setPixmap(QPixmap());
+    ui->previewPicture->resetScale();
 
     if (currentDirPath != rootDirPath)
     {
@@ -467,6 +469,9 @@ void PictureBrowser::saveCurrentViewPos()
     viewPoss[currentDirPath] = progress;
 }
 
+/**
+ * 还原当前文件夹的当前项、滚动位置为上次浏览
+ */
 void PictureBrowser::restoreCurrentViewPos()
 {
     if (currentDirPath.isEmpty() || !viewPoss.contains(currentDirPath))
@@ -1730,4 +1735,10 @@ void PictureBrowser::on_actionResize_Auto_Init_triggered()
     bool init = ui->actionResize_Auto_Init->isChecked();
     settings.setValue("picturebrowser/resizeAutoInit", init);
     ui->previewPicture->setResizeAutoInit(init);
+    ui->previewPicture->resetScale();
+}
+
+void PictureBrowser::on_actionClip_Selected_triggered()
+{
+
 }
