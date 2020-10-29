@@ -136,7 +136,7 @@ protected:
             int minY = qMin(pos1.y(), pos2.y());
             int maxX = qMax(pos1.x(), pos2.x());
             int maxY = qMax(pos1.y(), pos2.y());
-            currentRect = QRect(minX, minY, maxX - minX, maxY - minY);
+            currentRect = QRect(minX + this->x(), minY + this->y(), maxX - minX, maxY - minY);
             borderLabel->setGeometry(currentRect);
             borderLabel->setText("");
             borderLabel->show();
