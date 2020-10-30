@@ -431,7 +431,6 @@ void MainWindow::startRecordAudio()
        qWarning() << "default format not supported try to use nearest";
        format = info.nearestFormat(format);
     }
-    audioRecorder->setAudioInput(selectedInput);*/
 
     audioOutput = new QAudioOutput(info, format, this);
     audioOutput->start(&audioFile);
@@ -444,7 +443,6 @@ void MainWindow::endRecordAudio()
         return ;
 
     audioEndTime = getTimestamp();
-<<<<<<< HEAD
     audioRecorder->stop();
     delete audioRecorder;
     audioRecorder = nullptr;
@@ -500,11 +498,10 @@ void MainWindow::setSerialShortcut(QString s)
 
 /**
  * 显示预览图
-=======
->>>>>>> c8cd1017c2ccdfca6dd7b6c22d9a456a118f63b0
  */
 void MainWindow::showPreview(QPixmap pixmap)
 {
+    if (pixmap.width() > ui->previewLabel->width() || pixmap.height() > ui->previewLabel->height())
         pixmap = pixmap.scaled(ui->previewLabel->size(), Qt::KeepAspectRatio);
     ui->previewLabel->setPixmap(pixmap);
     ui->previewLabel->setMinimumSize(1, 1);

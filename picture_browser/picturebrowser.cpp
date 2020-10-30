@@ -1367,7 +1367,7 @@ void PictureBrowser::on_actionUndo_Delete_Command_triggered()
                 ? (existOriginPaths.first() + "  等" + QString::number(existOriginPaths.size()) + "个文件")
                 : existOriginPaths.join("\n");
         if (QMessageBox::question(this, "文件已存在", "下列原文件存在，是否覆盖？\n\n" + pathText,
-                                  QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Yes)
+                                  QMessageBox::Yes | QMessageBox::Cancel, QMessageBox::Yes) == QMessageBox::Yes)
         {
             for (int i = existOriginPaths.size() - 1; i >= 0; i--)
             {

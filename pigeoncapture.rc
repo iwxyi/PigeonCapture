@@ -23,12 +23,12 @@ VS_VERSION_INFO VERSIONINFO
             BEGIN
                 VALUE "CompanyName", "懒一夕智能科技"
                 VALUE "FileDescription", "鸽鸽子时光截图"
-                VALUE "FileVersion", "1.0"
+                VALUE "FileVersion", "1.2"
                 VALUE "InternalName", "PigeonCapture"
                 VALUE "LegalCopyright", "Copyright (C)2018-2020"
                 VALUE "OriginalFilename", "PigeonCapture.exe"
                 VALUE "ProductName", "鸽鸽子时光截图"
-                VALUE "ProductVersion", "1.1"
+                VALUE "ProductVersion", "1.2"
             END
         END
         BLOCK "VarFileInfo"

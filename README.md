@@ -29,10 +29,10 @@
 
 - 窗口截图：https://blog.csdn.net/liukang325/article/details/53559714
 
-- GIF生成：https://github.com/douzhongqiang/EasyGifTool
+- JPG合成GIF：https://github.com/douzhongqiang/EasyGifTool
 
 - 字符画生成：https://zhuanlan.zhihu.com/p/65232824
 
-- 视频生成：https://blog.csdn.net/jklinux/article/details/71773638
+- JPG合成视频：https://blog.csdn.net/jklinux/article/details/71773638
 
-- QAudioOutput输出raw转wav：https://blog.csdn.net/GoForwardToStep/article/details/52779913
+- 音频raw转wav：https://blog.csdn.net/GoForwardToStep/article/details/52779913

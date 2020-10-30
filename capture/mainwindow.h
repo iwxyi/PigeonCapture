@@ -19,10 +19,7 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioRecorder>
-<<<<<<< HEAD
 #include <QInputDialog>
-=======
->>>>>>> c8cd1017c2ccdfca6dd7b6c22d9a456a118f63b0
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
@@ -192,12 +189,12 @@ private:
     qint64 serialEndTime = 0;
 
     QFile audioFile;
-    QAudioRecorder* audioRecorder;
+    QAudioRecorder* audioRecorder = nullptr;
     qint64 audioStartTime = 0; // 音频录制与连续截图不一定一起，可能是后续想起来再开
     qint64 audioEndTime = 0;
 
     QFile sourceFile;
-    QAudioOutput* audioOutput;
+    QAudioOutput* audioOutput = nullptr;
 
     QTimer* prevTimer = nullptr;
     QList<CaptureInfo>* prevCapturedList = nullptr; // 预先截图的工具
