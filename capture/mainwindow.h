@@ -19,7 +19,10 @@
 #include <QAudioInput>
 #include <QAudioOutput>
 #include <QAudioRecorder>
+<<<<<<< HEAD
 #include <QInputDialog>
+=======
+>>>>>>> c8cd1017c2ccdfca6dd7b6c22d9a456a118f63b0
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
