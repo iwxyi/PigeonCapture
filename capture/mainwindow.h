@@ -18,6 +18,8 @@
 #include <QAudioDeviceInfo>
 #include <QAudioInput>
 #include <QAudioOutput>
+#include <QAudioRecorder>
+#include <QInputDialog>
 #include "qxtglobalshortcut.h"
 #include "areaselector.h"
 #include "picturebrowser.h"
@@ -140,6 +142,24 @@ private slots:
 
     void on_actionPlay_Test_Audio_triggered();
 
+    void on_actionSave_Area_1_triggered();
+
+    void on_actionSave_Area_2_triggered();
+
+    void on_actionSave_Area_3_triggered();
+
+    void on_actionRestore_Area_1_triggered();
+
+    void on_actionRestore_Area_2_triggered();
+
+    void on_actionRestore_Area_3_triggered();
+
+    void on_actionRename_Area_1_triggered();
+
+    void on_actionRename_Area_2_triggered();
+
+    void on_actionRename_Area_3_triggered();
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
@@ -169,7 +189,7 @@ private:
     qint64 serialEndTime = 0;
 
     QFile audioFile;
-    QAudioInput* audio = nullptr;
+    QAudioRecorder* audioRecorder;
     qint64 audioStartTime = 0; // 音频录制与连续截图不一定一起，可能是后续想起来再开
     qint64 audioEndTime = 0;
 

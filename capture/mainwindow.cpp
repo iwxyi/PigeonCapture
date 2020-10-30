@@ -137,6 +137,22 @@ MainWindow::MainWindow(QWidget *parent)
     {
         on_modeTab_currentChanged(mode);
     }
+
+    // 各种位置的命名
+    QString name1 = settings.value("capture/area1_name", "位置1").toString();
+    ui->actionSave_Area_1->setText(name1);
+    ui->actionRestore_Area_1->setText(name1);
+    ui->actionRename_Area_1->setText(name1);
+
+    QString name2 = settings.value("capture/area2_name", "位置2").toString();
+    ui->actionSave_Area_2->setText(name2);
+    ui->actionRestore_Area_2->setText(name2);
+    ui->actionRename_Area_2->setText(name2);
+
+    QString name3 = settings.value("capture/area3_name", "位置3").toString();
+    ui->actionSave_Area_3->setText(name3);
+    ui->actionRestore_Area_3->setText(name3);
+    ui->actionRename_Area_3->setText(name3);
 }
 
 MainWindow::~MainWindow()
@@ -416,21 +432,21 @@ void MainWindow::startRecordAudio()
        format = info.nearestFormat(format);
     }
 
-    audio = new QAudioInput(info, format, this);
-    audio->start(&audioFile);
+    audioOutput = new QAudioOutput(info, format, this);
+    audioOutput->start(&audioFile);
     audioStartTime = getTimestamp();
 }
 
 void MainWindow::endRecordAudio()
 {
-    if (!audio)
+    if (!audioRecorder)
         return ;
 
     audioEndTime = getTimestamp();
-    audio->stop();
+    audioRecorder->stop();
+    delete audioRecorder;
+    audioRecorder = nullptr;
     audioFile.close();
-    delete audio;
-    audio = nullptr;
 
 //    translateRaw2Wav("test.raw", "test.wav");
 
@@ -878,4 +894,79 @@ void MainWindow::on_actionPlay_Test_Audio_triggered()
     connect(audioOutput, &QAudioOutput::stateChanged, this, [=](QAudio::State){
         qDebug() << "播放结束";
     });
+}
+
+void MainWindow::on_actionSave_Area_1_triggered()
+{
+    if (areaSelector)
+        settings.setValue("capture/area1", areaSelector->getArea());
+}
+
+void MainWindow::on_actionSave_Area_2_triggered()
+{
+    if (areaSelector)
+        settings.setValue("capture/area2", areaSelector->getArea());
+}
+
+void MainWindow::on_actionSave_Area_3_triggered()
+{
+    if (areaSelector)
+        settings.setValue("capture/area3", areaSelector->getArea());
+}
+
+void MainWindow::on_actionRestore_Area_1_triggered()
+{
+    if (areaSelector)
+        areaSelector->setArea(settings.value("capture/area1", areaSelector->getArea()).toRect());
+}
+
+void MainWindow::on_actionRestore_Area_2_triggered()
+{
+    if (areaSelector)
+        areaSelector->setArea(settings.value("capture/area2", areaSelector->getArea()).toRect());
+}
+
+void MainWindow::on_actionRestore_Area_3_triggered()
+{
+    if (areaSelector)
+        areaSelector->setArea(settings.value("capture/area3", areaSelector->getArea()).toRect());
+}
+
+void MainWindow::on_actionRename_Area_1_triggered()
+{
+    QString name = settings.value("capture/area1_name", "位置1").toString();
+    bool ok = false;
+    name = QInputDialog::getText(this, "命名位置1", "请输入位置1的名字", QLineEdit::Normal, name, &ok);
+    if (!ok)
+        return ;
+    settings.setValue("capture/area1_name", name);
+    ui->actionSave_Area_1->setText(name);
+    ui->actionRestore_Area_1->setText(name);
+    ui->actionRename_Area_1->setText(name);
+}
+
+void MainWindow::on_actionRename_Area_2_triggered()
+{
+    QString name = settings.value("capture/area2_name", "位置2").toString();
+    bool ok = false;
+    name = QInputDialog::getText(this, "命名位置2", "请输入位置2的名字", QLineEdit::Normal, name, &ok);
+    if (!ok)
+        return ;
+    settings.setValue("capture/area2_name", name);
+    ui->actionSave_Area_2->setText(name);
+    ui->actionRestore_Area_2->setText(name);
+    ui->actionRename_Area_2->setText(name);
+}
+
+void MainWindow::on_actionRename_Area_3_triggered()
+{
+    QString name = settings.value("capture/area3_name", "位置3").toString();
+    bool ok = false;
+    name = QInputDialog::getText(this, "命名位置3", "请输入位置3的名字", QLineEdit::Normal, name, &ok);
+    if (!ok)
+        return ;
+    settings.setValue("capture/area3_name", name);
+    ui->actionSave_Area_3->setText(name);
+    ui->actionRestore_Area_3->setText(name);
+    ui->actionRename_Area_3->setText(name);
 }
