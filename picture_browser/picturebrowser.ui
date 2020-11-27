@@ -65,6 +65,7 @@
     <addaction name="actionBack_Prev_Directory"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Directory"/>
+    <addaction name="actionCreate_Folder"/>
     <addaction name="actionUndo_Delete_Command"/>
     <addaction name="actionRefresh"/>
    </widget>
@@ -193,6 +194,8 @@
     <addaction name="separator"/>
     <addaction name="actionPlace_Red_Top"/>
     <addaction name="actionPlace_Green_Top"/>
+    <addaction name="separator"/>
+    <addaction name="actionSort_Enabled"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_4"/>
@@ -431,7 +434,7 @@
     <string>自动播放</string>
    </property>
    <property name="shortcut">
-    <string>Alt+P</string>
+    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionSlide_100ms">
@@ -506,7 +509,7 @@
     <string>红标记</string>
    </property>
    <property name="shortcut">
-    <string>Alt+R</string>
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionMark_Green">
@@ -514,7 +517,7 @@
     <string>绿标记</string>
    </property>
    <property name="shortcut">
-    <string>Alt+G</string>
+    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionMark_None">
@@ -522,7 +525,7 @@
     <string>取消标记</string>
    </property>
    <property name="shortcut">
-    <string>Alt+N</string>
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionSelect_Green_Marked">
@@ -530,7 +533,7 @@
     <string>选中所有绿标记项</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+R</string>
+    <string>Ctrl+Shift+R</string>
    </property>
   </action>
   <action name="actionSelect_Red_Marked">
@@ -538,7 +541,7 @@
     <string>选中所有红标记项</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+G</string>
+    <string>Ctrl+Shift+G</string>
    </property>
   </action>
   <action name="actionPlace_Red_Top">
@@ -546,7 +549,7 @@
     <string>置顶所有红标记项</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+R</string>
+    <string>Alt+Shift+R</string>
    </property>
   </action>
   <action name="actionPlace_Green_Top">
@@ -557,7 +560,7 @@
     <string>置顶所有绿标记项</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+G</string>
+    <string>Alt+Shift+G</string>
    </property>
   </action>
   <action name="actionEmoji_Factory">
@@ -762,6 +765,19 @@
    </property>
    <property name="toolTip">
     <string>以显示部分来裁剪所有选中项</string>
+   </property>
+  </action>
+  <action name="actionSort_Enabled">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>快速分类</string>
+   </property>
+  </action>
+  <action name="actionCreate_Folder">
+   <property name="text">
+    <string>新建文件夹</string>
    </property>
   </action>
  </widget>

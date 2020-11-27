@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QtConcurrent/QtConcurrent>
 #include <QProgressBar>
+#include <QInputDialog>
 #include "gif.h"
 #include "ASCII_Art.h"
 #include "avilib.h"
@@ -31,6 +32,7 @@
 #define GENERAL_DIRECTORY "general"
 #define RECYCLE_DIRECTORY "recycle"
 #define SEQUENCE_PARAM_FILE "params.ini"
+#define CLASSIFICATION_FILE "classification"
 #define FilePathRole (Qt::UserRole)
 #define FileMarkRole (Qt::UserRole+1)
 
@@ -69,6 +71,8 @@ protected:
     void saveCurrentViewPos();
     void restoreCurrentViewPos();
     void setSlideInterval(int ms);
+
+    void fastSortItems(QString key);
 
 private slots:
     void on_actionRefresh_triggered();
@@ -209,6 +213,10 @@ private slots:
 
     void on_actionClip_Selected_triggered();
 
+    void on_actionSort_Enabled_triggered();
+
+    void on_actionCreate_Folder_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
@@ -233,6 +241,7 @@ private:
     QDir recycleDir;
     QString currentDirPath;
     QDir::SortFlags sortFlags;
+    bool fastSort = false;
 
     QHash<QString, ListProgress> viewPoss; // 缓存每个文件夹的浏览位置
     QTimer* slideTimer;

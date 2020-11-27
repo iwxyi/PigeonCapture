@@ -211,6 +211,9 @@ PictureBrowser::PictureBrowser(QWidget *parent) :
     ui->actionResize_Auto_Init->setChecked(resizeAutoInit);
     ui->previewPicture->setResizeAutoInit(resizeAutoInit);
 
+    // 快速分类
+    fastSort = settings.value("picturebrowser/fastSort", true).toBool();
+
     // 状态栏
     selectLabel = new QLabel;
     ui->statusbar->addWidget(selectLabel);
@@ -247,6 +250,15 @@ PictureBrowser::~PictureBrowser()
 
 void PictureBrowser::readDirectory(QString targetDir)
 {
+    // 如果之前就有目录，则进行临时目录的删除操作
+    if (!rootDirPath.isEmpty())
+    {
+        QDir tempDir(tempDirPath);
+        if (tempDir.exists())
+            tempDir.removeRecursively();
+    }
+
+    // 读取目录
     rootDirPath = targetDir;
     tempDirPath = QDir(targetDir).absoluteFilePath(TEMP_DIRECTORY);
     recycleDir = QDir(QDir(tempDirPath).absoluteFilePath(RECYCLE_DIRECTORY));
@@ -440,6 +452,13 @@ void PictureBrowser::keyPressEvent(QKeyEvent *event)
             slideTimer->stop();
             return ;
         }
+        break;
+    }
+
+    if (fastSort && event->modifiers() == Qt::AltModifier && key >= Qt::Key_A && key <= Qt::Key_Z)
+    {
+        char ch = key - Qt::Key_A + 'a';
+        fastSortItems(QString(ch));
     }
 
     QWidget::keyPressEvent(event);
@@ -515,6 +534,72 @@ void PictureBrowser::setSlideInterval(int ms)
 {
     settings.setValue("picturebrowser/slideInterval", ms);
     slideTimer->setInterval(ms);
+}
+
+void PictureBrowser::fastSortItems(QString key)
+{
+    QDir root(rootDirPath);
+    QFileInfo sInfo(root.absoluteFilePath(CLASSIFICATION_FILE));
+    if (!sInfo.exists())
+    {
+        root.mkpath(CLASSIFICATION_FILE);
+        QString tip = "在根目录下“classification/”文件夹中创建形如“-S名称”的文件夹，";
+        tip += "则可以使用“S”键一键移动选中项到对应位置。";
+        tip += "\n支持A-Z的快捷键(只要不冲突)，请勿重复（不区分大小写）";
+        QMessageBox::information(this, "快速分类", tip);
+        return ;
+    }
+
+    QDir classification(sInfo.absoluteFilePath());
+    QList<QFileInfo> dirs = classification.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    QFileInfo target;
+    bool find = false;
+    for (int i = 0; i < dirs.size(); i++)
+    {
+        QString name = dirs.at(i).fileName();
+        if (name.startsWith("-"+key.toLower()) || name.startsWith("-"+key.toUpper()))
+        {
+            target = dirs.at(i);
+            find = true;
+            break;
+        }
+    }
+    if (!find)
+    {
+        qDebug() << "快速分类：没有找到“-" + key + "”的目录" << sInfo.absoluteFilePath();
+        return ;
+    }
+    QDir clsfct(target.absoluteFilePath());
+
+    // 开始移动
+    auto items = ui->listWidget->selectedItems();
+    if (!items.size())
+        return ;
+    ui->previewPicture->unbindMovie();
+    int firstRow = ui->listWidget->row(items.first());
+    foreach(auto item, items)
+    {
+        QString path = item->data(FilePathRole).toString();
+        if (path == BACK_PREV_DIRECTORY)
+            continue;
+        QFileInfo info(path);
+        if (!info.exists())
+            continue;
+        if (info.isFile() || info.isDir())
+        {
+            QFile file(path);
+            QString newPath = clsfct.absoluteFilePath(info.fileName());
+            if (!file.rename(newPath))
+                qDebug() << "重命名失败：" << path << newPath;
+        }
+
+        int row = ui->listWidget->row(item);
+        ui->listWidget->takeItem(row);
+    }
+    if (firstRow >= ui->listWidget->count())
+        firstRow = ui->listWidget->count()-1;
+    ui->listWidget->setCurrentRow(firstRow);
+
 }
 
 void PictureBrowser::on_actionRefresh_triggered()
@@ -746,6 +831,8 @@ void PictureBrowser::on_actionExtra_Selected_triggered()
         int row = ui->listWidget->row(item);
         ui->listWidget->takeItem(row);
     }
+    if (firstRow >= ui->listWidget->count())
+        firstRow = ui->listWidget->count()-1;
     ui->listWidget->setCurrentRow(firstRow);
 }
 
@@ -1820,4 +1907,21 @@ void PictureBrowser::on_actionClip_Selected_triggered()
 
     commitDeleteCommand();
     showCurrentItemPreview();
+}
+
+void PictureBrowser::on_actionSort_Enabled_triggered()
+{
+    fastSort = !fastSort;
+    settings.setValue("picturebrowser/fastSort", fastSort);
+}
+
+void PictureBrowser::on_actionCreate_Folder_triggered()
+{
+    bool ok;
+    QString name = QInputDialog::getText(this, "新建文件夹", "请输入文件夹名字", QLineEdit::Normal, "新建文件夹", &ok);
+    if (!ok)
+        return ;
+
+    QDir(currentDirPath).mkpath(name);
+    enterDirectory(currentDirPath);
 }

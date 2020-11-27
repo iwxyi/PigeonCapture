@@ -694,6 +694,7 @@ void MainWindow::on_showAreaSelector_clicked()
         ui->showAreaSelector->setText("显示截图区域");
         settings.setValue("capture/area", areaSelector->geometry());
     }
+    showPreview(getScreenShot());
 }
 
 void MainWindow::on_actionOpen_Directory_triggered()
