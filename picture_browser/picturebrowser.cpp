@@ -455,10 +455,18 @@ void PictureBrowser::keyPressEvent(QKeyEvent *event)
         break;
     }
 
-    if (fastSort && event->modifiers() == Qt::AltModifier && key >= Qt::Key_A && key <= Qt::Key_Z)
+    if (fastSort && event->modifiers() == Qt::AltModifier)
     {
-        char ch = key - Qt::Key_A + 'a';
-        fastSortItems(QString(ch));
+        if (key >= Qt::Key_A && key <= Qt::Key_Z)
+        {
+            char ch = key - Qt::Key_A + 'a';
+            fastSortItems(QString(ch));
+        }
+        else if (key >= Qt::Key_0 && key <= Qt::Key_9)
+        {
+            char ch = key - Qt::Key_0 + '0';
+            fastSortItems(QString(ch));
+        }
     }
 
     QWidget::keyPressEvent(event);
