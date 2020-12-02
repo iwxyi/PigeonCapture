@@ -217,6 +217,34 @@ private slots:
 
     void on_actionCreate_Folder_triggered();
 
+    void on_actionAutoColor_triggered();
+
+    void on_actionColorOnly_triggered();
+
+    void on_actionMonoOnly_triggered();
+
+    void on_actionDiffuseDither_triggered();
+
+    void on_actionOrderedDither_triggered();
+
+    void on_actionThresholdDither_triggered();
+
+    void on_actionThresholdAlphaDither_triggered();
+
+    void on_actionOrderedAlphaDither_triggered();
+
+    void on_actionDiffuseAlphaDither_triggered();
+
+    void on_actionPreferDither_triggered();
+
+    void on_actionAvoidDither_triggered();
+
+    void on_actionAutoDither_triggered();
+
+    void on_actionNoOpaqueDetection_triggered();
+
+    void on_actionNoFormatConversion_triggered();
+
 private:
     void deleteFileOrDir(QString path);
     void commitDeleteCommand();
@@ -224,6 +252,8 @@ private:
     static QStringList getImageFilters();
     bool copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool coverFileIfExist);
     int getRecordInterval();
+    void saveImageConversionFlag();
+    void fromImageConversionFlag();
 
 signals:
     void signalGeneralGIFProgress(int index);
@@ -255,6 +285,7 @@ private:
 
     int gifBitDepth = 32;
     bool gifDither = true; // GIF抖动，更加平滑
+    Qt::ImageConversionFlags imageConversion;
 };
 
 #endif // PICTUREBROWSER_H
