@@ -550,7 +550,7 @@ void PictureBrowser::restoreCurrentViewPos()
     ListProgress progress = viewPoss.value(currentDirPath);
     ui->listWidget->setCurrentRow(progress.index);
     ui->listWidget->verticalScrollBar()->setSliderPosition(progress.scroll);
-    if (ui->listWidget->currentItem()->data(FilePathRole) != progress.file)
+    if (!ui->listWidget->currentItem() || ui->listWidget->currentItem()->data(FilePathRole) != progress.file)
     {
         for (int i = 0; i < ui->listWidget->count(); i++)
         {
