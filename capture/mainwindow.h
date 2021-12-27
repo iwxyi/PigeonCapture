@@ -160,6 +160,8 @@ private slots:
 
     void on_actionRename_Area_3_triggered();
 
+    void on_screensCombo_currentIndexChanged(int);
+
 protected:
     void showEvent(QShowEvent* event);
     void closeEvent(QCloseEvent* event);
@@ -168,8 +170,8 @@ protected:
     QString timeToFile();
     qint64 getTimestamp();
 
-    QString get_window_title(HWND hwnd);
-    QString get_window_class(HWND hwnd);
+    QString get_window_title(HWND hwnd) const;
+    QString get_window_class(HWND hwnd) const;
     qint64 translateRaw2Wav(QString rawFileName, QString wavFileName);
 
 private:

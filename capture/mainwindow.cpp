@@ -174,15 +174,23 @@ QPixmap MainWindow::getScreenShot()
     QScreen *screen = QGuiApplication::primaryScreen();
     if (mode == FullScreen) // 全屏截图
     {
-        QPixmap pixmap = screen->grabWindow(ui->screensCombo->currentIndex());
-        return pixmap;
+        int index = ui->screensCombo->currentIndex();
+        auto screens = QGuiApplication::screens();
+        if (index >= 0 && index < screens.size())
+        {
+            screen = screens.at(index);
+            return screen->grabWindow(0);
+        }
+        else
+        {
+            return screen->grabWindow(ui->screensCombo->currentIndex());
+        }
     }
     else if (mode == ScreenArea) // 区域截图
     {
-        // 隐藏区域截图
-        areaSelector->setPaint(false);
-        QRect rect = areaSelector->getArea();
+        areaSelector->setPaint(false); // 隐藏选择区域
 
+        QRect rect = areaSelector->getArea();
         QPixmap pixmap = screen->grabWindow(QApplication::desktop()->winId(),
                                         rect.left(), rect.top(),
                                        rect.width(), rect.height());
@@ -195,7 +203,6 @@ QPixmap MainWindow::getScreenShot()
         if (!currentHwnd)
             return QPixmap();
         try {
-            QScreen *screen = QGuiApplication::primaryScreen();
             QPixmap map = screen->grabWindow(reinterpret_cast<WId>(currentHwnd)); // 参数0表示全屏
             return map;
         } catch (...) {
@@ -565,7 +572,7 @@ qint64 MainWindow::getTimestamp()
     return QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
-QString MainWindow::get_window_title(HWND hwnd)
+QString MainWindow::get_window_title(HWND hwnd) const
 {
     QString retStr;
     wchar_t *temp;
@@ -584,7 +591,7 @@ QString MainWindow::get_window_title(HWND hwnd)
     return retStr;
 }
 
-QString MainWindow::get_window_class(HWND hwnd)
+QString MainWindow::get_window_class(HWND hwnd) const
 {
     QString retStr;
     wchar_t temp[256];
@@ -826,7 +833,8 @@ void MainWindow::on_refreshWindows_clicked()
 
         if (!title.isEmpty())
         {
-            ui->windowsCombo->addItem(title + " (" + clss + ")", QVariant(reinterpret_cast<qint64>(pWnd)));
+            qint64 id = reinterpret_cast<qint64>(pWnd);
+            ui->windowsCombo->addItem(title + " (" + clss + ") " + QString::number(id), QVariant(id));
             if (pWnd == currentHwnd)
                 ui->windowsCombo->setCurrentIndex(ui->windowsCombo->count()-1);
         }
@@ -970,4 +978,11 @@ void MainWindow::on_actionRename_Area_3_triggered()
     ui->actionSave_Area_3->setText(name);
     ui->actionRestore_Area_3->setText(name);
     ui->actionRename_Area_3->setText(name);
+}
+
+void MainWindow::on_screensCombo_currentIndexChanged(int)
+{
+    QTimer::singleShot(1, [=]{
+        showPreview(getScreenShot());
+    });
 }
